@@ -1,0 +1,6 @@
+node_modules
+.env
+runs/
+casefiles/
+dist
+metrics.json

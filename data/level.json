@@ -1,0 +1,24 @@
+{
+  "rooms": [
+    { "id": "lobby", "pos": [0, 0], "reverb": "marble", "spokenName": "the lobby", "footsteps": "marble" },
+    { "id": "hall", "pos": [0, 1], "reverb": "marble", "spokenName": "the hall", "footsteps": "marble" },
+    { "id": "gallery", "pos": [-1, 1], "reverb": "marble", "spokenName": "the gallery", "footsteps": "marble" },
+    { "id": "office", "pos": [1, 1], "reverb": "dry", "spokenName": "the office", "footsteps": "carpet" },
+    { "id": "stairwell", "pos": [0, 2], "reverb": "metal", "spokenName": "the stairwell", "footsteps": "metal" }
+  ],
+  "doors": [
+    { "id": "door_lobby_hall", "between": ["lobby", "hall"], "side": { "lobby": "ahead", "hall": "behind" }, "state": "closed", "kind": "door", "spokenName": "the lobby door" },
+    { "id": "arch_hall_gallery", "between": ["hall", "gallery"], "side": { "hall": "left", "gallery": "right" }, "state": "open", "kind": "arch", "spokenName": "the gallery arch" },
+    { "id": "door_hall_office", "between": ["hall", "office"], "side": { "hall": "right", "office": "left" }, "state": "closed", "kind": "door", "spokenName": "the office door" },
+    { "id": "door_hall_stairwell", "between": ["hall", "stairwell"], "side": { "hall": "ahead", "stairwell": "behind" }, "state": "closed", "kind": "door", "spokenName": "the stairwell door" }
+  ],
+  "props": [
+    { "id": "case_1", "room": "gallery", "side": "left", "tags": ["hide"], "spokenName": "the display case" },
+    { "id": "desk_1", "room": "office", "side": "left", "tags": ["hide"], "spokenName": "the desk" }
+  ],
+  "items": [{ "id": "ledger", "room": "office", "spokenName": "the ledger" }],
+  "guard": { "id": "g1", "route": ["stairwell", "hall", "gallery", "hall"] },
+  "start": { "room": "lobby", "facing": "north" },
+  "objective": { "item": "ledger", "exitRoom": "lobby" },
+  "scheduled": [{ "id": "office_phone", "turn": 6, "room": "office", "sound": "phone_ring" }]
+}
