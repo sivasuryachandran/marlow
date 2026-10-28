@@ -17,7 +17,7 @@ npm run eval            # V3 regression harness -> metrics.json + metrics.md
 npm run replay          # replay every runs/*.jsonl and assert identical event logs
 npm run check-access    # real calls to Spark, Voice Transcribe, Baseten (--image, --wonder opt-in)
 npx tsx tools/path-share.ts # local-parser vs model-call share of a scripted run
-# real-speech eval: npm run server, open http://localhost:5173/record.html, record the 50 commands, then npm run eval
+# real-speech eval: npm run server, open http://localhost:5173/record.html, record the 50 commands (kept out of git; your own voice), then npm run eval
 npx tsx tools/simulate.ts   # balance: cautious / reckless / expert over 1000 seeds
 ```
 
