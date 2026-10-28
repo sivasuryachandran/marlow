@@ -88,6 +88,10 @@ Rules the code enforces (each has a test): the engine owns truth; truth flows en
 
 Pick the intent backend with `INTENT_BACKEND=mock|meta|baseten`. Spark counts reasoning tokens against `max_completion_tokens`, so the adapter asks for 1200. Baseten serves the model as `meta-models/muse-spark-open` (the `-1026` suffix from the original brief is rejected).
 
+## Evaluation data and privacy
+
+`data/eval/commands.jsonl` (50 dev commands) and `data/eval/heldout.jsonl` (30 frozen held-out commands) are published. **The voice recordings of those commands are not published, for privacy**: `data/eval/audio/` and `data/eval/heldout-audio/` are gitignored and were purged from git history; the repo keeps only the text and the recorder page (`/record.html`, `/record.html?set=heldout`) so anyone can record their own. The held-out set is never used for tuning prompts, parsers or keywords and is reported separately (`npm run eval:heldout` → `metrics.heldout.md`).
+
 ## Metrics and balance
 
 - [metrics.md](metrics.md) (`npm run eval`): intent accuracy on 50 commands for the mock, Spark and Spark Open side by side, invalid actions accepted (0), adversarial V2 check (2000 bad replies, 0 illegal reached the engine), replay determinism.

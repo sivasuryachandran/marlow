@@ -8,6 +8,23 @@ Status date: 2026-10-28 (evening). Real Meta model calls are now wired and measu
 
 Stage-one requirement ("real use of Meta models") is now met by: Voice Transcribe (speech → text), Muse Spark (speech → one legal action or a clarify question), Muse Image (Case File), plus Spark Open on Baseten as the alternate backend.
 
+## Matched-phrase check (wrong-target bug fixed)
+
+"Peek the vault door" → a real door was a bug (a model, or a mishearing, executing a legal action aimed at the wrong thing). Now every move / peek / take reply must carry `matched`: the exact words of the order that name the target. Code (V2b, `packages/game/src/match.ts`) requires that the quote (1) is in the transcript, (2) names the target by spokenName, an alias from `level.json` (e.g. ledger: book, logbook; office: study; stairwell: stairs), or the room beyond a door, and for a bare room word names the **destination** (so "go to the lobby" in the lobby never means the lobby door), (3) agrees with any side word (left/right/ahead/behind), and (4) for generic phrases ("the door") fits exactly one candidate, otherwise it asks a template clarify. A quote that isn't in the order is a broken model contract: retry once, then "Say again". A mismatch becomes the existing refusal template. Note: Marlow can't say "There's no vault door" because every spoken line is pre-rendered from templates, so it says "There's nothing like that here, boss."
+
+- **Wrong-target stress:** 31,920 replies (3 verbs × every phrase × every possible target × 5 rooms × partial/full knowledge): 200 executed legitimately, **0 wrong-target**, **0 with a quote not in the order**. First version of the matcher failed this test with 18 and 20 wrong-target executions (e.g. "go to the lobby" while in the lobby moving to the hall; "take the door" taking the ledger); both were fixed before the numbers above.
+- Eval metric "Wrong-target actions executed (must be 0)" is in `metrics.md` for every backend, on correct transcripts and on real speech: **0 / 0 / 0**.
+- Dev set (50, tuned on): Spark 98%, Spark Open 90%, end-to-end from real speech Spark 94% / Spark Open 92% / mock 96%, word error rate 9.2% (7.8% in the previous run on the same clips: the recognizer is not fully deterministic).
+- **Held-out set (30 new commands, frozen before the first run, never tuned on), `metrics.heldout.md`:** **Spark 96.7%** · **Spark Open 76.7%** (below the 90% target; 2 of the 7 misses were 8 s eval timeouts, the rest "Say again"), wrong-target 0 on both, engine-illegal 0. I did not investigate or fix the Spark Open misses, to keep the set clean. Anything tuned from here on needs a fresh held-out set. Held-out audio isn't recorded yet (`/record.html?set=heldout`, 30 clips).
+
+## Requested report (current numbers)
+
+- **Chase rule:** live and tested (7 engine tests). Spotted = alert +2, trust −10, then exactly one turn to hide at known cover or leave the room, otherwise caught; refused orders don't use the turn.
+- **Simulator, 1000 seeds (expert 150):** reckless **43.4% win / 18.4% clean**, caught 56.6% · cautious-simple **50.7% win / 44.1% clean**, caught 49.3% · expert 100% clean, 0 alerts.
+- **Spark Open latency (same 50 commands):** p50 0.8 to 1.4 s, p95 7.5 to 9.8 s across four runs (latest 1.4 s / 9.8 s); Spark p50 1.7 to 2.6 s, p95 3.7 to 6.6 s (latest 1.7 s / 3.7 s). Held-out (30): Spark 1.9 s / 3.8 s, Spark Open 3.1 s / 10.3 s.
+- **Local parser share, seed-9 demo run:** 8 of 11 turns (73%) local, 3 (27%) model calls.
+- Fireworks: key stored in `.env` only; not wired, per your call.
+
 ## Real-speech eval (50 recordings of the player's own voice)
 
 | | Before fixes | After fixes |
