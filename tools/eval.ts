@@ -32,7 +32,7 @@ function matches(exp: Cmd["expected"], got: { kind: string; action?: Action; lin
   if (exp.sayagain) return got.kind === "sayagain";
   if (exp.refuse) return got.kind === "refused" && got.reason === exp.refuse;
   return got.kind === "ok" && got.action?.action === exp.action && ((got.action as any).target ?? undefined) === (exp.target ?? undefined)
-    && ((got.action as any).stance ?? undefined) === (exp.stance ?? undefined);
+    && (((got.action as any).stance ?? "normal") === (exp.stance ?? "normal")); // "normal" is the default stance
 }
 
 async function evalBackend(name: string, adapter: IntentAdapter, cmds: Cmd[]) {

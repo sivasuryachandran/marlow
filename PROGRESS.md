@@ -24,13 +24,13 @@ Stage-one requirement ("real use of Meta models") is now met by: Voice Transcrib
 
 | | Result |
 |---|---|
-| Intent accuracy (50 commands, correct transcript) | mock 100% (wiring only) · **Spark 98%** · **Spark Open 92%** (target ≥ 90) |
+| Intent accuracy (50 commands, correct transcript) | mock 100% (wiring only) · **Spark 96%** · **Spark Open 92%** in the latest run (target ≥ 90). Across three runs Spark scored 98 / 92 (after fixing a harness bug) / 96 and Spark Open 92 / 96 / 92: the models are not deterministic, so quote it as ~92–98% |
 | Invalid actions accepted | **0** on all backends; adversarial V2: 2000 bad replies, 0 illegal reached the engine |
-| Latency release → result (intent path only) | Spark p50 2.6 s / p95 6.6 s · Spark Open p50 0.8 s / p95 7.7 s · Voice Transcribe ~0.7–1.1 s |
+| Latency release → result (intent path only) | Spark p50 ~2.1–2.6 s / p95 5.0–6.6 s · Spark Open p50 ~0.8–1.0 s / p95 7.7–9.5 s · Voice Transcribe ~0.7–1.1 s. One Spark call exceeded the 8 s eval timeout in one run |
 | Replay determinism | 100% of generated seeded runs |
 | Balance (1000 seeds; expert 150) | expert **100%** clean win · cautious 44% (all clean) · reckless 43% win but only **18% clean**, 57% caught (`simulation.md`) |
 
-Misses: Spark: "banana" got a refusal instead of "Say again". Spark Open: two "take the ledger" (refused as not-known instead of unknown), "peek the vault door" and "take the gold" answered "Say again" instead of a refusal. All are safe outcomes; none executed.
+Misses (latest run): Spark: "open the safe" and "banana" got a refusal instead of "Say again". Spark Open: two "take the ledger" (refused as not-known instead of unknown), "banana" refused, and "peek the door" answered "Say again" instead of a clarify. All are safe outcomes; none executed. (The harness once counted `stance:"normal"` as a miss; fixed.)
 
 ## Known issues / honest caveats
 
