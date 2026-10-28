@@ -11,11 +11,13 @@ export type Dir = Side | "here";
 export const Room = z.object({
   id: z.string(), pos: z.tuple([z.number(), z.number()]),
   reverb: z.string(), spokenName: z.string(), footsteps: z.string().default("carpet"),
+  /** Off-stage rooms exist for the guard only: Marlow can never learn of or enter them. */
+  offstage: z.boolean().default(false),
 });
 export const Door = z.object({
   id: z.string(), between: z.tuple([z.string(), z.string()]),
   side: z.record(Side), state: z.enum(["open", "closed", "locked"]),
-  kind: z.enum(["door", "arch"]).default("door"), spokenName: z.string().default("the door"),
+  kind: z.enum(["door", "arch", "stairs"]).default("door"), spokenName: z.string().default("the door"),
 });
 export const Prop = z.object({
   id: z.string(), room: z.string(), side: Side, tags: z.array(z.string()), spokenName: z.string(),
@@ -40,7 +42,7 @@ export const WorldState = z.object({
   guard: Guard, marlow: Marlow, knowledge: Knowledge,
   objective: z.object({ item: z.string(), exitRoom: z.string() }),
   scheduled: z.array(ScheduledEvent),
-  memory: z.object({ lastTrustLoss: z.string().nullable(), warned: z.boolean() }),
+  memory: z.object({ lastTrustLoss: z.string().nullable(), warned: z.boolean(), danger: z.array(z.string()).default([]) }),
 });
 export type WorldState = z.infer<typeof WorldState>;
 

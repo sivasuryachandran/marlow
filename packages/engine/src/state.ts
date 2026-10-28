@@ -8,7 +8,7 @@ export function revealRoom(s: WorldState, room: string, doors: boolean) {
   add(k.rooms, room);
   for (const p of s.props) if (p.room === room) add(k.props, p.id);
   for (const i of s.items) if (i.room === room) add(k.items, i.id);
-  if (doors) for (const d of s.doors) if (d.between.includes(room)) add(k.doors, d.id);
+  if (doors) for (const d of s.doors) if (d.between.includes(room) && !d.between.some(r => s.rooms.find(x => x.id === r)?.offstage)) add(k.doors, d.id);
 }
 
 export function createInitialState(
@@ -25,7 +25,7 @@ export function createInitialState(
     marlow: { room: level.start.room, facing: level.start.facing, hidden: false, carrying: null, prevRoom: null },
     knowledge: { rooms: [], doors: [], props: [], items: [], guardLastHeard: null },
     objective: level.objective, scheduled: level.scheduled,
-    memory: { lastTrustLoss: carry.lastTrustLoss ?? null, warned: false },
+    memory: { lastTrustLoss: carry.lastTrustLoss ?? null, warned: false, danger: [] },
   };
   revealRoom(s, s.marlow.room, true);
   s.rngState = rng.state;
@@ -60,6 +60,8 @@ export function validateLevel(level: Level): string[] {
   if (!rooms.has(level.objective.exitRoom)) errs.push("exitRoom unknown");
   if (!rooms.has(level.start.room)) errs.push("start room unknown");
   for (const r of level.rooms) if (!path(probe, level.start.room, r.id)) errs.push(`room ${r.id} unreachable`);
+  const onstage = { ...probe, doors: level.doors.filter(d => !d.between.some(b => level.rooms.find(r => r.id === b)?.offstage)) } as unknown as WorldState;
+  for (const r of level.rooms.filter(r => !r.offstage)) if (!path(onstage, level.start.room, r.id)) errs.push(`room ${r.id} unreachable without off-stage rooms`);
   for (const r of level.guard.route) if (!rooms.has(r)) errs.push(`guard route: unknown room ${r}`);
   const rt = level.guard.route;
   for (let i = 0; i < rt.length; i++) {

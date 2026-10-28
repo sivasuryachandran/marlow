@@ -105,8 +105,9 @@ function determinism() {
       if (replayRows(sess.log, level).ok) ok++;
     }
     const saved = readRuns();
-    const savedOk = saved.filter(r => replayRows(r.rows, level).ok).length;
-    return { generatedRuns: runs, generatedIdentical: ok, savedRuns: saved.length, savedIdentical: savedOk, pct: pct(ok + savedOk, runs + saved.length) };
+    const results = saved.map(r => replayRows(r.rows, level)).filter(r => !r.stale);
+    const savedOk = results.filter(r => r.ok).length;
+    return { generatedRuns: runs, generatedIdentical: ok, savedRuns: results.length, savedStale: saved.length - results.length, savedIdentical: savedOk, pct: pct(ok + savedOk, runs + results.length) };
   })();
 }
 
@@ -138,9 +139,9 @@ Transcription error rate: ${metrics.transcription}.
 
 **Adversarial V2 check:** ${adv.sent} hallucinated/illegal model replies across 5 rooms; ${adv.executed} passed V2 as legal actions; **${adv.executedIllegal} illegal actions reached the engine** (must be 0).
 
-**Replay determinism:** ${det.generatedIdentical}/${det.generatedRuns} generated seeded runs and ${det.savedIdentical}/${det.savedRuns} saved runs replay to identical event logs (${det.pct}%).
+**Replay determinism:** ${det.generatedIdentical}/${det.generatedRuns} generated seeded runs and ${det.savedIdentical}/${det.savedRuns} saved runs (${det.savedStale} stale, recorded on an older level, skipped) replay to identical event logs (${det.pct}%).
 
-Notes: the mock backend is a deterministic keyword NLU, so its latency says nothing about Muse. Meta / Baseten rows fill in once their adapters are wired and keys are present.
+Notes: the mock backend is a deterministic keyword NLU written alongside the cases, so its 100% only shows the pipeline is wired. The meta-spark (muse-spark-1.3, reasoning_effort minimal, strict JSON schema) and baseten-spark-open (meta-models/muse-spark-open, JSON mode) rows are real calls. Their latency is end-to-end including network and reasoning tokens; the local parser answers wait/listen/hide/exit/go-to-room orders without any call. A "miss" is any difference from the expected outcome, including a different refusal reason; no miss executed an invalid action.
 ${backends.filter((b: any) => b.failures?.length).map((b: any) => `\n### ${b.name} misses\n${b.failures.map((f: any) => `- ${f.id} "${f.said}" → ${JSON.stringify(f.got)} (${f.kind})`).join("\n")}`).join("\n")}
 `;
 writeFileSync("metrics.md", md);

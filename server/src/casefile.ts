@@ -114,7 +114,7 @@ export async function buildCaseFile(opts: {
         // On mismatch: regenerate once, else the placeholder frame (engine-drawn, always true).
         if (!v.ok) img = { ext: "svg", data: placeholderSvg(st.after, mo.label, caption), source: "placeholder" };
       }
-      writeFileSync(`${base}.${img.ext}`, img.data as string);
+      writeFileSync(`${base}.${img.ext}`, img.data);
       writeFileSync(`${base}.source`, img.source);
     }
     panels.push({ key: mo.key, turnId: mo.turnId, label: mo.label, facts, mustShow, prompt, caption, alt: facts.join(" "), image: `panel-${panels.length + 1}.${img.ext}`, source: img.source, verified });

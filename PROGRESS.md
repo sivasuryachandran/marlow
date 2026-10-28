@@ -1,57 +1,59 @@
 # PROGRESS
 
-Status date: 2026-10-28. No Meta/Baseten keys were available, so everything that needs a live model is built behind an adapter with a mock and marked `TODO(docs)`. Nothing below claims a live-model result.
+Status date: 2026-10-28 (evening). Real Meta model calls are now wired and measured.
 
-## Milestones
+## Go / no-go (recorded)
 
-| | State | Evidence |
-|---|---|---|
-| M1 Access + engine | **Code done; access go/no-go PENDING (yours)** | 7 actions, seeded replay, `npm test`. `tools/check-access.ts` SKIPs every call it can't make safely |
-| M2 One voice turn | **Code done; real latency NOT measured** | PTT → STT chain → local parser → intent → V1/V2 → engine → text; per-turn latencies logged; turn-ID guard tested (timeout, superseded, wrong id) |
-| M3 World audio | **Code done; blindfold test NOT run (needs you)** | HRTF panner, synthesized per-room IR reverb, occlusion low-pass, moving guard arc, text-log mirroring of every cue |
-| M4 Earpiece | **Code done; Kokoro render NOT run** | band-pass + static bus, instant click + "Copy.", ambience, 4 s timeout static, −9 dB ducking, `tools/render-lines.ts` (810-file manifest) |
-| M5 Clarify + eval | **Done for mock; Meta/Baseten rows SKIP** | `npm run eval`: see below |
-| M6 Story + memory | **Done** | beats.json + Director (≤2/turn), 5 trust rules, curt set < 30, run-2 callback (tested across two runs), `author-mission --validate` (V0) |
-| M7 Case File + polish | **Code done; Muse Image NOT called** | 3–6 panels from the run log, prompts from engine facts only, engine-drawn placeholder frames, cache, `?debug=1`, settings, music |
-| M8 Ship | **Partly** | README, CREDITS written. NOT done: public repo, demo video, real-audio checks, final metrics |
+`npm run check-access` with the supplied keys: **PASS** Muse Spark `muse-spark-1.3` · **PASS** Muse Voice Transcribe · **PASS** Baseten `meta-models/muse-spark-open` · Muse Image PASS (real Case File generated, ~12 s/panel) · Muse Wonder not tested (optional, unused). **Go.**
 
-## Measured (mock backend, `npm run eval`, see metrics.md)
+Stage-one requirement ("real use of Meta models") is now met by: Voice Transcribe (speech → text), Muse Spark (speech → one legal action or a clarify question), Muse Image (Case File), plus Spark Open on Baseten as the alternate backend.
 
-- 64 unit/integration tests passing; `tsc` clean.
-- Intent accuracy 100% on 50 commands. **Caveat:** the mock is a keyword NLU I wrote and the cases were written alongside it, so this shows wiring, not Muse quality.
-- Invalid actions accepted: 0 (50 commands + 2000 adversarial replies; 574 passed V2 as legal and none was illegal at the engine).
-- Replay determinism: 50/50 generated seeded runs identical.
-- Latency (mock): p50 0.05 ms, p95 ~0.3 ms. Meaningless for Muse.
+## What changed today
+
+- **Adapters, from the official docs** (no guessing): Spark `POST /chat/completions` with `reasoning_effort`, strict `response_format: json_schema`; Voice Transcribe multipart `request` + 16 kHz mono WAV, reply `transcript`; Muse Image `POST /images/generations` (`b64_json`); Baseten OpenAI-compatible chat, JSON mode. Request shapes are pinned by `server/src/adapters/adapters.test.ts`.
+- **Findings from real calls:** Spark spends reasoning tokens inside `max_completion_tokens` (a 200 cap returned empty content) → 1200. Without strict schema Spark sometimes appended junk to `target`; strict mode with a per-request enum of known ids fixed it. Baseten returned a nested `{"action":{"name":…}}` until the prompt got examples; V1 rejects that shape rather than guessing. The Baseten model id is `meta-models/muse-spark-open` (the `-1026` suffix in the brief is rejected). Browser speech and Muse Transcribe both mishear "peek" as "peak"; the intent layers accept that homophone.
+- **Turn timeout default 4 s → 7 s**: measured Spark p95 is ~6.5 s (p50 ~2.6 s). The local parser answers listen / wait / hide / exit / "go to X" / "quietly go to X" with no call, so the slow path is peek / take phrasings only.
+- **Guard and trust redesign** (the three design bugs):
+  - New off-stage `upstairs` room (Marlow can never learn of or enter it). Route: upstairs ×3, stairwell, hall, gallery, **gallery (pause)**, hall, office, office, hall, stairwell, hall, office, hall, stairwell. The hall is occupied 5 of 16 steps.
+  - `listen` returns silence when the guard is upstairs (3+ hops), so listening is a decision.
+  - A **warning** now fires only when the guard is one hop away **and his next step is Marlow's room**. The −5 trust applies only when the player then moves **into** the guard's room or the one he is heading to; moving away is free; waiting/hiding after a warning still earns +5.
+- **Lines trimmed**: 2 variants per line, 1 curt variant, room/door/prop slot pools exclude off-stage things, mixed-type clarifies are refused. Pre-render manifest 930 → **339 files**. `npx tsx tools/demo-lines.ts 7` lists the **24 distinct lines** a clean demo run plus the start of run 2 actually speak (`DEMO_LINES.md`).
+- Dev notes: `listen` no longer narrates the guard twice; run logs carry a `levelHash` so logs recorded on an older level are reported as stale rather than as nondeterminism.
+
+## Measured
+
+| | Result |
+|---|---|
+| Intent accuracy (50 commands, correct transcript) | mock 100% (wiring only) · **Spark 98%** · **Spark Open 92%** (target ≥ 90) |
+| Invalid actions accepted | **0** on all backends; adversarial V2: 2000 bad replies, 0 illegal reached the engine |
+| Latency release → result (intent path only) | Spark p50 2.6 s / p95 6.6 s · Spark Open p50 0.8 s / p95 7.7 s · Voice Transcribe ~0.7–1.1 s |
+| Replay determinism | 100% of generated seeded runs |
+| Balance (1000 seeds; expert 150) | expert **100%** clean win · cautious 44% (all clean) · reckless 43% win but only **18% clean**, 57% caught (`simulation.md`) |
+
+Misses: Spark: "banana" got a refusal instead of "Say again". Spark Open: two "take the ledger" (refused as not-known instead of unknown), "peek the vault door" and "take the gold" answered "Say again" instead of a refusal. All are safe outcomes; none executed.
+
+## Known issues / honest caveats
+
+- **Reckless still wins 43% of runs** because one spot (+2) is survivable (caught at alert 3). "Reckless rarely wins" holds for clean wins (18%), not for any win. If you want it lower, the lever is a rule change (e.g. spotted = +3), which I have not made without your say-so.
+- The "cautious" policy in the simulator is deliberately simple (44%); the expert policy shows the level is cleanly winnable by a player who counts the guard's loop. Real players land in between: that is the playtest question.
+- **Nobody has listened to the audio yet.** Everything audible is still synthesized placeholders (footsteps, creak, phone, stinger, music, reverb IRs) and Marlow's voice is placeholder tones until Kokoro is rendered. The browser run showed the audio context running and the text log mirroring every cue; it can't tell if it sounds good.
+- The intent latency (≈3–5 s with Spark) is above the ~3 s design target; the wait is filled with ambience and the guard pacing where he was last heard.
+- Keys were pasted in chat: they live only in `.env` (gitignored, not in git history). Rotate them after the hackathon.
 
 ## Needs you
 
-1. **Keys + go/no-go** in `.env`, then read these docs and fill the `TODO(docs)` spots (each is one function):
-   - Spark chat path, model id, low reasoning-effort setting, schema-constrained output → `server/src/adapters/intent.ts` (`INTENT_JSON_SCHEMA` and `INTENT_SYSTEM_PROMPT` are ready in `@marlow/game`)
-   - Voice Transcribe request fields/response → `server/src/adapters/stt.ts` (client `ServerStt` already uploads a MediaRecorder blob to `/api/transcribe`)
-   - Muse Image shape → `server/src/adapters/image.ts`; Baseten shape for `meta-models/muse-spark-open-1026`; Wonder (`tools/author-mission.ts --generate`)
-2. **Kokoro**: `npm i -D kokoro-js` locally (check its dependency licenses first; I did not install it), then `npm run render-lines`. Until then Marlow's lines are placeholder murmurs plus on-screen/aria-live text. Fallback is a recorded voice bank using the manifest file names (`assets/audio/lines/manifest.json`).
-3. **Blindfold test (M3 acceptance, ≥ 8/10)** and listening tune-ups: ducking depth, reverb, occlusion cutoff, arc speed. I could only check that it runs (browser console clean, context running); I can't hear it.
-4. **Review `data/lines.json`** (all spoken text; 3 variants each, curt set for low trust).
-5. **Real assets**: CC0 sfx/music/IR are not downloaded; every sound is currently synthesized (see TODO list). Dropping files at `assets/audio/sfx/<cueId>.wav` replaces the synth automatically.
-6. Case File with real art, VERIFY_ART (SAM 3.1 + Spark), playtest notes, blind/low-vision tester, repo public, 3-minute demo video.
+1. **Listen tonight** (headphones, blindfold, M3: locate the guard left/right/ahead/behind ≥ 8/10). If the synth sounds cheap, drop CC0 files at `assets/audio/sfx/<cueId>.wav` (they replace the synth automatically) and log them in CREDITS.md.
+2. **Kokoro**: `npm i -D kokoro-js` locally (dev-only; espeak-ng/GPL concern noted in CREDITS.md), then `npm run render-lines` (339 files). Review only `DEMO_LINES.md`.
+3. Recruit the blind / low-vision tester; make the repo public; record the video (`DEMO_SCRIPT.md`, rehearsed with `tools/rehearse-demo.ts`).
+4. Decide on the reckless-win rule and whether Wonder / SAM verification are worth the remaining time.
 
-## Placeholder / TODO asset list (synth in `web/src/audio.ts`)
+## Revised plan
 
-- Voice: all lines (`assets/audio/lines/<audioKey>.wav`, see manifest) → murmur tones
-- SFX: `sfx.footsteps.{marble,carpet,metal}`, `sfx.door.creak`, `sfx.phone.ring`, `sfx.stinger.spotted`, `sfx.radio.click`, `sfx.radio.static`
-- Ambience: rain, HVAC hum, breathing (all synthesized loops)
-- Music: calm pad + tension pulse (synthesized; "two CC0 stems" replaced by two synthesized layers)
-- Reverb IRs: procedurally generated marble/dry/metal (no OpenAIR files used)
-
-## Design observations to review (rules unchanged from the brief)
-
-- The level is 2 hops across, so `listen` always hears the guard (never "quiet").
-- The guard crosses the hall every other step: a 2-step quiet move into the hall is always spotted; quiet works for office/gallery.
-- Warnings fire whenever the guard is ≤ 1 hop away, which is most turns here, so "move right after a warning" (−5 trust) happens often even in a clean run (solver wins keep alert ≤ 1 but trust can dip). Tune the warning rule or the guard route if trust should feel more meaningful.
-- Intent request carries an extra `side` field (relative to Marlow's facing) per known entity so "the left door" can resolve; the brief's triple was `{id, spokenName, type}`.
-- Moves may name a door (`door:<id>` encoding in the mock) which resolves to the room beyond; V2 for `move` relies on the connecting door being known, not the destination room (Marlow hasn't seen it yet).
-- Case File needs the server for the button; without it the CLI `npm run casefile -- <runId>` works from `runs/*.jsonl`.
-
-## Next
-
-Keys → fill adapters → rerun `npm run eval` (both backends side by side) → render Kokoro lines → blindfold + tune audio → demo seed/video (`npx tsx tools/demo-plan.ts 7` prints a clean 7-turn script).
+| Day | Focus |
+|---|---|
+| Oct 28 | done: real models wired, guard/trust fixes, simulator, trimmed lines |
+| Oct 29–30 | real sound assets, Kokoro lines, tune audio by ear, measured latency with real mic audio (record the 50 commands for a transcription error rate) |
+| Oct 31–Nov 1 | playtests incl. the tester, balance, bugs |
+| Nov 2 | freeze; README / CREDITS / repo public |
+| Nov 3 | record + edit video |
+| Nov 4 | buffer; submit early |

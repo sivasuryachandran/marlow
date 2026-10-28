@@ -16,7 +16,7 @@ export function validate(s: WorldState, a: Action): Validation {
   const k = s.knowledge, here = s.marlow.room;
   switch (a.action) {
     case "move": {
-      if (!s.rooms.some(r => r.id === a.target)) return refuse("unknown_target", a.target);
+      if (!s.rooms.some(r => r.id === a.target && !r.offstage)) return refuse("unknown_target", a.target);
       const door = doorBetween(s, here, a.target);
       if (!door || a.target === here) return refuse("not_adjacent", a.target);
       if (!k.doors.includes(door.id)) return refuse("not_known", a.target);
@@ -82,9 +82,11 @@ export function step(prev: WorldState, action: Action, rngIn?: Rng): StepResult 
     return loc;
   };
 
-  // Trust reaction to the previous turn's warning.
+  // Trust reaction to the previous turn's warning: walking into the guard's room (or the one he's heading to) costs trust.
+  const dangerBefore = s.memory.danger;
+  s.memory.danger = [];
   if (warnedBefore) {
-    if (action.action === "move") addTrust(-5, "ignored_warning", "ignored_warning");
+    if (action.action === "move" && dangerBefore.includes(action.target)) addTrust(-5, "ignored_warning", "ignored_warning");
     else if (action.action === "wait" || action.action === "hide") addTrust(5, "heeded_warning");
   }
 
@@ -176,10 +178,15 @@ export function step(prev: WorldState, action: Action, rngIn?: Rng): StepResult 
     }
     // Passive footsteps: audible only when the guard is within one hop. That is also the warning.
     const loc = locate(s, guardRoom(s));
-    if (loc.hops >= 1 && loc.hops <= 1) {
+    if (loc.hops === 1) {
       hear("footsteps");
-      ev.push({ type: "warning", dir: loc.dir, dist: loc.dist, perceived: true });
-      s.memory.warned = true;
+      // Warn only when he is heading toward Marlow's room next step.
+      const next = s.guard.route[(s.guard.step + 1) % s.guard.route.length];
+      if (next === s.marlow.room) {
+        ev.push({ type: "warning", dir: loc.dir, dist: loc.dist, perceived: true });
+        s.memory.warned = true;
+        s.memory.danger = [guardRoom(s), next];
+      }
     }
   }
 

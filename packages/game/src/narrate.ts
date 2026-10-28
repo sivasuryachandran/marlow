@@ -38,7 +38,7 @@ export function narrate(prev: WorldState, next: WorldState, events: GameEvent[])
       }
       case "guard_heard":
         if (e.via === "listen") out.push(e.dir === "here" ? { id: "marlow.guard.here", slots: {} } : { id: "marlow.listen.heard", slots: { dir: e.dir, dist: e.dist } });
-        else if (!has("warning")) out.push({ id: "marlow.listen.heard", slots: { dir: e.dir, dist: e.dist } });
+        else if (!has("warning") && !events.some(x => x.type === "guard_heard" && x.via === "listen")) out.push({ id: "marlow.listen.heard", slots: { dir: e.dir, dist: e.dist } });
         break;
       case "warning": out.push({ id: "marlow.warning", slots: { dir: e.dir } }); break;
       case "listen_quiet": out.push({ id: "marlow.listen.quiet", slots: {} }); break;

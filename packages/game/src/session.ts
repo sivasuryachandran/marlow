@@ -3,7 +3,7 @@ import type { Action, GameEvent, WorldState } from "@marlow/shared";
 import { Director, type Beat } from "./director";
 import { knowledgeList, type IntentAdapter, type KnownEntity } from "./intent";
 import { localParse } from "./parser";
-import { renderLine, type LineBank, type LineRef, type SpokenLine } from "./lines";
+import { hash, renderLine, type LineBank, type LineRef, type SpokenLine } from "./lines";
 import type { MemoryStore } from "./memory";
 import { cuesFor, narrate, type Cue } from "./narrate";
 import { verify, type Verified } from "./verify";
@@ -42,7 +42,7 @@ export class Session {
     this.runId = cfg.runId ?? `run-${cfg.seed}-${this.runNumber}`;
     this.director = new Director(cfg.beats);
     this.now = cfg.now ?? (() => performance.now());
-    this.write({ type: "start", runId: this.runId, seed: cfg.seed, trust: mem.trust, lastTrustLoss: mem.lastTrustLoss, runNumber: this.runNumber });
+    this.write({ type: "start", levelHash: hash(JSON.stringify(cfg.level)), runId: this.runId, seed: cfg.seed, trust: mem.trust, lastTrustLoss: mem.lastTrustLoss, runNumber: this.runNumber });
   }
 
   private write(row: Record<string, unknown>) { this.log.push(row); this.cfg.onLog?.(row); }

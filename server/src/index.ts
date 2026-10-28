@@ -19,7 +19,7 @@ const app = new Hono();
 mkdirSync(cfg.runsDir, { recursive: true });
 const safeId = (s: string) => /^[\w.-]{1,80}$/.test(s);
 
-app.get("/api/health", c => c.json({ intent: cfg.intentBackend, stt: false, image: false, timeoutMs: cfg.timeoutMs, keys: { meta: !!cfg.modelApiKey, baseten: !!cfg.basetenKey } }));
+app.get("/api/health", c => c.json({ intent: cfg.intentBackend, stt: !!cfg.modelApiKey, image: false, timeoutMs: cfg.timeoutMs, keys: { meta: !!cfg.modelApiKey, baseten: !!cfg.basetenKey } }));
 
 app.post("/api/intent", async c => {
   const req = (await c.req.json()) as IntentRequest;

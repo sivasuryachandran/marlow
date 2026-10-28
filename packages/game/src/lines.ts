@@ -50,7 +50,7 @@ export function renderLine(bank: LineBank, ref: LineRef, opts: { seed: number; t
 /** Slot domains per line id, used by tools/render-lines.ts to enumerate every file that can be spoken. */
 export function slotDomains(level: { rooms: any[]; doors: any[]; props: any[]; items: any[] }): Record<string, string[]> {
   return {
-    room: level.rooms.map(r => r.spokenName), door: level.doors.map(d => d.spokenName),
+    room: level.rooms.filter(r => !r.offstage).map(r => r.spokenName), door: level.doors.filter(d => d.kind !== "stairs").map(d => d.spokenName),
     item: level.items.map(i => i.spokenName), prop: level.props.map(p => p.spokenName),
     dir: ["ahead", "behind", "left", "right"], dist: ["near", "mid", "far"],
   };
@@ -60,7 +60,7 @@ export function expandLine(id: string, def: LineDef, level: Parameters<typeof sl
   const dom = slotDomains(level);
   const clarify = id.startsWith("marlow.clarify.");
   const kind = id.split(".")[2];
-  const pool = kind === "door" ? dom.door : kind === "room" ? dom.room : [...dom.room, ...dom.door, ...dom.prop, ...dom.item];
+  const pool = kind === "door" ? dom.door : kind === "room" ? dom.room : [...dom.prop, ...dom.item];
   const out: { audioKey: string; text: string; speaker: string }[] = [];
   for (const curt of [false, true]) {
     const variants = curt ? def.curt ?? [] : def.text;

@@ -20,20 +20,32 @@ export function knowledgeList(s: WorldState): KnownEntity[] {
   return out;
 }
 
-/** Plain JSON Schema for schema-constrained output (exact wiring per provider docs is an adapter TODO). */
+/**
+ * Schema for schema-constrained output. Meta's Chat Completions rejects oneOf/anyOf at the root under strict mode,
+ * so the root is one object with optional keys; V1 (v1()) still enforces "exactly one of the two shapes".
+ */
 export const INTENT_JSON_SCHEMA = {
-  oneOf: [
-    { type: "object", additionalProperties: false, required: ["action"],
-      properties: { action: { enum: ["move", "peek", "listen", "wait", "hide", "take", "exit"] }, target: { type: "string" }, stance: { enum: ["normal", "quiet"] } } },
-    { type: "object", additionalProperties: false, required: ["clarify"],
-      properties: { clarify: { type: "object", additionalProperties: false, required: ["candidates"], properties: { candidates: { type: "array", minItems: 2, items: { type: "string" } } } } } },
-  ],
+  type: "object", additionalProperties: false,
+  properties: {
+    action: { type: "string", enum: ["move", "peek", "listen", "wait", "hide", "take", "exit"] },
+    target: { type: "string", description: "an id from the knowledge list" },
+    stance: { type: "string", enum: ["normal", "quiet"] },
+    clarify: { type: "object", additionalProperties: false, required: ["candidates"],
+      properties: { candidates: { type: "array", items: { type: "string" }, minItems: 2 } } },
+  },
 } as const;
 
 export const INTENT_SYSTEM_PROMPT =
-  "You convert a spoken order into exactly one JSON object for a heist game. Use only ids from the knowledge list. " +
-  "Reply with {\"action\":...,\"target\":...,\"stance\":...} or {\"clarify\":{\"candidates\":[ids]}} when the order fits two or more known targets. " +
-  "Never invent ids. No prose.";
+  "You convert one spoken order into exactly one JSON object for a stealth heist game. Marlow is the operative; the player speaks to her. " +
+  "Allowed actions: move (target = a room id, or a door id meaning the room beyond it as \"door:<id>\"), peek (target = a door id in Marlow's current room), " +
+  "take (target = an item id), listen, wait, hide, exit (these four take no target). Add \"stance\":\"quiet\" when the player asks to be quiet, slow or sneaky. " +
+  "Use ONLY ids from the knowledge list; each entity's `side` is relative to Marlow's facing. " +
+  "If the order fits two or more known targets and you cannot tell which, reply {\"clarify\":{\"candidates\":[id,id]}} instead of guessing. " +
+  "If the order names something not in the knowledge list, still output the action with that target as the player said it (it will be refused). " +
+  "Reply with the JSON object only: either {\"action\":...} or {\"clarify\":...}, never both. One action, no compound orders, no prose. " +
+  "`action` is always a plain string, never an object. Examples: " +
+  "{\"action\":\"peek\",\"target\":\"door_hall_office\",\"stance\":\"quiet\"} ; {\"action\":\"move\",\"target\":\"door:arch_hall_gallery\"} ; " +
+  "{\"action\":\"take\",\"target\":\"ledger\"} ; {\"action\":\"listen\"} ; {\"clarify\":{\"candidates\":[\"door_a\",\"door_b\"]}}.";
 
 /** V1: exactly one valid shape. */
 export function v1(reply: unknown): { ok: true; reply: IntentReply } | { ok: false } {
@@ -47,7 +59,7 @@ export function v1(reply: unknown): { ok: true; reply: IntentReply } | { ok: fal
 
 // ---------- deterministic mock (also the offline fallback) ----------
 const VERBS: [RegExp, string][] = [
-  [/\b(peek|look through|look in|look at|check|crack|glance)\b/, "peek"],
+  [/\b(peek|peak|pique|look through|look in|look at|check|crack|glance)\b/, "peek"],
   [/\b(go|move|walk|head|enter|step|sneak|creep|proceed|run|cross)\b/, "move"],
   [/\b(take|grab|get|pick up|steal|lift|pocket)\b/, "take"],
   [/\b(hide|duck|take cover|get down)\b/, "hide"],

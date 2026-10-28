@@ -1,53 +1,442 @@
 {
   "_slots": "{room} {door} {item} {prop} are spokenNames from level.json; {dir} ahead|behind|left|right|here; {dist} near|mid|far; {a} {b} spokenNames for clarify. Edit freely, then re-run tools/render-lines.ts.",
-  "system.ack": { "speaker": "marlow", "text": ["Copy.", "Copy that.", "Got it."] },
-  "system.sayagain": { "speaker": "marlow", "text": ["Say again, boss?", "Didn't catch that, boss. Say again?", "You broke up. Say again?"], "curt": ["Say again."] },
-  "system.timeout": { "speaker": "marlow", "text": ["Signal's bad, say again?", "You're breaking up. Say again?"] },
-  "system.nothing_pending": { "speaker": "marlow", "text": ["Nothing to confirm, boss.", "I wasn't waiting on anything.", "Confirm what, boss?"], "curt": ["Confirm what?"] },
-  "system.nothing_to_repeat": { "speaker": "marlow", "text": ["I haven't said anything yet, boss.", "Nothing to repeat."] },
-  "client.intro.a": { "speaker": "client", "text": ["They said you retired. They said you can't do this anymore."] },
-  "client.intro.b": { "speaker": "client", "text": ["The gallery keeps a ledger in the office off the main hall. Marlow is already in the lobby. Bring it out, quietly, and I will forget the rest."] },
-  "client.intro.repeat": { "speaker": "client", "text": ["Same building. Same ledger. Try not to make it a habit, Owl.", "Back again. The ledger's still in the office. Let's see if you've learned anything."] },
-  "marlow.intro": { "speaker": "marlow", "text": ["I'm in the lobby, boss. Door's ahead of me. Whenever you're ready.", "In position. Lobby. One door ahead. Your call.", "Rain's loud out there, but it's quiet in here. Door ahead. Go when you like."], "curt": ["In the lobby. Door ahead. Go."] },
-  "marlow.callback.spotted": { "speaker": "marlow", "text": ["Last time he saw me. Not this time. Careful, okay?", "Remember last run, boss. He spotted me. Let's not repeat it."], "curt": ["Last time I got seen. Don't do that again."] },
-  "marlow.callback.ignored_warning": { "speaker": "marlow", "text": ["Last time you sent me out right after I warned you. Patience, okay?", "I called out a guard and you pushed me anyway last run. Listen to me this time."], "curt": ["You pushed me past a warning last time. Don't."] },
-  "marlow.callback.none": { "speaker": "marlow", "text": ["Good to work with you again, boss.", "Clean run last time. Let's do it again."] },
-  "marlow.move": { "speaker": "marlow", "text": ["Moving to {room}.", "Heading into {room}.", "On my way to {room}.", "Going through to {room}."], "curt": ["Moving. {room}.", "Going to {room}."] },
-  "marlow.move.quiet": { "speaker": "marlow", "text": ["Easing into {room}. Slow and quiet.", "Quietly into {room}. This takes a moment.", "Soft steps to {room}."], "curt": ["Slowly. {room}."] },
-  "marlow.door_noise": { "speaker": "marlow", "text": ["That door was louder than I like.", "Hinge squeaked. Sorry.", "Door creaked. Hope nobody heard."], "curt": ["Door creaked."] },
-  "marlow.arrive.item": { "speaker": "marlow", "text": ["I see {item}.", "{item}, right there.", "There's {item} in here."], "curt": ["{item}."] },
-  "marlow.arrive.hide": { "speaker": "marlow", "text": ["I can hide at {prop}.", "{prop} would cover me if I need it.", "There's {prop}. Good for hiding."], "curt": ["Cover: {prop}."] },
-  "marlow.peek.room": { "speaker": "marlow", "text": ["Cracking it open. That's {room}.", "Looking through. {room}.", "Peeking in. {room}."], "curt": ["{room}."] },
-  "marlow.peek.empty": { "speaker": "marlow", "text": ["Nothing in there worth mentioning.", "Empty, as far as I can see.", "Clear."], "curt": ["Empty."] },
-  "marlow.peek.guard": { "speaker": "marlow", "text": ["Guard in there! Not moving yet.", "He's right there in that room.", "Guard. In the room. Careful."], "curt": ["Guard in there."] },
-  "marlow.listen.heard": { "speaker": "marlow", "text": ["Footsteps. {dir}, {dist}.", "I hear him. {dir}, {dist}.", "Guard walking, {dir}, {dist}.", "Boots on the floor. {dir}, {dist}."], "curt": ["Guard. {dir}, {dist}."] },
-  "marlow.guard.here": { "speaker": "marlow", "text": ["He's in the room with me!", "He's right here. Right here!"] },
-  "marlow.listen.quiet": { "speaker": "marlow", "text": ["Quiet. Nothing close.", "Nothing but the rain.", "Not a sound, boss."], "curt": ["Quiet."] },
-  "marlow.wait": { "speaker": "marlow", "text": ["Holding.", "Waiting.", "Staying put.", "Standing by."], "curt": ["Holding."] },
-  "marlow.hide": { "speaker": "marlow", "text": ["Tucked in at {prop}.", "Down behind {prop}. Not breathing.", "Hiding at {prop}."], "curt": ["Hidden. {prop}."] },
-  "marlow.take": { "speaker": "marlow", "text": ["Got {item}.", "I have {item}.", "{item}'s in my bag."], "curt": ["Got it."] },
-  "marlow.warning": { "speaker": "marlow", "text": ["Guard's close, boss. {dir}.", "Footsteps, {dir}, and coming. Careful.", "He's near, {dir}. Think before you send me."], "curt": ["Guard close. {dir}."] },
-  "marlow.sound.phone_ring": { "speaker": "marlow", "text": ["A phone is ringing. {dir}, {dist}.", "Phone ringing somewhere, {dir}, {dist}.", "Desk phone, ringing, {dir}."], "curt": ["Phone ringing. {dir}."] },
-  "marlow.spotted": { "speaker": "marlow", "text": ["He saw me! He saw me!", "Hey! Somebody's seen me!", "I've been seen, boss!"], "curt": ["Seen."] },
-  "marlow.caught": { "speaker": "marlow", "text": ["They've got me. It's over.", "Hands up. It's over, boss."] },
-  "marlow.win.clean": { "speaker": "marlow", "text": ["We're out. Clean. You did that by ear.", "Outside. Not a hair out of place.", "Out clean, boss. You heard him before I saw him. Again."] },
-  "marlow.win.messy": { "speaker": "marlow", "text": ["We're out, but that was loud. Let's not do it like that again.", "Out. Barely. They'll know somebody was here."] },
-  "marlow.refuse.unknown_target": { "speaker": "marlow", "text": ["There's nothing like that here, boss.", "I don't know what you mean, boss.", "No such thing as far as I can see."], "curt": ["Nothing like that."] },
-  "marlow.refuse.not_known": { "speaker": "marlow", "text": ["I haven't seen that yet, boss.", "I don't know where that is yet.", "Haven't laid eyes on that."], "curt": ["Haven't seen it."] },
-  "marlow.refuse.not_adjacent": { "speaker": "marlow", "text": ["I can't get there from here, boss.", "That's not next door. One room at a time.", "Not from here, boss."], "curt": ["Not from here."] },
-  "marlow.refuse.door_locked": { "speaker": "marlow", "text": ["That door's locked.", "Locked, boss."] },
-  "marlow.refuse.not_in_room": { "speaker": "marlow", "text": ["There's no door there, boss.", "No door like that in this room, boss.", "I don't see that door from here."], "curt": ["No door there."] },
-  "marlow.refuse.no_hide_spot": { "speaker": "marlow", "text": ["Nowhere to hide in here, boss.", "There's no cover in this room.", "Open floor. I can't hide here."], "curt": ["No cover here."] },
-  "marlow.refuse.no_item": { "speaker": "marlow", "text": ["It's not in here, boss.", "That isn't in this room."], "curt": ["Not here."] },
-  "marlow.refuse.not_ready_to_exit": { "speaker": "marlow", "text": ["Not yet. I need to be at the exit with the ledger.", "I can't leave without the ledger, and I need to be by the door.", "Not out yet, boss. Ledger first, then the lobby."], "curt": ["Not yet. Ledger, then lobby."] },
-  "marlow.refuse.game_over": { "speaker": "marlow", "text": ["It's over, boss."] },
-  "marlow.clarify.door": { "speaker": "marlow", "text": ["Which door, boss? {a}, or {b}?", "I see two. {a} or {b}?", "Which one? {a}, or {b}?"], "curt": ["Which door? {a} or {b}?"] },
-  "marlow.clarify.room": { "speaker": "marlow", "text": ["Which way, boss? {a} or {b}?", "{a}, or {b}?"], "curt": ["{a} or {b}?"] },
-  "marlow.clarify.other": { "speaker": "marlow", "text": ["Which one, boss? {a} or {b}?", "{a}, or {b}?"], "curt": ["{a} or {b}?"] },
-  "marlow.alert2": { "speaker": "marlow", "text": ["They know someone's in the building. Radio chatter everywhere.", "Alarm's going quiet-loud. They're on alert, boss."] },
-  "marlow.twist.tape": { "speaker": "marlow", "text": ["Boss. There's a tape in the drawer. Labeled with a date. The night you lost your sight. I'm bringing it out."] },
-  "marlow.nudge": { "speaker": "marlow", "text": ["We're burning time, boss. The ledger's in the office.", "Clock's ticking. What's the plan?"], "curt": ["Time. Ledger's in the office."] },
-  "marlow.lowtrust": { "speaker": "marlow", "text": ["Keep it short with me from here on, boss. I'm not sure I'm following your lead."] },
-  "marlow.outro.win": { "speaker": "marlow", "text": ["Debrief at the van. Case file's coming. For once, they're the ones who need a description."] },
-  "marlow.outro.caught": { "speaker": "marlow", "text": ["Tell the client I'm sorry. We'll go again."] }
+  "system.ack": {
+    "speaker": "marlow",
+    "text": [
+      "Copy.",
+      "Copy that."
+    ]
+  },
+  "system.sayagain": {
+    "speaker": "marlow",
+    "text": [
+      "Say again, boss?",
+      "Didn't catch that, boss. Say again?"
+    ],
+    "curt": [
+      "Say again."
+    ]
+  },
+  "system.timeout": {
+    "speaker": "marlow",
+    "text": [
+      "Signal's bad, say again?",
+      "You're breaking up. Say again?"
+    ]
+  },
+  "system.nothing_pending": {
+    "speaker": "marlow",
+    "text": [
+      "Nothing to confirm, boss.",
+      "I wasn't waiting on anything."
+    ],
+    "curt": [
+      "Confirm what?"
+    ]
+  },
+  "system.nothing_to_repeat": {
+    "speaker": "marlow",
+    "text": [
+      "I haven't said anything yet, boss.",
+      "Nothing to repeat."
+    ]
+  },
+  "client.intro.a": {
+    "speaker": "client",
+    "text": [
+      "They said you retired. They said you can't do this anymore."
+    ]
+  },
+  "client.intro.b": {
+    "speaker": "client",
+    "text": [
+      "The gallery keeps a ledger in the office off the main hall. Marlow is already in the lobby. Bring it out, quietly, and I will forget the rest."
+    ]
+  },
+  "client.intro.repeat": {
+    "speaker": "client",
+    "text": [
+      "Same building. Same ledger. Try not to make it a habit, Owl.",
+      "Back again. The ledger's still in the office. Let's see if you've learned anything."
+    ]
+  },
+  "marlow.intro": {
+    "speaker": "marlow",
+    "text": [
+      "I'm in the lobby, boss. Door's ahead of me. Whenever you're ready.",
+      "In position. Lobby. One door ahead. Your call."
+    ],
+    "curt": [
+      "In the lobby. Door ahead. Go."
+    ]
+  },
+  "marlow.callback.spotted": {
+    "speaker": "marlow",
+    "text": [
+      "Last time he saw me. Not this time. Careful, okay?",
+      "Remember last run, boss. He spotted me. Let's not repeat it."
+    ],
+    "curt": [
+      "Last time I got seen. Don't do that again."
+    ]
+  },
+  "marlow.callback.ignored_warning": {
+    "speaker": "marlow",
+    "text": [
+      "Last time you sent me out right after I warned you. Patience, okay?",
+      "I called out a guard and you pushed me anyway last run. Listen to me this time."
+    ],
+    "curt": [
+      "You pushed me past a warning last time. Don't."
+    ]
+  },
+  "marlow.callback.none": {
+    "speaker": "marlow",
+    "text": [
+      "Good to work with you again, boss.",
+      "Clean run last time. Let's do it again."
+    ]
+  },
+  "marlow.move": {
+    "speaker": "marlow",
+    "text": [
+      "Moving to {room}.",
+      "Heading into {room}."
+    ],
+    "curt": [
+      "Moving. {room}."
+    ]
+  },
+  "marlow.move.quiet": {
+    "speaker": "marlow",
+    "text": [
+      "Easing into {room}. Slow and quiet.",
+      "Quietly into {room}. This takes a moment."
+    ],
+    "curt": [
+      "Slowly. {room}."
+    ]
+  },
+  "marlow.door_noise": {
+    "speaker": "marlow",
+    "text": [
+      "That door was louder than I like.",
+      "Hinge squeaked. Sorry."
+    ],
+    "curt": [
+      "Door creaked."
+    ]
+  },
+  "marlow.arrive.item": {
+    "speaker": "marlow",
+    "text": [
+      "I see {item}.",
+      "{item}, right there."
+    ],
+    "curt": [
+      "{item}."
+    ]
+  },
+  "marlow.arrive.hide": {
+    "speaker": "marlow",
+    "text": [
+      "I can hide at {prop}.",
+      "{prop} would cover me if I need it."
+    ],
+    "curt": [
+      "Cover: {prop}."
+    ]
+  },
+  "marlow.peek.room": {
+    "speaker": "marlow",
+    "text": [
+      "Cracking it open. That's {room}.",
+      "Looking through. {room}."
+    ],
+    "curt": [
+      "{room}."
+    ]
+  },
+  "marlow.peek.empty": {
+    "speaker": "marlow",
+    "text": [
+      "Nothing in there worth mentioning.",
+      "Empty, as far as I can see."
+    ],
+    "curt": [
+      "Empty."
+    ]
+  },
+  "marlow.peek.guard": {
+    "speaker": "marlow",
+    "text": [
+      "Guard in there! Not moving yet.",
+      "He's right there in that room."
+    ],
+    "curt": [
+      "Guard in there."
+    ]
+  },
+  "marlow.listen.heard": {
+    "speaker": "marlow",
+    "text": [
+      "Footsteps. {dir}, {dist}.",
+      "I hear him. {dir}, {dist}."
+    ],
+    "curt": [
+      "Guard. {dir}, {dist}."
+    ]
+  },
+  "marlow.guard.here": {
+    "speaker": "marlow",
+    "text": [
+      "He's in the room with me!",
+      "He's right here. Right here!"
+    ]
+  },
+  "marlow.listen.quiet": {
+    "speaker": "marlow",
+    "text": [
+      "Quiet. Nothing close.",
+      "Nothing but the rain."
+    ],
+    "curt": [
+      "Quiet."
+    ]
+  },
+  "marlow.wait": {
+    "speaker": "marlow",
+    "text": [
+      "Holding.",
+      "Waiting."
+    ],
+    "curt": [
+      "Holding."
+    ]
+  },
+  "marlow.hide": {
+    "speaker": "marlow",
+    "text": [
+      "Tucked in at {prop}.",
+      "Down behind {prop}. Not breathing."
+    ],
+    "curt": [
+      "Hidden. {prop}."
+    ]
+  },
+  "marlow.take": {
+    "speaker": "marlow",
+    "text": [
+      "Got {item}.",
+      "I have {item}."
+    ],
+    "curt": [
+      "Got it."
+    ]
+  },
+  "marlow.warning": {
+    "speaker": "marlow",
+    "text": [
+      "Guard's close, boss. {dir}.",
+      "Footsteps, {dir}, and coming. Careful."
+    ],
+    "curt": [
+      "Guard close. {dir}."
+    ]
+  },
+  "marlow.sound.phone_ring": {
+    "speaker": "marlow",
+    "text": [
+      "A phone is ringing. {dir}, {dist}.",
+      "Phone ringing somewhere, {dir}, {dist}."
+    ],
+    "curt": [
+      "Phone ringing. {dir}."
+    ]
+  },
+  "marlow.spotted": {
+    "speaker": "marlow",
+    "text": [
+      "He saw me! He saw me!",
+      "Hey! Somebody's seen me!"
+    ],
+    "curt": [
+      "Seen."
+    ]
+  },
+  "marlow.caught": {
+    "speaker": "marlow",
+    "text": [
+      "They've got me. It's over.",
+      "Hands up. It's over, boss."
+    ]
+  },
+  "marlow.win.clean": {
+    "speaker": "marlow",
+    "text": [
+      "We're out. Clean. You did that by ear.",
+      "Outside. Not a hair out of place."
+    ]
+  },
+  "marlow.win.messy": {
+    "speaker": "marlow",
+    "text": [
+      "We're out, but that was loud. Let's not do it like that again.",
+      "Out. Barely. They'll know somebody was here."
+    ]
+  },
+  "marlow.refuse.unknown_target": {
+    "speaker": "marlow",
+    "text": [
+      "There's nothing like that here, boss.",
+      "I don't know what you mean, boss."
+    ],
+    "curt": [
+      "Nothing like that."
+    ]
+  },
+  "marlow.refuse.not_known": {
+    "speaker": "marlow",
+    "text": [
+      "I haven't seen that yet, boss.",
+      "I don't know where that is yet."
+    ],
+    "curt": [
+      "Haven't seen it."
+    ]
+  },
+  "marlow.refuse.not_adjacent": {
+    "speaker": "marlow",
+    "text": [
+      "I can't get there from here, boss.",
+      "That's not next door. One room at a time."
+    ],
+    "curt": [
+      "Not from here."
+    ]
+  },
+  "marlow.refuse.door_locked": {
+    "speaker": "marlow",
+    "text": [
+      "That door's locked.",
+      "Locked, boss."
+    ]
+  },
+  "marlow.refuse.not_in_room": {
+    "speaker": "marlow",
+    "text": [
+      "There's no door there, boss.",
+      "No door like that in this room, boss."
+    ],
+    "curt": [
+      "No door there."
+    ]
+  },
+  "marlow.refuse.no_hide_spot": {
+    "speaker": "marlow",
+    "text": [
+      "Nowhere to hide in here, boss.",
+      "There's no cover in this room."
+    ],
+    "curt": [
+      "No cover here."
+    ]
+  },
+  "marlow.refuse.no_item": {
+    "speaker": "marlow",
+    "text": [
+      "It's not in here, boss.",
+      "That isn't in this room."
+    ],
+    "curt": [
+      "Not here."
+    ]
+  },
+  "marlow.refuse.not_ready_to_exit": {
+    "speaker": "marlow",
+    "text": [
+      "Not yet. I need to be at the exit with the ledger.",
+      "I can't leave without the ledger, and I need to be by the door."
+    ],
+    "curt": [
+      "Not yet. Ledger, then lobby."
+    ]
+  },
+  "marlow.refuse.game_over": {
+    "speaker": "marlow",
+    "text": [
+      "It's over, boss."
+    ]
+  },
+  "marlow.clarify.door": {
+    "speaker": "marlow",
+    "text": [
+      "Which door, boss? {a}, or {b}?",
+      "I see two. {a} or {b}?"
+    ],
+    "curt": [
+      "Which door? {a} or {b}?"
+    ]
+  },
+  "marlow.clarify.room": {
+    "speaker": "marlow",
+    "text": [
+      "Which way, boss? {a} or {b}?",
+      "{a}, or {b}?"
+    ],
+    "curt": [
+      "{a} or {b}?"
+    ]
+  },
+  "marlow.clarify.other": {
+    "speaker": "marlow",
+    "text": [
+      "Which one, boss? {a} or {b}?",
+      "{a}, or {b}?"
+    ],
+    "curt": [
+      "{a} or {b}?"
+    ]
+  },
+  "marlow.alert2": {
+    "speaker": "marlow",
+    "text": [
+      "They know someone's in the building. Radio chatter everywhere.",
+      "Alarm's going quiet-loud. They're on alert, boss."
+    ]
+  },
+  "marlow.twist.tape": {
+    "speaker": "marlow",
+    "text": [
+      "Boss. There's a tape in the drawer. Labeled with a date. The night you lost your sight. I'm bringing it out."
+    ]
+  },
+  "marlow.nudge": {
+    "speaker": "marlow",
+    "text": [
+      "We're burning time, boss. The ledger's in the office.",
+      "Clock's ticking. What's the plan?"
+    ],
+    "curt": [
+      "Time. Ledger's in the office."
+    ]
+  },
+  "marlow.lowtrust": {
+    "speaker": "marlow",
+    "text": [
+      "Keep it short with me from here on, boss. I'm not sure I'm following your lead."
+    ]
+  },
+  "marlow.outro.win": {
+    "speaker": "marlow",
+    "text": [
+      "Debrief at the van. Case file's coming. For once, they're the ones who need a description."
+    ]
+  },
+  "marlow.outro.caught": {
+    "speaker": "marlow",
+    "text": [
+      "Tell the client I'm sorry. We'll go again."
+    ]
+  }
 }

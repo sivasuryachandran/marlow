@@ -13,5 +13,5 @@ const run = async (seed: number, cmds: string[]) => {
   }
   console.log("status", s.state.status);
 };
-await run(7, ["peek the vault door", "listen", "go to the hall", "peek the door", "quietly go to the office", "take the ledger", "go to the hall", "go to the lobby", "exit"]);
-await run(8, ["listen", "wait"]); // the UI "Run it again" button uses seed+1
+await run(9, ["peek the vault door", "listen", "go to the hall", "peek the door", "quietly go to the office", "hide", "listen", "take the ledger", "go to the hall", "go to the lobby", "exit"]);
+await run(10, ["listen", "wait"]);

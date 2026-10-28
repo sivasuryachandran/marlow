@@ -1,13 +1,16 @@
 import { createInitialState, step } from "@marlow/engine";
+import { hash } from "@marlow/game";
 import type { WorldState } from "@marlow/shared";
 
 export type Row = Record<string, any>;
 
 /** Re-run a logged run through the engine; every executed turn must reproduce its logged events exactly. */
-export function replayRows(rows: Row[], level: unknown): { ok: boolean; turns: number; mismatchAt?: number; final: WorldState } {
+export function replayRows(rows: Row[], level: unknown): { ok: boolean; turns: number; mismatchAt?: number; stale?: boolean; final: WorldState } {
   const head = rows.find(r => r.type === "start");
   if (!head) throw new Error("run log has no start row");
   let s = createInitialState(level, head.seed, { trust: head.trust, lastTrustLoss: head.lastTrustLoss });
+  // A log recorded against a different level file cannot be expected to replay; report it as stale, not as nondeterminism.
+  if (head.levelHash !== undefined && head.levelHash !== hash(JSON.stringify(level))) return { ok: false, stale: true, turns: 0, final: s };
   let turns = 0;
   for (const row of rows) {
     if (!row.action || !row.events || row.discarded) continue;

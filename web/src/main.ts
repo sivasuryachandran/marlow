@@ -63,7 +63,7 @@ function newSession() {
   const runId = `${seed}-${Date.now().toString(36)}`;
   session = new Session({
     level, bank, beats: beatsJson as Beat[], intent, seed, memory: store, runId,
-    timeoutMs: Number((q.get("timeout") ?? 4000)), onLog: row => postLog(runId, row),
+    timeoutMs: Number((q.get("timeout") ?? 7000)), onLog: row => postLog(runId, row),
   });
   $("log").replaceChildren(); $("end").hidden = true; $("casefileOut").textContent = "";
 }
@@ -135,7 +135,11 @@ async function pttUp() {
   const ackLine = renderLine(bank, { id: "system.ack", slots: {} }, { seed, turnId: session.currentTurn + 1, curt: false });
   void audio.playAck(ackLine ?? undefined); // instant radio click + "Copy."
   let text: string | null = null;
-  try { text = await stt.stop(); } catch { text = null; }
+  try { text = await stt.stop(); }
+  catch {
+    text = null;
+    if (stt instanceof ServerStt && BrowserStt.available()) { stt = new BrowserStt(); log("sys", "[Cloud transcription failed; switched to browser speech recognition. Say it again.]"); }
+  }
   $("partial").textContent = "";
   if (!text) { log("sys", "[No speech picked up. Try again, or type.]"); status("Didn't catch that."); return; }
   void handleTranscript(text);

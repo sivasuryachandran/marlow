@@ -12,7 +12,8 @@ const mk = (seed = 1, patch?: (s: WorldState) => void): WorldState => {
 const at = (s: WorldState, room: string, facing: WorldState["marlow"]["facing"] = "north") => {
   s.marlow.room = room; s.marlow.facing = facing; revealRoom(s, room, true);
 };
-const GUARD = { stairwell: 0, hall1: 1, gallery: 2, hall3: 3 };
+// route: upstairs x3, stairwell, hall, gallery, gallery (pause), hall, office, office, hall, stairwell, hall, office, hall, stairwell
+const GUARD = { up: 0, up3: 2, stairwell: 3, hall: 4, gallery: 5, pause: 6, hall2: 7, office: 8 };
 const types = (r: ReturnType<typeof step>) => r.events.map(e => e.type);
 
 describe("level", () => {
@@ -49,7 +50,7 @@ describe("spatial", () => {
 
 describe("move", () => {
   it("through a closed door is noisy: guard within 1 hop -> alert +1", () => {
-    const s = mk(1, s => { s.guard.step = GUARD.hall1; });
+    const s = mk(1, s => { s.guard.step = GUARD.hall; });
     const r = step(s, { action: "move", target: "hall" });
     expect(types(r)).toContain("door_noise");
     expect(r.state.alert).toBe(1);
@@ -65,9 +66,9 @@ describe("move", () => {
     const r = step(s, { action: "move", target: "office", stance: "quiet" });
     expect(types(r)).not.toContain("door_noise");
     expect(r.state.alert).toBe(0);
-    expect(r.state.guard.step).toBe(GUARD.stairwell); // gallery -> hall -> stairwell
+    expect(r.state.guard.step).toBe(GUARD.hall2); // gallery -> pause -> hall, while Marlow is already in the office
   });
-  it("quiet entry to the hall is still spotted: the guard crosses it on every second step", () => {
+  it("quiet entry to the hall is spotted when the guard is about to enter it", () => {
     const s = mk(1, s => { s.guard.step = GUARD.stairwell; });
     expect(types(step(s, { action: "move", target: "hall", stance: "quiet" }))).toContain("spotted");
   });
@@ -95,7 +96,7 @@ describe("move", () => {
 
 describe("peek", () => {
   it("reveals the adjacent room's contents and any guard there", () => {
-    const s = mk(1, s => { s.guard.step = GUARD.hall1; });
+    const s = mk(1, s => { s.guard.step = GUARD.hall; });
     const r = step(s, { action: "peek", target: "door_lobby_hall" });
     const e = r.events.find(e => e.type === "door_peeked") as any;
     expect(e).toMatchObject({ sees: "hall", guardSeen: true });
@@ -122,11 +123,28 @@ describe("listen", () => {
     const r = step(s, { action: "listen" });
     expect(r.events.find(e => e.type === "guard_heard")).toMatchObject({ dir: "ahead", dist: "mid", via: "listen" });
   });
+  it("is silent when the guard is upstairs (3+ hops): listening is a real decision", () => {
+    for (const st of [GUARD.up, 1, GUARD.up3]) {
+      const r = step(mk(1, s => { s.guard.step = st; }), { action: "listen" });
+      expect(types(r)).toContain("listen_quiet");
+      expect(types(r)).not.toContain("guard_heard");
+    }
+  });
+  it("the guard pauses a step in the gallery, and the hall is empty most of the route", () => {
+    const route = (level as any).guard.route as string[];
+    expect(route.filter(r => r === "hall").length / route.length).toBeLessThan(0.4);
+    expect(route.some((r, i) => r === "gallery" && route[(i + 1) % route.length] === "gallery")).toBe(true);
+  });
+  it("Marlow can never move to or learn about the off-stage room", () => {
+    const s = mk(1, s => at(s, "stairwell"));
+    expect(s.knowledge.doors).not.toContain("stairs_up");
+    expect(validate(s, { action: "move", target: "upstairs" })).toMatchObject({ ok: false });
+  });
 });
 
 describe("wait", () => {
   it("only advances the guard", () => {
-    const s = mk(1, s => { s.guard.step = GUARD.stairwell; });
+    const s = mk(1, s => { s.guard.step = GUARD.up; });
     const r = step(s, { action: "wait" });
     expect(r.state.guard.step).toBe(1);
     expect(r.state.turn).toBe(1);
@@ -141,7 +159,7 @@ describe("hide", () => {
     expect(validate(unseen, { action: "hide" })).toMatchObject({ reason: "no_hide_spot" });
   });
   it("hidden Marlow is not spotted; moving clears hiding", () => {
-    const s = mk(1, s => { at(s, "gallery", "west"); s.guard.step = GUARD.hall1; });
+    const s = mk(1, s => { at(s, "gallery", "west"); s.guard.step = GUARD.hall; });
     const r = step(s, { action: "hide" });
     expect(r.state.guard.step).toBe(GUARD.gallery);
     expect(types(r)).not.toContain("spotted");
@@ -197,22 +215,35 @@ describe("guard, alert, trust", () => {
     expect(r.state.status).toBe("caught");
     expect(validate(r.state, { action: "wait" })).toMatchObject({ reason: "game_over" });
   });
-  it("footsteps within one hop warn and arm the trust rules", () => {
-    const s = mk(1, s => { s.guard.step = GUARD.stairwell; });
-    const r = step(s, { action: "wait" }); // guard -> hall, adjacent to lobby
+  it("a warning fires only when the guard is one hop away AND heading into Marlow's room", () => {
+    // Marlow in the hall; guard goes upstairs(2) -> stairwell(3), whose next step is the hall.
+    const r = step(mk(1, s => { at(s, "hall"); s.guard.step = GUARD.up3; }), { action: "wait" });
     expect(types(r)).toContain("warning");
-    expect(r.state.memory.warned).toBe(true);
+    expect(r.state.memory).toMatchObject({ warned: true, danger: ["stairwell", "hall"] });
+    // Adjacent but heading elsewhere (hall -> gallery): heard, not warned.
+    const r2 = step(mk(1, s => { s.guard.step = GUARD.stairwell; }), { action: "wait" });
+    expect(types(r2)).toContain("guard_heard");
+    expect(types(r2)).not.toContain("warning");
+    expect(r2.state.memory.warned).toBe(false);
   });
-  it("ordering a move right after a warning costs trust (-5) and is remembered", () => {
-    const s = mk(1, s => { s.guard.step = GUARD.stairwell; });
-    const warned = step(s, { action: "wait" }).state;
-    const r = step(warned, { action: "move", target: "hall" });
+  const warnedInHall = () => step(mk(1, s => { at(s, "hall"); s.guard.step = GUARD.up3; }), { action: "wait" }).state;
+  it("moving INTO the guard's room after a warning costs trust (-5) and is remembered", () => {
+    const r = step(warnedInHall(), { action: "move", target: "stairwell" });
     expect(r.events).toContainEqual({ type: "trust_changed", delta: -5, reason: "ignored_warning", perceived: false });
     expect(r.state.memory.lastTrustLoss).toBe("ignored_warning");
   });
-  it("waiting right after a warning earns +5", () => {
-    const warned = step(mk(1, s => { s.guard.step = GUARD.stairwell; }), { action: "wait" }).state;
-    expect(step(warned, { action: "wait" }).state.trust).toBe(55);
+  it("moving AWAY from the guard after a warning is free", () => {
+    const r = step(warnedInHall(), { action: "move", target: "office" });
+    expect(r.events.some(e => e.type === "trust_changed")).toBe(false);
+    expect(r.state.status).toBe("playing");
+    expect(r.state.alert).toBeLessThanOrEqual(1);
+  });
+  it("hiding right after a warning earns +5", () => {
+    const warned = step(mk(1, s => { at(s, "gallery", "west"); s.guard.step = GUARD.stairwell; }), { action: "wait" }).state;
+    expect(warned.memory.warned).toBe(true); // guard in hall, next step is the gallery
+    const r = step(warned, { action: "hide" });
+    expect(r.state.trust).toBe(55);
+    expect(types(r)).not.toContain("spotted");
   });
   it("scheduled phone rings only when perceivable", () => {
     const s = mk(1, s => { at(s, "hall"); s.turn = 5; s.guard.step = GUARD.stairwell; s.marlow.hidden = true; });

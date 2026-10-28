@@ -26,7 +26,8 @@ export function verify(s: WorldState, reply: unknown): Verified {
     const c = [...new Set(r.clarify.candidates)];
     if (c.length < 2 || c.some(id => !known.has(id))) return { kind: "sayagain", why: "bad_clarify" };
     const types = new Set(c.map(id => s.doors.some(d => d.id === id) ? "door" : s.rooms.some(x => x.id === id) ? "room" : "other"));
-    return { kind: "clarify", candidates: c, ctype: types.size === 1 ? ([...types][0] as "door" | "room" | "other") : "other" };
+    if (types.size !== 1) return { kind: "sayagain", why: "bad_clarify" }; // mixed kinds: not a question we can speak from a template
+    return { kind: "clarify", candidates: c, ctype: [...types][0] as "door" | "room" | "other" };
   }
   if ("target" in r && r.action !== "move" && !known.has(r.target)) {
     // Hallucinated or never-seen target: world unchanged.
