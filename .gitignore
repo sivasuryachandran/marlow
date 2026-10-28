@@ -5,3 +5,4 @@ casefiles/
 dist
 metrics*.json
 data/eval/audio/*.wav
+data/eval/heldout-audio/*.wav

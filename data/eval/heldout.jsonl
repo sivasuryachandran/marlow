@@ -1,0 +1,30 @@
+{"id": "h01", "saidText": "stay where you are", "state": {"room": "lobby"}, "expected": {"action": "wait"}}
+{"id": "h02", "saidText": "hold still", "state": {"room": "lobby"}, "expected": {"action": "wait"}}
+{"id": "h03", "saidText": "wait a moment", "state": {"room": "lobby"}, "expected": {"action": "wait"}}
+{"id": "h04", "saidText": "tell me what you hear", "state": {"room": "lobby"}, "expected": {"action": "listen"}}
+{"id": "h05", "saidText": "listen carefully", "state": {"room": "lobby"}, "expected": {"action": "listen"}}
+{"id": "h06", "saidText": "have a look through the entrance door", "state": {"room": "lobby"}, "expected": {"action": "peek", "target": "door_lobby_hall"}}
+{"id": "h07", "saidText": "walk through the front door", "state": {"room": "lobby"}, "expected": {"action": "move", "target": "hall"}}
+{"id": "h08", "saidText": "tiptoe into the corridor", "state": {"room": "lobby"}, "expected": {"action": "move", "target": "hall", "stance": "quiet"}}
+{"id": "h09", "saidText": "go upstairs", "state": {"room": "lobby"}, "expected": {"refuse": "unknown_target"}}
+{"id": "h10", "saidText": "take the gold bars", "state": {"room": "lobby"}, "expected": {"refuse": "unknown_target"}}
+{"id": "h11", "saidText": "dance", "state": {"room": "lobby"}, "expected": {"sayagain": true}}
+{"id": "h12", "saidText": "peek behind the vault door", "state": {"room": "lobby"}, "expected": {"refuse": "unknown_target"}}
+{"id": "h13", "saidText": "get out of there", "state": {"room": "lobby"}, "expected": {"refuse": "not_ready_to_exit"}}
+{"id": "h14", "saidText": "check the cellar door", "state": {"room": "lobby"}, "expected": {"refuse": "unknown_target"}}
+{"id": "h15", "saidText": "look through the study door", "state": {"room": "hall"}, "expected": {"action": "peek", "target": "door_hall_office"}}
+{"id": "h16", "saidText": "check the archway", "state": {"room": "hall"}, "expected": {"action": "peek", "target": "arch_hall_gallery"}}
+{"id": "h17", "saidText": "peek the one ahead", "state": {"room": "hall"}, "expected": {"action": "peek", "target": "door_hall_stairwell"}}
+{"id": "h18", "saidText": "sneak into the study", "state": {"room": "hall"}, "expected": {"action": "move", "target": "office", "stance": "quiet"}}
+{"id": "h19", "saidText": "go into the gallery", "state": {"room": "hall"}, "expected": {"action": "move", "target": "gallery"}}
+{"id": "h20", "saidText": "take a look at the door on the right", "state": {"room": "hall"}, "expected": {"action": "peek", "target": "door_hall_office"}}
+{"id": "h21", "saidText": "peek the door", "state": {"room": "hall"}, "expected": {"clarify": true}}
+{"id": "h22", "saidText": "hide", "state": {"room": "hall"}, "expected": {"refuse": "no_hide_spot"}}
+{"id": "h23", "saidText": "walk through the kitchen door", "state": {"room": "hall"}, "expected": {"refuse": "unknown_target"}}
+{"id": "h24", "saidText": "grab the book", "state": {"room": "office"}, "expected": {"action": "take", "target": "ledger"}}
+{"id": "h25", "saidText": "pocket the logbook", "state": {"room": "office"}, "expected": {"action": "take", "target": "ledger"}}
+{"id": "h26", "saidText": "conceal yourself", "state": {"room": "office"}, "expected": {"action": "hide"}}
+{"id": "h27", "saidText": "back to the hall", "state": {"room": "office"}, "expected": {"action": "move", "target": "hall"}}
+{"id": "h28", "saidText": "duck behind the glass case", "state": {"room": "gallery"}, "expected": {"action": "hide"}}
+{"id": "h29", "saidText": "we are done, leave now", "state": {"room": "lobby", "carrying": "ledger"}, "expected": {"action": "exit"}}
+{"id": "h30", "saidText": "head out", "state": {"room": "lobby", "carrying": "ledger"}, "expected": {"action": "exit"}}
