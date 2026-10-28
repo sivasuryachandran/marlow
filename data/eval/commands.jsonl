@@ -1,0 +1,50 @@
+{"id": "c01", "saidText": "wait", "state": {"room": "lobby"}, "expected": {"action": "wait"}}
+{"id": "c02", "saidText": "stop", "state": {"room": "lobby"}, "expected": {"action": "wait"}}
+{"id": "c03", "saidText": "hold position", "state": {"room": "lobby"}, "expected": {"action": "wait"}}
+{"id": "c04", "saidText": "listen", "state": {"room": "lobby"}, "expected": {"action": "listen"}}
+{"id": "c05", "saidText": "what do you hear", "state": {"room": "lobby"}, "expected": {"action": "listen"}}
+{"id": "c06", "saidText": "peek the door", "state": {"room": "lobby"}, "expected": {"action": "peek", "target": "door_lobby_hall"}}
+{"id": "c07", "saidText": "look through the lobby door", "state": {"room": "lobby"}, "expected": {"action": "peek", "target": "door_lobby_hall"}}
+{"id": "c08", "saidText": "go through the door", "state": {"room": "lobby"}, "expected": {"action": "move", "target": "hall"}}
+{"id": "c09", "saidText": "go to the hall", "state": {"room": "lobby"}, "expected": {"action": "move", "target": "hall"}}
+{"id": "c10", "saidText": "sneak to the hall quietly", "state": {"room": "lobby"}, "expected": {"action": "move", "target": "hall", "stance": "quiet"}}
+{"id": "c11", "saidText": "creep through the door", "state": {"room": "lobby"}, "expected": {"action": "move", "target": "hall", "stance": "quiet"}}
+{"id": "c12", "saidText": "go back", "state": {"room": "lobby"}, "expected": {"refuse": "not_adjacent"}}
+{"id": "c13", "saidText": "go to the office", "state": {"room": "lobby"}, "expected": {"refuse": "not_adjacent"}}
+{"id": "c14", "saidText": "take the ledger", "state": {"room": "lobby"}, "expected": {"refuse": "unknown_target"}}
+{"id": "c15", "saidText": "hide", "state": {"room": "lobby"}, "expected": {"refuse": "no_hide_spot"}}
+{"id": "c16", "saidText": "exit", "state": {"room": "lobby"}, "expected": {"refuse": "not_ready_to_exit"}}
+{"id": "c17", "saidText": "peek the vault door", "state": {"room": "lobby"}, "expected": {"refuse": "unknown_target"}}
+{"id": "c18", "saidText": "open the safe", "state": {"room": "lobby"}, "expected": {"sayagain": true}}
+{"id": "c19", "saidText": "banana", "state": {"room": "lobby"}, "expected": {"sayagain": true}}
+{"id": "c20", "saidText": "go to the moon", "state": {"room": "lobby"}, "expected": {"refuse": "unknown_target"}}
+{"id": "c21", "saidText": "peek the left door", "state": {"room": "hall"}, "expected": {"action": "peek", "target": "arch_hall_gallery"}}
+{"id": "c22", "saidText": "peek the right door", "state": {"room": "hall"}, "expected": {"action": "peek", "target": "door_hall_office"}}
+{"id": "c23", "saidText": "peek the door ahead", "state": {"room": "hall"}, "expected": {"action": "peek", "target": "door_hall_stairwell"}}
+{"id": "c24", "saidText": "peek the office door", "state": {"room": "hall"}, "expected": {"action": "peek", "target": "door_hall_office"}}
+{"id": "c25", "saidText": "peek the door", "state": {"room": "hall"}, "expected": {"clarify": true}}
+{"id": "c26", "saidText": "check the stairwell", "state": {"room": "hall"}, "expected": {"action": "peek", "target": "door_hall_stairwell"}}
+{"id": "c27", "saidText": "go to the office", "state": {"room": "hall"}, "expected": {"action": "move", "target": "office"}}
+{"id": "c28", "saidText": "go left", "state": {"room": "hall"}, "expected": {"action": "move", "target": "gallery"}}
+{"id": "c29", "saidText": "head right quietly", "state": {"room": "hall"}, "expected": {"action": "move", "target": "office", "stance": "quiet"}}
+{"id": "c30", "saidText": "go through the door", "state": {"room": "hall"}, "expected": {"clarify": true}}
+{"id": "c31", "saidText": "go back", "state": {"room": "hall"}, "expected": {"action": "move", "target": "lobby"}}
+{"id": "c32", "saidText": "hide", "state": {"room": "hall"}, "expected": {"refuse": "no_hide_spot"}}
+{"id": "c33", "saidText": "listen", "state": {"room": "hall"}, "expected": {"action": "listen"}}
+{"id": "c34", "saidText": "sneak into the gallery", "state": {"room": "hall"}, "expected": {"action": "move", "target": "gallery", "stance": "quiet"}}
+{"id": "c35", "saidText": "peek the gallery arch", "state": {"room": "hall"}, "expected": {"action": "peek", "target": "arch_hall_gallery"}}
+{"id": "c36", "saidText": "go to the vault", "state": {"room": "hall"}, "expected": {"refuse": "unknown_target"}}
+{"id": "c37", "saidText": "take the ledger", "state": {"room": "hall"}, "expected": {"refuse": "unknown_target"}}
+{"id": "c38", "saidText": "wait", "state": {"room": "hall"}, "expected": {"action": "wait"}}
+{"id": "c39", "saidText": "take the ledger", "state": {"room": "office"}, "expected": {"action": "take", "target": "ledger"}}
+{"id": "c40", "saidText": "grab the ledger", "state": {"room": "office"}, "expected": {"action": "take", "target": "ledger"}}
+{"id": "c41", "saidText": "pick up the ledger", "state": {"room": "office"}, "expected": {"action": "take", "target": "ledger"}}
+{"id": "c42", "saidText": "hide", "state": {"room": "office"}, "expected": {"action": "hide"}}
+{"id": "c43", "saidText": "go back", "state": {"room": "office"}, "expected": {"action": "move", "target": "hall"}}
+{"id": "c44", "saidText": "go to the hall", "state": {"room": "office"}, "expected": {"action": "move", "target": "hall"}}
+{"id": "c45", "saidText": "leave", "state": {"room": "office"}, "expected": {"refuse": "not_ready_to_exit"}}
+{"id": "c46", "saidText": "peek the door", "state": {"room": "office"}, "expected": {"action": "peek", "target": "door_hall_office"}}
+{"id": "c47", "saidText": "take the gold", "state": {"room": "office"}, "expected": {"refuse": "unknown_target"}}
+{"id": "c48", "saidText": "hide", "state": {"room": "gallery"}, "expected": {"action": "hide"}}
+{"id": "c49", "saidText": "go back", "state": {"room": "gallery"}, "expected": {"action": "move", "target": "hall"}}
+{"id": "c50", "saidText": "get out", "state": {"room": "lobby", "carrying": "ledger"}, "expected": {"action": "exit"}}
