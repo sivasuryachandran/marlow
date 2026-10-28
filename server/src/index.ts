@@ -27,6 +27,12 @@ app.post("/api/intent", async c => {
   catch (e) { return c.json({ error: String(e), notConfigured: e instanceof NotConfigured }, e instanceof NotConfigured ? 501 : 502); }
 });
 
+app.post("/api/warmup", async c => {
+  const t0 = performance.now();
+  try { await intent.warmup?.(); } catch { /* best effort */ }
+  return c.json({ ok: true, backend: intent.name, ms: Math.round(performance.now() - t0) });
+});
+
 app.post("/api/transcribe", async c => {
   try { return c.json(await stt.transcribe(await c.req.arrayBuffer(), c.req.header("content-type") ?? "audio/webm")); }
   catch (e) { return c.json({ error: String(e) }, e instanceof NotConfigured ? 501 : 502); }

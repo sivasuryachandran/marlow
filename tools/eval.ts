@@ -39,7 +39,9 @@ function matches(exp: Cmd["expected"], got: { kind: string; action?: Action; lin
 
 async function evalBackend(name: string, adapter: IntentAdapter, cmds: Cmd[]) {
   const results: { id: string; ok: boolean; kind: string; ms: number; said: string; got?: unknown; wrong?: boolean }[] = [];
-  let invalidAccepted = 0, clarifies = 0, wrongTarget = 0;
+  let invalidAccepted = 0, clarifies = 0, wrongTarget = 0, timeouts = 0;
+  let warmupMs: number | null = null;
+  if (process.env.EVAL_WARMUP === "1" && adapter.warmup) { const w0 = performance.now(); await adapter.warmup(); warmupMs = Math.round(performance.now() - w0); }
   for (const c of cmds) {
     const sess = new Session({ level, bank, beats, intent: adapter, seed: 1, memory: new InMemoryStore(), timeoutMs: 8000, knowledgeScope: (process.env.EVAL_SCOPE as "all" | "near" | undefined) ?? "all" });
     sess.state = presetState(c.state);
@@ -52,6 +54,7 @@ async function evalBackend(name: string, adapter: IntentAdapter, cmds: Cmd[]) {
     const reasonLine = o.lines[0]?.id.replace("marlow.refuse.", "");
     const ok = matches(c.expected, { kind: o.kind, action: o.action, reason: reasonLine });
     if (o.kind === "clarify") clarifies++;
+    if (o.kind === "timeout") timeouts++;
     // an order that was meant to be refused (or was gibberish) must not have executed; with real speech this can be a legal action triggered by a mishearing
     if ((c.expected.refuse || c.expected.sayagain) && o.kind === "ok") invalidAccepted++;
     // Wrong-target: an executed action aimed at something other than what the order named (e.g. "vault door" -> a real door).
@@ -63,7 +66,7 @@ async function evalBackend(name: string, adapter: IntentAdapter, cmds: Cmd[]) {
   const ms = results.map(r => r.ms);
   return {
     name, n: results.length, intentAccuracy: pct(results.filter(r => r.ok).length, results.length),
-    clarificationRate: pct(clarifies, results.length), invalidAccepted, wrongTarget, wrongTargetCases: results.filter(r => r.wrong).map(r => `${r.id} "${r.said}" -> ${JSON.stringify(r.got)}`),
+    clarificationRate: pct(clarifies, results.length), invalidAccepted, timeouts, warmupMs, wrongTarget, wrongTargetCases: results.filter(r => r.wrong).map(r => `${r.id} "${r.said}" -> ${JSON.stringify(r.got)}`),
     latencyMs: { p50: Math.round((quantile(ms, 0.5) ?? 0) * 100) / 100, p95: Math.round((quantile(ms, 0.95) ?? 0) * 100) / 100 },
     failures: results.filter(r => !r.ok),
   };
@@ -199,7 +202,7 @@ const clip = (id: string) => `data/eval/${HELD ? "heldout-audio" : "audio"}/${id
 const spoken = cmds.filter(c => existsSync(clip(c.id)));
 let transcription: any = "n/a (no recordings: run the recorder, see README)";
 const e2e: any[] = [];
-if (spoken.length && process.env.MODEL_API_KEY) {
+if (spoken.length && process.env.MODEL_API_KEY && process.env.EVAL_SKIP_AUDIO !== "1") {
   const stt = new MetaStt(cfg), heard: Cmd[] = [], ms: number[] = [], mis: string[] = [];
   let edits = 0, refWords = 0;
   for (const c of spoken) {
@@ -215,7 +218,7 @@ if (spoken.length && process.env.MODEL_API_KEY) {
   for (const b of want) e2e.push(await evalBackend(b === "meta" ? "meta-spark" : b === "baseten" ? "baseten-spark-open" : "mock", makeIntent(cfg, b as any), heard));
 }
 const metrics = { commands: cmds.length, transcription, endToEndFromSpeech: e2e, backends, adversarialV2: adv, wrongTargetStress: stress, determinism: det };
-const suffix = `${HELD ? ".heldout" : ""}${process.env.EVAL_FULL_KNOWLEDGE === "1" ? ".full" : ""}${process.env.EVAL_SCOPE === "near" ? ".near" : ""}`;
+const suffix = `${process.env.EVAL_TAG ? "." + process.env.EVAL_TAG : ""}${HELD ? ".heldout" : ""}${process.env.EVAL_FULL_KNOWLEDGE === "1" ? ".full" : ""}${process.env.EVAL_SCOPE === "near" ? ".near" : ""}`;
 writeFileSync(`metrics${suffix}.json`, JSON.stringify(metrics, null, 2));
 
 const row = (f: (b: any) => string) => backends.map(f).join(" | ");
@@ -229,6 +232,7 @@ ${HELD ? "> **Held-out:** these commands were written once and frozen before thi
 | Clarification rate | ${row(b => ("skipped" in b ? "—" : `${b.clarificationRate}%`))} |
 | Intended-invalid orders that executed (engine-illegal actions are always 0, see adversarial check) | ${row(b => ("skipped" in b ? "—" : String(b.invalidAccepted)))} |
 | Wrong-target actions executed (must be 0) | ${row(b => ("skipped" in b ? "—" : String(b.wrongTarget)))} |
+| Timeouts (> 8 s in this harness) | ${row(b => ("skipped" in b ? "—" : `${b.timeouts}${b.warmupMs != null ? ` (warm-up ${b.warmupMs} ms)` : ""}`))} |
 | Latency p50 / p95, release → result (ms, adapter + pipeline) | ${row(b => ("skipped" in b ? "—" : `${b.latencyMs.p50} / ${b.latencyMs.p95}`))} |
 
 ${typeof transcription === "string" ? `Transcription error rate: ${transcription}.` : `**Transcription (Muse Voice Transcribe, ${transcription.clips} real recordings):** word error rate ${transcription.wordErrorRate}%, ${transcription.clipsWithAnError} clips with at least one error, STT latency p50 / p95 ${transcription.sttLatencyMs.p50} / ${transcription.sttLatencyMs.p95} ms.\n\nEnd-to-end (speech → STT → intent → V1/V2): ${e2e.map((b: any) => "skipped" in b ? `${b.name} SKIP` : `${b.name} ${b.intentAccuracy}% (${b.invalidAccepted} intended-invalid executed, ${b.wrongTarget} wrong-target)`).join(" · ")}.\n${transcription.errors.map((x: string) => `- ${x}`).join("\n")}`}

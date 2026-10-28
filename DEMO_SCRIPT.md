@@ -1,8 +1,10 @@
 # MARLOW — 3-minute demo script
 
-Every spoken line below is real output from `npx tsx tools/rehearse-demo.ts` (which uses the offline mock; with Spark the same orders resolve the same way) (seed 9, then seed 10 for run 2), so the take will match. Orders marked **[type]** are safe to type if speech recognition mishears; say them aloud if it works.
+Every line below is real output from `node --env-file=.env --import tsx tools/rehearse-demo.ts --live`, which plays this exact script through the real game with **live Muse Spark**. It has played exactly as written **5 out of 5** times (seed 7, then seed 8 for run 2). Offline `tools/rehearse-demo.ts` (no `--live`) can't parse the natural-language lines.
 
 **The three things this video must prove:** (1) an ambiguous order gets a clarifying question, never a guess; (2) an invalid order leaves the world unchanged; (3) the same logged actions replay to identical outcomes.
+
+**Which path answers each turn.** `LOCAL` = the plain-code parser answers instantly (about 0 ms, no model). `SPARK` = a real Muse Spark call, then the code checks it (V1 schema, V2 legality, matched-phrase check) before anything can happen. In this script **6 of 11 turns go to Spark** (one refusal, one clarify, one clarify answer, three natural-language orders) and **5 are instant local turns**.
 
 ## Before you record
 
@@ -10,33 +12,39 @@ Every spoken line below is real output from `npx tsx tools/rehearse-demo.ts` (wh
 - Real voices: run `npm i -D kokoro-js && npm run render-lines` first. Without it Marlow is placeholder tones and the video will not land.
 - Tune by ear first: ducking depth, reverb, the guard arc. Do the blindfold smoke test once with a friend.
 - Fresh memory: open the settings and press "Forget Marlow's memory", then reload. Take 1 must be Run 1.
-- Open `http://localhost:5173/?seed=9` (debug OFF) for the player view. Open a second window `?seed=9&debug=1` only for the split-screen beat (replay the same orders there, or capture the debug panel from a second take).
+- Open `http://localhost:5173/?seed=7` (debug OFF) for the player view. Open a second window `?seed=7&debug=1` only for the split-screen beat (replay the same orders there, or capture the debug panel from a second take).
 - `npm run server` running if you want the Case File shot; otherwise `npx tsx tools/casefile.ts <runId>`.
 - If a real blind or low-vision tester plays, **their reaction goes first** in the cut (before 0:00). Say "designed to be playable without vision", not more.
 
-## Timeline
+## Timeline (seed 7)
 
-Which orders need the model: only **peek / take** phrasings (3 in this script); everything else (listen, go to X, quietly go to X, hide, exit) is handled by the local parser and answers instantly. Real Spark answers in ~3 to 5 s; while it thinks the player hears only rain, HVAC, breathing and the guard pacing where he was last heard. Keep that gap in the cut; it is the product.
+Spark turns take about 2 to 4.5 s in the rehearsals (median 2.8 s). Let that gap play: while it thinks you hear only rain, the HVAC, Marlow breathing and the guard pacing where he was last heard. If a turn ever exceeds 7 s the game says "Signal's bad, say again?" and nothing changes; that is a feature, keep the take.
 
-| Time | You say | You hear / see | Proves |
-|---|---|---|---|
-| **0:00–0:15** | (phone rings) | Client: *"They said you retired. They said you can't do this anymore."* then the job. Marlow: *"I'm in the lobby, boss. Door's ahead of me. Whenever you're ready."* | the client call |
-| **0:15–0:30** | voice-over | "You're the voice in her earpiece. She's the only one who can see. Muse understands what you say. A deterministic engine decides what happens." | pitch |
-| **0:30–0:50** | **"Peek the vault door."** | Marlow: *"I don't know what you mean, boss."* No sound, no footsteps. Say: "Invalid order. The world didn't change." (debug turn counter stays 0) | **invalid = unchanged** |
-| **0:50–1:10** | **"Listen."** | Dull, muffled footsteps panned ahead. *"I hear him. Ahead, mid distance."* Let it breathe. | 3D audio, listen as a decision |
-| **1:10–1:30** | **"Go to the hall."** | Door creak, guard sweeps in on the left, tension music enters. *"That door was louder than I like."* *"Heading into the hall."* *"Footsteps. Left, near."* | moving source, music by alert |
-| **1:30–1:45** | **"Peek the door."** | *"I see two. The lobby door or the gallery arch?"* "Four doors in this room. It asks instead of guessing." **Do not answer** (an answer spends a turn). | **clarify, never a guess** |
-| **1:45–2:10** | **"Quietly go to the office."** then **"Hide."** then **"Listen."** | *"Easing into the office. Slow and quiet."* … *"Guard's close, boss. Behind."* *"Down behind the desk. Not breathing."* Then footsteps **here, near**: *"He's in the room with me!"* Hold the silence. | the tension peak; hiding works |
-| **2:10–2:25** | **"Take the ledger."** | *"Got the ledger."* the phone rings in the room; twist: *"Boss. There's a tape in the drawer. Labeled with a date. The night you lost your sight. I'm bringing it out."* | story beat |
-| **2:25–2:40** | **"Go to the hall."** **"Go to the lobby."** **"Exit."** | *"Outside. Not a hair out of place."* trust rises 50 → 70 | clean exit |
-| **2:40–2:50** | "Run it again" | Run 2 opens: *"Same building. Same ledger. Try not to make it a habit, Owl."* … *"Clean run last time. Let's do it again."* | memory across runs |
-| **2:50–3:00** | split screen | Left: player. Right: `?debug=1` hidden map + event log. Then `metrics.md`, `simulation.md` (expert 100% clean win, reckless 18%), `npm run replay` → determinism 100%, and a flash of the Case File (real Muse Image panels, "Illustrated from the run log."). End card: "MARLOW. A heist you play by ear." + repo URL. | **replay**, validation |
+| Time | You say | Path | You hear / see | Proves |
+|---|---|---|---|---|
+| **0:00–0:15** | (phone rings) | — | Client: *"They said you retired. They said you can't do this anymore."* then the job. Marlow: *"I'm in the lobby, boss. Door's ahead of me. Whenever you're ready."* | the client call |
+| **0:15–0:30** | voice-over | — | "You're the voice in her earpiece. She's the only one who can see. Muse understands what you say. A deterministic engine decides what happens." | pitch |
+| **0:30–0:38** | **"Listen."** | LOCAL, instant | Marlow: *"Quiet. Nothing close."* (the guard is upstairs: silence is information) | listen is a decision |
+| **0:38–0:55** | **"Check the vault door."** | **SPARK** | ~3 s of rain and breathing, then *"There's nothing like that here, boss."* Nothing moves; the debug turn counter doesn't change. Say: "Invalid order. The world didn't change." | **invalid = unchanged** (model names a door that isn't there; the code won't map it to a real one) |
+| **0:55–1:12** | **"Let's head into the hallway."** | **SPARK** | Door creak, Marlow's footsteps. *"That door was louder than I like."* *"Heading into the hall."* | natural language → one legal action ("hallway" is an alias the code checks) |
+| **1:12–1:28** | **"Take a look through that door."** | **SPARK** | *"I see two. The lobby door or the gallery arch?"* Say: "Four doors here. It asks instead of guessing." | **clarify, never a guess** |
+| **1:28–1:48** | **"The one on the left."** | **SPARK** | *"Looking through. The gallery."* *"I can hide at the display case."* then a muffled guard cue, ahead and near: *"Footsteps, ahead, and coming. Careful."* | follow-up resolved from the same question |
+| **1:48–2:05** | **"Quietly slip into the study."** | **SPARK** | *"Quietly into the office. This takes a moment."* *"The ledger, right there."* *"I can hide at the desk."* No door noise, so the guard doesn't turn toward her. | quiet stance; sound-reactive guard stays asleep |
+| **2:05–2:10** | **"Hide."** | LOCAL, instant | *"Tucked in at the desk."* | instant local turn |
+| **2:10–2:25** | **"Grab the book off the desk."** | **SPARK** | *"Got the ledger."* the phone rings in the room; then the twist: *"Boss. There's a tape in the drawer. Labeled with a date. The night you lost your sight. I'm bringing it out."* | story beat ("book" is an alias of the ledger) |
+| **2:25–2:40** | **"Go to the hall."** **"Go to the lobby."** **"Exit."** | LOCAL ×3, instant | *"Heading into the hall."* … *"Moving to the lobby."* … *"Outside. Not a hair out of place."* | clean exit |
+| **2:40–2:48** | "Run it again" · **"Listen."** **"Wait."** | LOCAL ×2 | Run 2 opens: *"Back again. The ledger's still in the office…"* then *"I called out a guard and you pushed me anyway last run. Listen to me this time."* (the rehearsal's run 1 moved into a room the guard had just warned about, which costs trust) | memory across runs |
+| **2:48–3:00** | split screen | — | Left: player. Right: `?debug=1` hidden map + event log. Then `metrics.md`, `simulation.md`, and `npm run replay` → determinism 100%. Flash the Case File (real Muse Image panels). End card: "MARLOW. A heist you play by ear." + repo URL. | **replay**, validation |
+
+### Optional bonus beat (not in the rehearsed run)
+To show the **sound-reactive guard**, on another take walk into the hall with a normal "Go to the hall" while the guard is in an adjacent room: Marlow says *"He heard that. Footsteps turning my way, left."*, the guard cue swings toward you, and you have to hide or leave. It costs a take; the rehearsed run above avoids it.
 
 ## Notes that keep the take honest
 
-- The seed-9 clean line is: listen, go to hall, quietly go to office, hide, listen, take the ledger, go to hall, go to lobby, exit. Other seeds: `npx tsx tools/demo-plan.ts <seed>` (that solver plan is the shortest clean one; it doesn't listen first).
-- Run 2 from the "Run it again" button is seed+1 (seed 10). Re-run `npx tsx tools/rehearse-demo.ts` after any change to lines or rules; lines pick a variant by hash of seed, turn and line id, so edits to `data/lines.json` can change wording.
-- Quote metrics only from `metrics.md` / `simulation.md` as generated. Intent accuracy comes from the real Spark / Spark Open rows in `metrics.md`; the mock row only proves wiring.
-- The Case File button needs `npm run server` (it calls Muse Image, about one minute for five panels); or `npx tsx tools/casefile.ts <runId>`.
+- Order of the model turns: refusal, move, clarify, clarify-answer, quiet move, take. Replace none of them with local phrasings; the wording is what makes them go to Spark.
+- Spark isn't deterministic. If a take goes off-script, check `tools/rehearse-demo.ts --live` still passes before re-recording.
+- Quote metrics only from `metrics.md` / `metrics.heldout.md` / `simulation.md` as generated. Don't claim the held-out numbers for Spark Open: they are below target.
+- The Case File button needs `npm run server` (about one minute for five panels); or `npx tsx tools/casefile.ts <runId>`.
 - Don't claim accessibility results you didn't measure.
-- Submission wants a **3-minute** video; the design doc planned ~90 s. The 90 s cut is rows 0:00, 0:30, 1:10, 1:30, 1:45 (shortened), 2:25 and 2:50.
+- The 90 s cut: rows 0:00, 0:38, 0:55, 1:12 (+1:28 answer), 2:10, 2:25, 2:48.
+

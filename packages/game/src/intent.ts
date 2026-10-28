@@ -1,10 +1,18 @@
 import { IntentReply, type Compass, type Side, type WorldState } from "@marlow/shared";
 import { sideRelativeToFacing } from "@marlow/engine";
 
-export interface KnownEntity { id: string; spokenName: string; aliases?: string[]; type: "room" | "door" | "prop" | "item"; side?: Side }
+export interface KnownEntity {
+  id: string; spokenName: string; aliases?: string[]; type: "room" | "door" | "prop" | "item"; side?: Side;
+  /** Doors only: the name of the room beyond (the briefing names every room). A hint for the model; contents stay unknown until seen. */
+  leadsTo?: { spokenName: string; aliases: string[] };
+}
 export interface IntentRequest { turnId: number; transcript: string; currentRoom: string; knowledge: KnownEntity[] }
 export interface IntentResponse { turnId: number; reply: unknown }
-export interface IntentAdapter { name: string; infer(req: IntentRequest): Promise<IntentResponse> }
+export interface IntentAdapter {
+  name: string; infer(req: IntentRequest): Promise<IntentResponse>;
+  /** Optional: one tiny throwaway call at session start so the first real order does not pay a cold-start. */
+  warmup?(): Promise<void>;
+}
 
 /** Marlow's knowledge only; `side` is relative to her current facing (extension to the brief's {id, spokenName, type}). */
 export type KnowledgeScope = "all" | "near";
@@ -30,7 +38,8 @@ function knowledgeAll(s: WorldState): KnownEntity[] {
   for (const r of s.rooms) if (k.rooms.includes(r.id)) out.push({ id: r.id, spokenName: r.spokenName, aliases: r.aliases, type: "room" });
   for (const d of s.doors) if (k.doors.includes(d.id)) {
     const side = d.side[s.marlow.room];
-    out.push({ id: d.id, spokenName: d.spokenName, aliases: d.aliases, type: "door", side: side ? sideRelativeToFacing(side, facing) : undefined });
+    const beyond = s.rooms.find(r => r.id === (d.between[0] === s.marlow.room ? d.between[1] : d.between[0]));
+    out.push({ id: d.id, spokenName: d.spokenName, aliases: d.aliases, type: "door", leadsTo: beyond && !beyond.offstage && beyond.id !== s.marlow.room ? { spokenName: beyond.spokenName, aliases: beyond.aliases } : undefined, side: side ? sideRelativeToFacing(side, facing) : undefined });
   }
   for (const p of s.props) if (k.props.includes(p.id)) out.push({ id: p.id, spokenName: p.spokenName, aliases: p.aliases, type: "prop", side: sideRelativeToFacing(p.side, facing) });
   for (const i of s.items) if (k.items.includes(i.id)) out.push({ id: i.id, spokenName: i.spokenName, aliases: i.aliases, type: "item" });
@@ -59,6 +68,7 @@ export const INTENT_SYSTEM_PROMPT =
   "Allowed actions: move (target = a room id, or a door id meaning the room beyond it as \"door:<id>\"), peek (target = a door id in Marlow's current room), " +
   "take (target = an item id), listen, wait, hide, exit (these four take no target). Add \"stance\":\"quiet\" when the player asks to be quiet, slow or sneaky. " +
   "For move, peek and take you MUST include \"matched\": the exact words copied from the order that name or point to the target (e.g. \"left door\", \"office\", \"ledger\"); copy them verbatim, do not paraphrase. If the order names something that is not in the knowledge list, use target \"unknown\" and put the words it used in \"matched\". " +
+  "A door's \"leadsTo\" names the room beyond it: \"go to the hallway\" or \"slip into the study\" means move through the door that leadsTo that room (target \"door:<id>\"). " +
   "Use ONLY ids from the knowledge list; each entity's `side` is relative to Marlow's facing. " +
   "If the order fits two or more known targets and you cannot tell which, reply {\"clarify\":{\"candidates\":[id,id]}} instead of guessing. " +
   "If the order names something not in the knowledge list, still output the action with that target as the player said it (it will be refused). " +
@@ -118,9 +128,8 @@ export function mockInfer(req: IntentRequest): unknown {
   else {
     // move: a room reachable through a known door here, or a door here (meaning the room beyond it)
     options = k.filter(e => e.type === "door" && e.id.includes(req.currentRoom)).map(d => {
-      const other = d.id.replace(/^(door|arch)_/, "").split("_").find(r => r !== req.currentRoom) ?? "";
-      const room = k.find(e => e.type === "room" && e.id === other);
-      return { id: d.id, target: `door:${d.id}`, names: [...nm(d), ...(room ? nm(room) : [])], side: d.side };
+      const beyond = d.leadsTo ? words([d.leadsTo.spokenName, ...d.leadsTo.aliases].join(" ")).filter(w => !FILLER.has(w)) : [];
+      return { id: d.id, target: `door:${d.id}`, names: [...nm(d), ...beyond], side: d.side };
     });
   }
   const content = words(t).filter(w => !FILLER.has(w));

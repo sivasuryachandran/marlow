@@ -12,6 +12,8 @@ export class HttpIntent implements IntentAdapter {
       if (!this.usingFallback) this.name = h.intent;
     } catch { this.usingFallback = true; }
   }
+  /** Fire-and-forget at session start: the first real order should not pay a cold start. */
+  async warmup(): Promise<void> { if (!this.usingFallback) await fetch("/api/warmup", { method: "POST" }).then(() => undefined).catch(() => undefined); }
   async infer(req: IntentRequest): Promise<IntentResponse> {
     if (!this.usingFallback) {
       try {

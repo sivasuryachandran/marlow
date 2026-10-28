@@ -83,6 +83,7 @@ async function begin() {
   await audio.unlock();
   audio.applySettings(prefs);
   await intent.init();
+  void intent.warmup();
   const h = await fetch("/api/health").then(r => r.json()).catch(() => null);
   stt = h?.stt ? new ServerStt() : BrowserStt.available() ? new BrowserStt() : null;
   if (!stt) $("ptt").textContent = "Voice input unavailable in this browser. Type your orders below.";

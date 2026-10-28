@@ -105,3 +105,19 @@ describe("speech robustness", () => {
     expect(req.keywords).toEqual(expect.arrayContaining(["peek", "ledger", "gallery"]));
   });
 });
+
+describe("default backend", () => {
+  it("is Muse Spark when a Meta key exists, the offline mock otherwise, and an explicit choice wins", () => {
+    expect(loadConfig({ MODEL_API_KEY: "k" } as any).intentBackend).toBe("meta");
+    expect(loadConfig({} as any).intentBackend).toBe("mock");
+    expect(loadConfig({ MODEL_API_KEY: "k", INTENT_BACKEND: "baseten" } as any).intentBackend).toBe("baseten");
+    expect(loadConfig({ MODEL_API_KEY: "k", INTENT_BACKEND: "mock" } as any).intentBackend).toBe("mock");
+  });
+  it("warm-up is a tiny throwaway call for both backends", async () => {
+    const { f, calls } = spy({ choices: [] });
+    await new BasetenSparkOpenIntent(cfg, f).warmup();
+    await new MetaSparkIntent(cfg, f).warmup();
+    expect(calls.map(c => c.url)).toEqual(["https://inference.baseten.co/v1/chat/completions", "https://api.meta.ai/v1/chat/completions"]);
+    expect(JSON.parse(calls[0].init.body as string).max_tokens).toBeLessThanOrEqual(16);
+  });
+});

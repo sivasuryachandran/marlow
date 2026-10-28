@@ -55,6 +55,13 @@ export class MetaSparkIntent implements IntentAdapter {
       },
     };
   }
+  async warmup(): Promise<void> {
+    if (!this.cfg.modelApiKey) return;
+    await this.fetchImpl(this.cfg.base + "/chat/completions", {
+      method: "POST", headers: { Authorization: `Bearer ${this.cfg.modelApiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ model: process.env.SPARK_MODEL ?? "muse-spark-1.3", reasoning_effort: "minimal", max_completion_tokens: 64, messages: [{ role: "user", content: "ok" }] }),
+    }).then(r => r.arrayBuffer()).catch(() => {});
+  }
   parseReply(json: any): unknown {
     const content = json?.choices?.[0]?.message?.content;
     if (typeof content !== "string") return { __unparseable: true }; // reasoning ate the token budget: V1 retry, then "Say again"
@@ -80,6 +87,13 @@ export class MetaSparkIntent implements IntentAdapter {
 export class BasetenSparkOpenIntent implements IntentAdapter {
   name = "baseten-spark-open";
   constructor(private cfg: Config, private fetchImpl: typeof fetch = fetch) {}
+  async warmup(): Promise<void> {
+    if (!this.cfg.basetenKey) return;
+    await this.fetchImpl("https://inference.baseten.co/v1/chat/completions", {
+      method: "POST", headers: { Authorization: `Bearer ${this.cfg.basetenKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ model: process.env.BASETEN_MODEL ?? "meta-models/muse-spark-open", max_tokens: 16, messages: [{ role: "user", content: "ok" }] }),
+    }).then(r => r.arrayBuffer()).catch(() => {});
+  }
   async infer(req: IntentRequest): Promise<IntentResponse> {
     if (!this.cfg.basetenKey) throw new NotConfigured("BASETEN_API_KEY not set");
     const res = await this.fetchImpl("https://inference.baseten.co/v1/chat/completions", {
