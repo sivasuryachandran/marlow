@@ -132,6 +132,15 @@ export class AudioEngine {
       case "sfx.stinger.spotted":
         this.tone(dest, t, 110, 1.1, 0.25, "sawtooth"); this.tone(dest, t, 116.5, 1.1, 0.2, "sawtooth"); this.burst(dest, t, { freq: 400, q: 0.5, dur: 0.6, gain: 1 });
         return 1.1;
+      case "sfx.guard.alert": {
+        // a sharp rising "huh?" blip and a rustle: the guard's head turns
+        const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+        o.type = "triangle"; o.frequency.setValueAtTime(260, t); o.frequency.exponentialRampToValueAtTime(520, t + 0.18);
+        g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.18, t + 0.03); g.gain.linearRampToValueAtTime(0, t + 0.3);
+        o.connect(g); g.connect(dest); o.start(t); o.stop(t + 0.35);
+        this.burst(dest, t, { freq: 1800, q: 0.8, dur: 0.25, gain: 0.5 });
+        return 0.35;
+      }
       case "sfx.chase": {
         for (let i = 0; i < 9; i++) this.burst(dest, t + i * 0.2, { freq: 2200, q: 3, dur: 0.07, gain: 1 });
         const o = this.ctx.createOscillator(), g = this.ctx.createGain();

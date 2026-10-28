@@ -61,4 +61,18 @@ export function locate(s: WorldState, room: string): { dir: Dir; dist: Dist; hop
   return { dir: relative(bearingBetween(a, b), s.marlow.facing), dist: distBucket(p.length - 1), hops: p.length - 1 };
 }
 
-export function guardRoom(s: WorldState): string { return s.guard.route[s.guard.step % s.guard.route.length]; }
+export function routeRoom(s: WorldState, offset = 0): string { return s.guard.route[(s.guard.step + offset) % s.guard.route.length]; }
+/** Where the guard is now: on his route, or off it while reacting to a noise. */
+export function guardRoom(s: WorldState): string { return s.guard.at ?? routeRoom(s); }
+
+function stepToward(s: WorldState, from: string, to: string): string {
+  const p = path(s, from, to);
+  return p && p.length > 1 ? p[1] : from;
+}
+/** The room he will be in after his next step (used for warnings and the trust rule). */
+export function nextGuardRoom(s: WorldState): string {
+  const g = s.guard, cur = guardRoom(s);
+  if (g.detour && g.detour.left > 0) return stepToward(s, cur, g.detour.target);
+  if (g.returning) return stepToward(s, cur, routeRoom(s));
+  return routeRoom(s, 1);
+}

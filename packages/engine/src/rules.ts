@@ -2,7 +2,7 @@ import type { Action, GameEvent, RefusalReason, WorldState } from "@marlow/share
 import { Rng } from "./rng";
 import { revealRoom } from "./state";
 import {
-  bearingBetween, doorBetween, guardRoom, hops, locate, neighbors, sideRelativeToFacing,
+  bearingBetween, doorBetween, guardRoom, hops, locate, neighbors, nextGuardRoom, routeRoom, sideRelativeToFacing,
 } from "./spatial";
 
 export type Validation = { ok: true } | { ok: false; reason: RefusalReason; target?: string };
@@ -48,12 +48,29 @@ export function validate(s: WorldState, a: Action): Validation {
   }
 }
 
+/** A normal (non-quiet) step is audible to a guard in the same or an adjacent room (1 hop). 2 hops made the level unwinnable for anyone who walks normally. */
+export const EARSHOT = 1;
+/** He walks toward the noise for at most this many steps, then walks back to his route. */
+export const DETOUR_STEPS = 2;
+
 const clamp = (n: number) => Math.max(0, Math.min(100, n));
 
 /**
  * Pure: (state, action) -> new state + events. Invalid actions return the SAME state
  * (no turn, no guard step, no RNG use) with a single `refused` event.
  */
+/** One guard step: toward a noise while detouring, back toward his route while returning, otherwise along the route. */
+function advanceGuard(s: WorldState) {
+  const g = s.guard, next = nextGuardRoom(s);
+  if (g.detour && g.detour.left > 0) {
+    g.at = next; g.detour.left -= 1;
+    if (g.at === g.detour.target || g.detour.left === 0) { g.detour = null; g.returning = g.at !== routeRoom(s); if (!g.returning) g.at = null; }
+  } else if (g.returning) {
+    g.at = next;
+    if (g.at === routeRoom(s)) { g.returning = false; g.at = null; }
+  } else { g.step = (g.step + 1) % g.route.length; g.at = null; }
+}
+
 export function step(prev: WorldState, action: Action, rngIn?: Rng): StepResult {
   const v = validate(prev, action);
   if (!v.ok) return { state: prev, events: [{ type: "refused", reason: v.reason, target: v.target, perceived: true }], roll: -1 };
@@ -111,6 +128,14 @@ export function step(prev: WorldState, action: Action, rngIn?: Rng): StepResult 
       s.marlow.hidden = false;
       revealRoom(s, to, true);
       ev.push({ type: "moved", from, to, stance: quiet ? "quiet" : "normal", perceived: true });
+      // Sound-reactive guard: any non-quiet move within earshot pulls him off his route toward Marlow's new room.
+      if (!quiet && guardRoom(s) !== to && hops(s, guardRoom(s), to) <= EARSHOT) {
+        s.guard.at = guardRoom(s);
+        s.guard.detour = { target: to, left: DETOUR_STEPS };
+        s.guard.returning = false;
+        const loc = locate(s, guardRoom(s));
+        ev.push({ type: "guard_alerted", dir: loc.dir, dist: loc.dist, perceived: true });
+      }
       break;
     }
     case "peek": {
@@ -172,7 +197,7 @@ export function step(prev: WorldState, action: Action, rngIn?: Rng): StepResult 
 
   // Guard advances; spotted check after every guard step.
   for (let i = 0; i < guardSteps && s.status === "playing"; i++) {
-    s.guard.step = (s.guard.step + 1) % s.guard.route.length;
+    advanceGuard(s);
     ev.push({ type: "guard_moved", to: guardRoom(s), perceived: false });
     if (guardRoom(s) === s.marlow.room && !s.marlow.hidden) {
       ev.push({ type: "spotted", perceived: true });
@@ -196,7 +221,7 @@ export function step(prev: WorldState, action: Action, rngIn?: Rng): StepResult 
     if (loc.hops === 1) {
       hear("footsteps");
       // Warn only when he is heading toward Marlow's room next step.
-      const next = s.guard.route[(s.guard.step + 1) % s.guard.route.length];
+      const next = nextGuardRoom(s);
       if (next === s.marlow.room) {
         ev.push({ type: "warning", dir: loc.dir, dist: loc.dist, perceived: true });
         s.memory.warned = true;

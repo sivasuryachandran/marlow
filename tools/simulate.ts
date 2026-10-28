@@ -6,7 +6,7 @@
  * Usage: npx tsx tools/simulate.ts [seeds=1000] [--md]   -> simulation.md + simulation.svg
  */
 import { writeFileSync } from "node:fs";
-import { createInitialState, locate, neighbors, path, step } from "../packages/engine/src/index";
+import { createInitialState, guardRoom, locate, neighbors, path, step } from "../packages/engine/src/index";
 import type { Action, GameEvent, WorldState } from "../packages/shared/src/index";
 import { level as baseLevel } from "./lib";
 
@@ -28,6 +28,8 @@ function objectiveAction(s: WorldState): Action | { move: string } {
 const mv = (t: string): Action => ({ action: "move", target: t });
 
 const policies: Record<string, (s: WorldState, m: Mem) => Action> = {
+  /** The earlier cautious player: listens and waits, but never takes cover on a warning. */
+  "cautious-no-cover"(s, m) { const w = m.warnedAtTurn; m.warnedAtTurn = null; const a = policies.cautious(s, m); m.warnedAtTurn = w; return a; },
   reckless(s) {
     const a = objectiveAction(s);
     return "move" in a ? mv(a.move) : a;
@@ -42,6 +44,10 @@ const policies: Record<string, (s: WorldState, m: Mem) => Action> = {
       return { action: "move", target: to, stance: "quiet" };
     }
     if (!("move" in a)) return a; // take / exit are in-room, no crossing risk
+    if (m.warnedAtTurn === s.turn) { // "Guard's close, boss": take cover if there is any, otherwise get out of his way
+      const cover = s.props.some(p => p.room === s.marlow.room && p.tags.includes("hide") && s.knowledge.props.includes(p.id));
+      if (cover) return { action: "hide" };
+    }
     if (m.commit > 0) { m.commit--; return mv(a.move); } // after a silent listen, finish the crossing without stopping in the open
     if (m.silentAtTurn === s.turn) {
       if (m.silent) { m.commit = s.marlow.room === "hall" ? 0 : 1; return mv(a.move); }
@@ -68,7 +74,9 @@ function learn(m: Mem, s: WorldState, events: GameEvent[]) {
 // it keeps a belief set of route indices consistent with every perceived event so far and plans against that set.
 import { candidateActions } from "../packages/engine/src/index";
 const obsSig = (events: GameEvent[]) => JSON.stringify(events.filter(e => e.perceived));
-const withGuard = (s: WorldState, g: number): WorldState => ({ ...s, guard: { ...s.guard, step: g } });
+type G = WorldState["guard"];
+const withGuard = (s: WorldState, g: G): WorldState => ({ ...s, guard: g });
+const uniqG = (gs: G[]): G[] => [...new Map(gs.map(g => [JSON.stringify([g.step, g.at, g.detour, g.returning]), g])).values()];
 
 function remaining(s: WorldState): number {
   const onstage = { ...s, doors: s.doors.filter(d => !d.between.some(b => s.rooms.find(r => r.id === b)?.offstage)) } as WorldState;
@@ -78,23 +86,23 @@ function remaining(s: WorldState): number {
   return hops(s.marlow.room, itemRoom!) + 1 + hops(itemRoom!, s.objective.exitRoom) + 1;
 }
 
-function expectimax(s: WorldState, belief: number[], depth: number): number {
+function expectimax(s: WorldState, belief: G[], depth: number): number {
   if (s.status === "won") return 1000;
   if (s.status === "caught") return -1000;
   if (depth === 0) return -3 * remaining(s);
   let best = -Infinity;
   for (const a of candidateActions(s)) {
-    const groups = new Map<string, { st: WorldState; gs: number[]; alertDelta: number }>();
+    const groups = new Map<string, { st: WorldState; gs: G[]; alertDelta: number }>();
     for (const g of belief) {
       const r = step(withGuard(s, g), a);
       const k = obsSig(r.events);
       const grp = groups.get(k) ?? { st: r.state, gs: [], alertDelta: r.state.alert - s.alert };
-      grp.gs.push(r.state.guard.step); groups.set(k, grp);
+      grp.gs.push(r.state.guard); groups.set(k, grp);
     }
     let v = -1; // every turn costs a little: don't dither
     for (const grp of groups.values()) {
       const p = grp.gs.length / belief.length;
-      v += p * (-60 * grp.alertDelta + expectimax(grp.st, [...new Set(grp.gs)], depth - 1));
+      v += p * (-60 * grp.alertDelta + expectimax(grp.st, uniqG(grp.gs), depth - 1));
     }
     if (v > best) best = v;
   }
@@ -104,27 +112,27 @@ function expectimax(s: WorldState, belief: number[], depth: number): number {
 const EXPERT_DEPTH = Number(process.env.EXPERT_DEPTH ?? 3);
 function expertPlay(seed: number, maxTurns = 60) {
   let s = createInitialState(level, seed);
-  let belief = s.guard.route.map((_, i) => i);
+  let belief: G[] = s.guard.route.map((_, i) => ({ ...s.guard, step: i, at: null, detour: null, returning: false }));
   while (s.status === "playing" && s.turn < maxTurns) {
     let bestA: Action | null = null, bestV = -Infinity;
     for (const a of candidateActions(s)) {
-      const groups = new Map<string, { st: WorldState; gs: number[]; alertDelta: number }>();
+      const groups = new Map<string, { st: WorldState; gs: G[]; alertDelta: number }>();
       for (const g of belief) {
         const r = step(withGuard(s, g), a);
         const k = obsSig(r.events);
         const grp = groups.get(k) ?? { st: r.state, gs: [], alertDelta: r.state.alert - s.alert };
-        grp.gs.push(r.state.guard.step); groups.set(k, grp);
+        grp.gs.push(r.state.guard); groups.set(k, grp);
       }
       let v = -1;
-      for (const grp of groups.values()) v += (grp.gs.length / belief.length) * (-60 * grp.alertDelta + expectimax(grp.st, [...new Set(grp.gs)], EXPERT_DEPTH - 1));
+      for (const grp of groups.values()) v += (grp.gs.length / belief.length) * (-60 * grp.alertDelta + expectimax(grp.st, uniqG(grp.gs), EXPERT_DEPTH - 1));
       if (v > bestV) { bestV = v; bestA = a; }
     }
     const prev = s;
     const r = step(s, bestA!);
     // update belief with what was actually perceived
-    const sig = obsSig(r.events), next = new Set<number>();
-    for (const g of belief) { const x = step(withGuard(prev, g), bestA!); if (obsSig(x.events) === sig) next.add(x.state.guard.step); }
-    belief = [...next];
+    const sig = obsSig(r.events), next: G[] = [];
+    for (const g of belief) { const x = step(withGuard(prev, g), bestA!); if (obsSig(x.events) === sig) next.push(x.state.guard); }
+    belief = uniqG(next);
     s = r.state;
   }
   return s;
@@ -133,11 +141,16 @@ function expertPlay(seed: number, maxTurns = 60) {
 function play(policy: string, seed: number, maxTurns = 60) {
   let s = createInitialState(level, seed);
   const m: Mem = { silentAtTurn: null, silent: false, warnedAtTurn: null, heardDir: null, commit: 0 };
+  const trace: string[] = [];
   while (s.status === "playing" && s.turn < maxTurns) {
-    const r = step(s, policies[policy](s, m));
+    const a = policies[policy](s, m);
+    const before = `${s.marlow.room}(g:${guardRoom(s)}${s.guard.detour ? "*" : ""})`;
+    const r = step(s, a);
     s = r.state;
     learn(m, s, r.events);
+    if (process.env.TRACE) trace.push(`${before} ${a.action}${(a as { target?: string }).target ? ":" + (a as { target?: string }).target : ""} -> ${r.events.filter(e => e.perceived && !["alert_changed", "trust_changed"].includes(e.type)).map(e => e.type).join(",")}`);
   }
+  if (process.env.TRACE && s.status === "caught" && Number(process.env.TRACE) > 0) { console.log(`--- ${policy} seed ${seed} caught\n  ` + trace.slice(-7).join("\n  ")); process.env.TRACE = String(Number(process.env.TRACE) - 1); }
   return s;
 }
 
@@ -167,7 +180,8 @@ ${rows.map(r => `| ${r.policy} | ${r.win} | ${r.cleanWin} | ${r.caught} | ${r.ti
 
 Reading it: the win % counts any exit (a single spot, alert 2, is survivable; caught at alert 3). **Clean win** (alert ≤ 1) is the skill measure.
 - reckless: always moves toward the objective, never listens.
-- cautious: listens, moves only after a silent listen, finishes a crossing without stopping, retreats from the heard direction when there is no cover. Simple rules, no memory of the guard's loop.
+- cautious (the "cautious-simple" policy): listens, moves only after a silent listen, finishes a crossing without stopping, **hides at known cover as soon as Marlow warns**, retreats from the heard direction when there is no cover, slips out quietly during a chase. Simple rules, no memory of the guard's loop.
+- cautious-no-cover: the same without the hide-on-warning rule (what this policy was before the sound-reactive guard; it shows how much that one habit matters).
 - expert: knows the rules and that the guard walks a loop; tracks which route positions are consistent with everything it has perceived and looks 3 turns ahead. It never reads the hidden guard position.
 `;
 if (!routeArg) writeFileSync("simulation.md", md);

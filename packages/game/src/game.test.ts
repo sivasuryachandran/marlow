@@ -30,7 +30,7 @@ describe("content (V0)", () => {
       "move", "move.quiet", "door_noise", "arrive.item", "arrive.hide", "peek.room", "peek.empty", "peek.guard", "listen.heard", "guard.here",
       "listen.quiet", "wait", "hide", "take", "warning", "sound.phone_ring", "spotted", "caught", "win.clean", "win.messy",
       "refuse.unknown_target", "refuse.not_known", "refuse.not_adjacent", "refuse.door_locked", "refuse.not_in_room", "refuse.no_hide_spot",
-      "refuse.no_item", "refuse.not_ready_to_exit", "refuse.game_over", "clarify.door", "clarify.room", "clarify.other",
+      "refuse.no_item", "guard.alerted", "chase", "chase.escaped", "chase.caught", "refuse.not_ready_to_exit", "refuse.game_over", "clarify.door", "clarify.room", "clarify.other",
     ];
     for (const n of need) expect(bank["marlow." + n], n).toBeDefined();
     for (const n of ["ack", "sayagain", "timeout", "nothing_pending", "nothing_to_repeat"]) expect(bank["system." + n]).toBeDefined();

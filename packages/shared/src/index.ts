@@ -23,7 +23,13 @@ export const Prop = z.object({
   id: z.string(), aliases: z.array(z.string()).default([]), room: z.string(), side: Side, tags: z.array(z.string()), spokenName: z.string(),
 });
 export const Item = z.object({ id: z.string(), aliases: z.array(z.string()).default([]), room: z.string().nullable(), spokenName: z.string() });
-export const Guard = z.object({ id: z.string(), route: z.array(z.string()).min(2), step: z.number().int().min(0) });
+export const Guard = z.object({
+  id: z.string(), route: z.array(z.string()).min(2), step: z.number().int().min(0),
+  /** Sound reaction: while detouring he leaves his route toward a noise for up to `left` steps, then walks back to route[step]. */
+  at: z.string().nullable().default(null),
+  detour: z.object({ target: z.string(), left: z.number().int() }).nullable().default(null),
+  returning: z.boolean().default(false),
+});
 export const Marlow = z.object({
   room: z.string(), facing: Compass, hidden: z.boolean(),
   carrying: z.string().nullable(), prevRoom: z.string().nullable(),
@@ -90,6 +96,7 @@ export type GameEvent = { perceived: boolean } & (
   | { type: "warning"; dir: Dir; dist: Dist }
   | { type: "sound_heard"; sound: string; dir: Dir; dist: Dist }
   | { type: "guard_moved"; to: string }
+  | { type: "guard_alerted"; dir: Dir; dist: Dist }
   | { type: "alert_changed"; alert: number }
   | { type: "trust_changed"; delta: number; reason: string }
   | { type: "spotted" }

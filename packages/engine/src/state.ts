@@ -21,7 +21,7 @@ export function createInitialState(
   const s: WorldState = {
     seed, rngState: 0, turn: 0, alert: 0, chase: false, trust: carry.trust ?? 50, status: "playing",
     rooms: level.rooms, doors: structuredClone(level.doors), props: level.props, items: structuredClone(level.items),
-    guard: { ...level.guard, step: rng.int(level.guard.route.length) },
+    guard: { ...level.guard, step: rng.int(level.guard.route.length), at: null, detour: null, returning: false },
     marlow: { room: level.start.room, facing: level.start.facing, hidden: false, carrying: null, prevRoom: null },
     knowledge: { rooms: [], doors: [], props: [], items: [], guardLastHeard: null },
     objective: level.objective, scheduled: level.scheduled,

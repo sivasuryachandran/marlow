@@ -468,5 +468,15 @@
     "curt": [
       "Too slow."
     ]
+  },
+  "marlow.guard.alerted": {
+    "speaker": "marlow",
+    "text": [
+      "He heard that. Footsteps turning my way, {dir}.",
+      "That was too loud. He's coming this way, {dir}."
+    ],
+    "curt": [
+      "He heard. Coming, {dir}."
+    ]
   }
 }

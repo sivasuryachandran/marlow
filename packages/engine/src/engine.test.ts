@@ -14,6 +14,7 @@ const at = (s: WorldState, room: string, facing: WorldState["marlow"]["facing"] 
 };
 // route: upstairs x3, stairwell, hall, gallery, gallery (pause), hall, office, office, hall, stairwell, hall, office, hall, stairwell
 const GUARD = { up: 0, up3: 2, stairwell: 3, hall: 4, gallery: 5, pause: 6, hall2: 7, office: 8 };
+const guardRoomOf = (s: WorldState) => s.guard.at ?? s.guard.route[s.guard.step];
 const types = (r: ReturnType<typeof step>) => r.events.map(e => e.type);
 
 describe("level", () => {
@@ -295,6 +296,56 @@ describe("chase", () => {
   it("exit still wins while chased", () => {
     const s = mk(1, s => { s.marlow.carrying = "ledger"; s.chase = true; });
     expect(step(s, { action: "exit" }).state.status).toBe("won");
+  });
+});
+
+describe("sound-reactive guard", () => {
+  it("a normal move within earshot pulls him off his route toward Marlow's new room (and Marlow hears it turn)", () => {
+    const s = mk(1, s => { s.guard.step = GUARD.gallery; }); // gallery: one hop from the hall
+    const r = step(s, { action: "move", target: "hall" });
+    expect(r.events.find(e => e.type === "guard_alerted")).toMatchObject({ perceived: true });
+    // first detour step happens in the same turn: gallery -> hall, where Marlow now is
+    expect(types(r)).toContain("spotted");
+    expect(r.state.guard.step).toBe(GUARD.gallery); // the route index is frozen while he detours
+  });
+  it("a quiet move is silent: no detour, no alert event", () => {
+    const s = mk(1, s => { at(s, "hall"); s.guard.step = GUARD.gallery; });
+    const r = step(s, { action: "move", target: "office", stance: "quiet" });
+    expect(types(r)).not.toContain("guard_alerted");
+    expect(r.state.guard.detour).toBeNull();
+  });
+  it("out of earshot (3+ hops) he does not react", () => {
+    const s = mk(1, s => { at(s, "hall"); s.guard.step = GUARD.up; }); // upstairs -> office is 3 hops
+    const r = step(s, { action: "move", target: "office" });
+    expect(types(r)).not.toContain("guard_alerted");
+  });
+  it("the detour is at most 2 steps, then he walks back and resumes his route where he left it", () => {
+    const s = mk(1, s => {
+      at(s, "office", "east"); s.marlow.hidden = true; s.guard.step = GUARD.hall; // route index 4 = hall
+      s.guard.at = "hall"; s.guard.detour = { target: "lobby", left: 2 };
+    });
+    const rooms: string[] = [], idx: number[] = [];
+    let st = s;
+    for (let i = 0; i < 4; i++) { st = step(st, { action: "wait" }).state; rooms.push(guardRoomOf(st)); idx.push(st.guard.step); }
+    // hall -> lobby (detour ends at its target) -> back to hall (route room) -> route resumes at the next index (gallery)
+    expect(rooms.slice(0, 3)).toEqual(["lobby", "hall", "gallery"]);
+    expect(idx.slice(0, 2)).toEqual([GUARD.hall, GUARD.hall]);
+    expect(idx[2]).toBe(GUARD.gallery);
+  });
+  it("he gives up after 2 steps even if the noise room is farther away", () => {
+    const s = mk(1, s => { at(s, "office", "east"); s.marlow.hidden = true; s.guard.step = GUARD.up; s.guard.at = "upstairs"; s.guard.detour = { target: "office", left: 2 }; });
+    let st = s;
+    st = step(st, { action: "wait" }).state; st = step(st, { action: "wait" }).state;
+    expect(st.guard.detour).toBeNull();
+    expect(guardRoomOf(st)).toBe("hall"); // upstairs -> stairwell -> hall: two steps, not yet at the office
+    expect(st.guard.returning).toBe(true);
+  });
+  it("a warning fires when his detour is heading into Marlow's room", () => {
+    const s = mk(1, s => { at(s, "hall"); s.guard.step = GUARD.stairwell; s.guard.at = "stairwell"; s.guard.detour = { target: "hall", left: 2 }; });
+    const r = step(s, { action: "wait" });
+    expect(types(r)).toContain("spotted"); // he arrives
+    const s2 = mk(1, s => { at(s, "hall"); s.marlow.hidden = true; s.guard.step = GUARD.up; s.guard.at = "upstairs"; s.guard.detour = { target: "hall", left: 2 }; });
+    expect(types(step(s2, { action: "wait" }))).toContain("warning"); // upstairs -> stairwell, next step is the hall
   });
 });
 

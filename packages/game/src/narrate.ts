@@ -48,6 +48,7 @@ export function narrate(prev: WorldState, next: WorldState, events: GameEvent[])
       case "sound_heard": out.push({ id: `marlow.sound.${e.sound}`, slots: { dir: e.dir, dist: e.dist } }); break;
       case "spotted": out.push({ id: "marlow.spotted", slots: {} }); break;
       case "caught": out.push({ id: e.reason === "chase" ? "marlow.chase.caught" : "marlow.caught", slots: {} }); break;
+      case "guard_alerted": out.push({ id: "marlow.guard.alerted", slots: { dir: e.dir } }); break;
       case "chase_started": out.push({ id: "marlow.chase", slots: {} }); break;
       case "chase_escaped": out.push({ id: "marlow.chase.escaped", slots: {} }); break;
       case "won": out.push({ id: e.alert <= 1 ? "marlow.win.clean" : "marlow.win.messy", slots: {} }); break;
@@ -89,6 +90,7 @@ export function cuesFor(prev: WorldState, next: WorldState, events: GameEvent[])
         if (e.via === "footsteps" && events.some(x => x.type === "guard_heard" && x.via === "listen")) break; // one guard cue per turn
         guardCue(e); break;
       case "sound_heard": cues.push({ id: "sfx.phone.ring", kind: "world", priority: 3, dir: e.dir, dist: e.dist, reverb, caption: `Phone ringing, ${spokenDir(e.dir)}, ${e.dist}` }); break;
+      case "guard_alerted": cues.push({ id: "sfx.guard.alert", kind: "world", priority: 5, dir: e.dir, dist: e.dist, reverb, caption: `He heard that: his footsteps turn toward you, ${spokenDir(e.dir)}` }); break;
       case "chase_started": cues.push({ id: "sfx.chase", kind: "sfx", priority: 7, reverb, caption: "Chase: the guard is running at Marlow" }); break;
       case "spotted": cues.push({ id: "sfx.stinger.spotted", kind: "sfx", priority: 6, reverb, caption: "Alarm stinger: Marlow has been spotted" }); break;
     }

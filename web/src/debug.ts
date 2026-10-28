@@ -28,7 +28,7 @@ export function renderDebug(session: Session, lastEvents: GameEvent[], extra: Re
   svg.innerHTML = out;
   pre.textContent = JSON.stringify({
     run: session.runId, runNumber: session.runNumber, turn: s.turn, alert: s.alert, trust: s.trust, status: s.status,
-    guard: { room: g, step: s.guard.step, fromMarlow: locate(s, g) }, marlow: s.marlow, knowledge: s.knowledge,
+    guard: { room: g, step: s.guard.step, detour: s.guard.detour, returning: s.guard.returning, fromMarlow: locate(s, g) }, marlow: s.marlow, knowledge: s.knowledge,
     lastEvents, ...extra,
   }, null, 1);
 }
