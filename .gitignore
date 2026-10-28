@@ -4,3 +4,4 @@ runs/
 casefiles/
 dist
 metrics*.json
+data/eval/audio/*.wav

@@ -260,3 +260,20 @@ describe("knowledge scope", () => {
     expect(n).not.toContain("door_hall_office");
   });
 });
+
+describe("speech-recognition artifacts", () => {
+  it("collapses stutters and glued repeats", async () => {
+    const { cleanTranscript } = await import("./index");
+    expect(cleanTranscript("Sneak to the sneak to the hall quietly.")).toBe("sneak to the hall quietly."); // case is irrelevant downstream
+    expect(cleanTranscript("Listen,Listen,")).toBe("Listen");
+    expect(cleanTranscript("Take the the gold.")).toBe("Take the gold.");
+    expect(cleanTranscript("Grab theGrab the ledger.")).toBe("Grab the ledger.");
+    expect(cleanTranscript("go to the hall")).toBe("go to the hall");
+  });
+  it("'pick the left door' is a peek, but 'pick up the ledger' is still a take", () => {
+    const s = mk(1, inHall);
+    const req = (t: string) => ({ turnId: 1, transcript: t, currentRoom: s.marlow.room, knowledge: knowledgeList(s) });
+    expect(mockInfer(req("Pick the left door."))).toMatchObject({ action: "peek", target: "arch_hall_gallery" });
+    expect(mockInfer(req("pick up the ledger"))).toMatchObject({ action: "take" });
+  });
+});

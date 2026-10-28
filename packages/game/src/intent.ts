@@ -54,6 +54,7 @@ export const INTENT_JSON_SCHEMA = {
 
 export const INTENT_SYSTEM_PROMPT =
   "You convert one spoken order into exactly one JSON object for a stealth heist game. Marlow is the operative; the player speaks to her. " +
+  "The order comes from speech recognition and may be misheard: \"pick\", \"peak\" and \"pique\" almost always mean \"peek\" (but \"pick up\" means take); repeated words are recognition noise. " +
   "Allowed actions: move (target = a room id, or a door id meaning the room beyond it as \"door:<id>\"), peek (target = a door id in Marlow's current room), " +
   "take (target = an item id), listen, wait, hide, exit (these four take no target). Add \"stance\":\"quiet\" when the player asks to be quiet, slow or sneaky. " +
   "Use ONLY ids from the knowledge list; each entity's `side` is relative to Marlow's facing. " +
@@ -76,7 +77,7 @@ export function v1(reply: unknown): { ok: true; reply: IntentReply } | { ok: fal
 
 // ---------- deterministic mock (also the offline fallback) ----------
 const VERBS: [RegExp, string][] = [
-  [/\b(peek|peak|pique|look through|look in|look at|check|crack|glance)\b/, "peek"],
+  [/\b(peek|peak|pique|pick(?! up)|look through|look in|look at|check|crack|glance)\b/, "peek"],
   [/\b(go|move|walk|head|enter|step|sneak|creep|proceed|run|cross)\b/, "move"],
   [/\b(take|grab|get|pick up|steal|lift|pocket)\b/, "take"],
   [/\b(hide|duck|take cover|get down)\b/, "hide"],

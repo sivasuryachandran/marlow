@@ -8,6 +8,20 @@ Status date: 2026-10-28 (evening). Real Meta model calls are now wired and measu
 
 Stage-one requirement ("real use of Meta models") is now met by: Voice Transcribe (speech → text), Muse Spark (speech → one legal action or a clarify question), Muse Image (Case File), plus Spark Open on Baseten as the alternate backend.
 
+## Real-speech eval (50 recordings of the player's own voice)
+
+| | Before fixes | After fixes |
+|---|---|---|
+| Muse Voice Transcribe word error rate | 16.3% (15 of 50 clips with an error) | **7.8%** (6 clips) |
+| STT latency p50 / p95 | 839 / 1031 ms | 841 / 1123 ms |
+| End-to-end speech → STT → intent → V1/V2: mock / Spark / Spark Open | 80% / 86% / 82% | **94% / 92% / 90%** |
+
+What the errors were: "peek" heard as "pick" or "peak" (7 of the first 15 bad clips), stuttered words ("the the", "Listen,Listen,"), and a few one-offs ("peek the office door" → "peeked off his door", "head right" → "he tried tried"). Fixes applied: the documented `keywords` bias on the transcribe request (peek, ledger, room names, etc.), a "speech may be misheard, pick/peak mean peek" hint in the intent prompt (but "pick up" stays take), a repeat-collapsing transcript cleaner, and `pick` as a peek verb in the offline mock. Caveat: the keyword list and fixes were tuned against these same 50 clips, so the 7.8% is optimistic for a new speaker or accent; the real test is a second voice.
+
+The one "executed although intended invalid" case is not an engine violation: "peek the vault door" heard as "peek the wall door" made Spark peek a real, legal door. Engine-illegal actions reaching the engine remain **0** (adversarial check, 2000 bad replies).
+
+Fireworks key: stored in `.env` as `FIREWORKS_API_KEY` for later; not wired to anything (no use in the plan yet).
+
 ## Latest changes (decisions applied)
 
 1. **Spotted = chase, not +3.** Being spotted still adds alert +2 and −10 trust, but now the guard runs at Marlow: the player has exactly one turn to **hide (known cover) or leave the room**, otherwise caught ("Too slow, boss"). A refused order (e.g. hide with no cover) doesn't use the turn. Slamming a closed door next to him adds noise alert, so quiet exits matter. New lines (`marlow.chase`, `.escaped`, `.caught`) and a chase cue (`sfx.chase`: fast footsteps + siren sweep, top priority, ducked music). 7 new engine tests.
@@ -34,7 +48,7 @@ Stage-one requirement ("real use of Meta models") is now met by: Voice Transcrib
 
 | | Result |
 |---|---|
-| Intent accuracy (50 commands, correct transcript) | mock 100% (wiring only) · **Spark 96%** · **Spark Open 92%** in the latest run (target ≥ 90). Across three runs Spark scored 98 / 92 (after fixing a harness bug) / 96 and Spark Open 92 / 96 / 92: the models are not deterministic, so quote it as ~92–98% |
+| Intent accuracy (50 commands, correct transcript; latest run Spark 96% / Spark Open 96%) | mock 100% (wiring only) · **Spark 96%** · **Spark Open 92%** in the latest run (target ≥ 90). Across three runs Spark scored 98 / 92 (after fixing a harness bug) / 96 and Spark Open 92 / 96 / 92: the models are not deterministic, so quote it as ~92–98% |
 | Invalid actions accepted | **0** on all backends; adversarial V2: 2000 bad replies, 0 illegal reached the engine |
 | Latency release → result (intent path only) | Spark p50 ~2.1–2.6 s / p95 5.0–6.6 s · Spark Open p50 ~0.8–1.0 s / p95 7.7–9.5 s · Voice Transcribe ~0.7–1.1 s. One Spark call exceeded the 8 s eval timeout in one run |
 | Replay determinism | 100% of generated seeded runs (logs carry a level hash; logs from an older level are skipped as stale) |

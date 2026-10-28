@@ -6,6 +6,18 @@ export type LocalParse =
   | { kind: "no_back" }
   | null;
 
+/** Speech recognizers sometimes stutter ("the the", "Listen,Listen,", "sneak to the sneak to the hall"): collapse adjacent repeats. */
+export function cleanTranscript(text: string): string {
+  let w = text.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/[,;]+/g, " ").split(/\s+/).filter(Boolean);
+  for (let n = 3; n >= 1; n--) {
+    for (let i = 0; i + 2 * n <= w.length; ) {
+      const a = w.slice(i, i + n).join(" ").toLowerCase(), b = w.slice(i + n, i + 2 * n).join(" ").toLowerCase();
+      if (a === b) w.splice(i, n); else i++;
+    }
+  }
+  return w.join(" ");
+}
+
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9' ]+/g, " ").replace(/\s+/g, " ").trim();
 
 /** Local parser (L1): plain code, no model call. Null => needs the intent adapter. */

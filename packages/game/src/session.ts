@@ -2,7 +2,7 @@ import { createInitialState, locate, step } from "@marlow/engine";
 import type { Action, GameEvent, WorldState } from "@marlow/shared";
 import { Director, type Beat } from "./director";
 import { knowledgeList, type IntentAdapter, type KnowledgeScope, type KnownEntity } from "./intent";
-import { localParse } from "./parser";
+import { cleanTranscript, localParse } from "./parser";
 import { hash, renderLine, type LineBank, type LineRef, type SpokenLine } from "./lines";
 import type { MemoryStore } from "./memory";
 import { cuesFor, narrate, type Cue } from "./narrate";
@@ -68,7 +68,8 @@ export class Session {
   }
 
   /** Returns null when the turn was superseded or timed out (reply discarded, state untouched). */
-  async submit(transcript: string): Promise<TurnOutput | null> {
+  async submit(rawTranscript: string): Promise<TurnOutput | null> {
+    const transcript = cleanTranscript(rawTranscript);
     const turnId = ++this.currentTurn;
     const t0 = this.now();
     const s = this.state;

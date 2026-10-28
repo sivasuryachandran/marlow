@@ -79,7 +79,7 @@ describe("Muse Voice Transcribe adapter", () => {
     const r = await new MetaStt(cfg, f).transcribe(new Uint8Array([1, 2, 3]).buffer, "audio/wav");
     const form = calls[0].init.body as FormData;
     expect(calls[0].url).toBe("https://api.meta.ai/v1/asr/transcribe");
-    expect(JSON.parse(await (form.get("request") as Blob).text())).toEqual({ model: "muse-voice-transcribe-1.0", audioEncoding: "WAV", mode: "PUSH_TO_TALK" });
+    expect(JSON.parse(await (form.get("request") as Blob).text())).toMatchObject({ model: "muse-voice-transcribe-1.0", audioEncoding: "WAV", mode: "PUSH_TO_TALK" });
     expect((form.get("audio") as Blob).type).toBe("audio/wav");
     expect(r.text).toBe("Peek the left door.");
   });
@@ -94,5 +94,14 @@ describe("Muse Image adapter", () => {
     expect(body).toMatchObject({ model: "muse-image-1.0", n: 1, response_format: "b64_json", output_format: "jpeg", reasoning_strength: "low" });
     expect(Buffer.from(r.data as Uint8Array).toString()).toBe("JPEGBYTES");
     expect(r.source).toBe("muse-image");
+  });
+});
+
+describe("speech robustness", () => {
+  it("Voice Transcribe request carries the game keywords", async () => {
+    const { f, calls } = spy({ transcript: "peek" });
+    await new MetaStt(cfg, f).transcribe(new Uint8Array([1]).buffer, "audio/wav");
+    const req = JSON.parse(await ((calls[0].init.body as FormData).get("request") as Blob).text());
+    expect(req.keywords).toEqual(expect.arrayContaining(["peek", "ledger", "gallery"]));
   });
 });
