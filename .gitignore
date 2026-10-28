@@ -3,4 +3,4 @@ node_modules
 runs/
 casefiles/
 dist
-metrics.json
+metrics*.json

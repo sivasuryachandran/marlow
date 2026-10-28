@@ -202,11 +202,12 @@ describe("take / exit", () => {
 });
 
 describe("guard, alert, trust", () => {
-  it("spots Marlow in the open: alert +2, trust -10, remembered", () => {
+  it("spots Marlow in the open: alert +2, trust -10, remembered, and a chase begins", () => {
     const s = mk(1, s => { at(s, "hall"); s.guard.step = GUARD.stairwell; });
     const r = step(s, { action: "wait" });
     expect(types(r)).toContain("spotted");
-    expect(r.state).toMatchObject({ alert: 2, trust: 40, status: "playing" });
+    expect(r.state).toMatchObject({ alert: 2, trust: 40, status: "playing", chase: true });
+    expect(types(r)).toContain("chase_started");
     expect(r.state.memory.lastTrustLoss).toBe("spotted");
   });
   it("alert >= 3 is caught", () => {
@@ -253,6 +254,47 @@ describe("guard, alert, trust", () => {
   it("trust is clamped to 0..100", () => {
     const s = mk(1, s => { at(s, "hall"); s.guard.step = GUARD.stairwell; s.trust = 4; });
     expect(step(s, { action: "wait" }).state.trust).toBe(0);
+  });
+});
+
+describe("chase", () => {
+  /** Marlow in the gallery (cover: display case) or hall (no cover), spotted by the guard stepping in. */
+  const spottedIn = (room: string, facing: any = "north") => step(mk(1, s => { at(s, room, facing); s.guard.step = room === "hall" ? GUARD.stairwell : GUARD.hall; }), { action: "wait" }).state;
+  it("one turn only: waiting, listening, peeking or taking while chased is caught", () => {
+    for (const a of [{ action: "wait" }, { action: "listen" }] as Action[]) {
+      const r = step(spottedIn("hall"), a);
+      expect(r.state.status).toBe("caught");
+      expect(r.events).toContainEqual({ type: "caught", reason: "chase", perceived: true });
+    }
+  });
+  it("hiding at known cover ends the chase", () => {
+    const s = spottedIn("gallery", "west");
+    expect(s.chase).toBe(true);
+    const r = step(s, { action: "hide" });
+    expect(r.state).toMatchObject({ status: "playing", chase: false });
+    expect(types(r)).toContain("chase_escaped");
+  });
+  it("leaving the room ends the chase", () => {
+    const r = step(spottedIn("hall"), { action: "move", target: "office", stance: "quiet" }); // a noisy closed door next to him would add alert
+    expect(types(r)).toContain("chase_escaped");
+    expect(r.state.status).toBe("playing");
+  });
+  it("no cover in the hall: hide is refused without using the turn, so the player can still run", () => {
+    const s = spottedIn("hall");
+    const refused = step(s, { action: "hide" });
+    expect(refused.state).toBe(s);
+    expect(step(refused.state, { action: "move", target: "lobby", stance: "quiet" }).state.status).toBe("playing");
+    expect(step(refused.state, { action: "move", target: "lobby" }).state.status).toBe("caught"); // slamming the door adds alert 1 -> 3
+  });
+  it("a second sighting after escaping reaches alert 3 and is caught", () => {
+    const s = spottedIn("gallery", "west");
+    const hidden = step(s, { action: "hide" }).state;
+    hidden.marlow.hidden = false; hidden.guard.step = GUARD.hall; // guard steps back into her room
+    expect(step(hidden, { action: "wait" }).state.status).toBe("caught");
+  });
+  it("exit still wins while chased", () => {
+    const s = mk(1, s => { s.marlow.carrying = "ledger"; s.chase = true; });
+    expect(step(s, { action: "exit" }).state.status).toBe("won");
   });
 });
 

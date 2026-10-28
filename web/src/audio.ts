@@ -132,6 +132,14 @@ export class AudioEngine {
       case "sfx.stinger.spotted":
         this.tone(dest, t, 110, 1.1, 0.25, "sawtooth"); this.tone(dest, t, 116.5, 1.1, 0.2, "sawtooth"); this.burst(dest, t, { freq: 400, q: 0.5, dur: 0.6, gain: 1 });
         return 1.1;
+      case "sfx.chase": {
+        for (let i = 0; i < 9; i++) this.burst(dest, t + i * 0.2, { freq: 2200, q: 3, dur: 0.07, gain: 1 });
+        const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+        o.type = "sawtooth"; o.frequency.setValueAtTime(420, t); o.frequency.linearRampToValueAtTime(900, t + 0.9); o.frequency.linearRampToValueAtTime(420, t + 1.8);
+        g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.14, t + 0.1); g.gain.linearRampToValueAtTime(0, t + 1.8);
+        o.connect(g); g.connect(dest); o.start(t); o.stop(t + 1.9);
+        return 1.9;
+      }
       case "sfx.radio.click": this.burst(dest, t, { freq: 3000, q: 0.7, dur: 0.03, gain: 0.7, type: "highpass" }); return 0.05;
       case "sfx.radio.static": this.burst(dest, t, { freq: 2200, q: 0.5, dur: 0.6, gain: 0.5 }); return 0.6;
       default: this.tone(dest, t, 330, 0.2, 0.05); return 0.2; // unknown cue id: audible TODO placeholder

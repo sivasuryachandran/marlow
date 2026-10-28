@@ -1,6 +1,6 @@
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
-import { appendFileSync, existsSync, mkdirSync, readFileSync } from "node:fs";
+import { appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { Hono } from "hono";
 import { knowledgeList, type IntentRequest } from "@marlow/game";
 import { MetaStt } from "./adapters/stt";
@@ -47,6 +47,19 @@ app.post("/api/casefile/:runId", async c => {
   if (!replayRows(rows, level).ok) return c.json({ error: "run log failed replay check" }, 409);
   const out = await buildCaseFile({ runId, rows, level, outDir: cfg.casefilesDir, image: new MuseImage(cfg), verify: cfg.verifyArt });
   return c.json({ url: `/casefiles/${runId}/index.html`, panels: out.panels.length, sources: [...new Set(out.panels.map(p => p.source))] });
+});
+
+// Dev tool: tools/record-commands page uploads one 16 kHz WAV per eval command.
+const EVAL_AUDIO = "data/eval/audio";
+app.get("/api/eval-audio", c => c.json(existsSync(EVAL_AUDIO) ? readdirSync(EVAL_AUDIO).filter(f => /^c\d{2}\.wav$/.test(f)).map(f => f.slice(0, 3)) : []));
+app.post("/api/eval-audio/:id", async c => {
+  const id = c.req.param("id");
+  if (!/^c\d{2}$/.test(id)) return c.json({ error: "bad id" }, 400);
+  const buf = Buffer.from(await c.req.arrayBuffer());
+  if (buf.length < 100 || buf.length > 4_000_000 || buf.toString("ascii", 0, 4) !== "RIFF") return c.json({ error: "expected a RIFF/WAV body under 4 MB" }, 400);
+  mkdirSync(EVAL_AUDIO, { recursive: true });
+  writeFileSync(`${EVAL_AUDIO}/${id}.wav`, buf);
+  return c.json({ ok: true, bytes: buf.length });
 });
 
 app.use("/casefiles/*", serveStatic({ root: "./" }));

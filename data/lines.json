@@ -438,5 +438,35 @@
     "text": [
       "Tell the client I'm sorry. We'll go again."
     ]
+  },
+  "marlow.chase": {
+    "speaker": "marlow",
+    "text": [
+      "He's coming for me! Hide or move me, boss, now!",
+      "He's running at me! One move, boss! Hide or go!"
+    ],
+    "curt": [
+      "He's on me! Hide or move!"
+    ]
+  },
+  "marlow.chase.escaped": {
+    "speaker": "marlow",
+    "text": [
+      "Lost him. For now.",
+      "I'm clear. He's off my back, for now."
+    ],
+    "curt": [
+      "Clear. For now."
+    ]
+  },
+  "marlow.chase.caught": {
+    "speaker": "marlow",
+    "text": [
+      "Too slow, boss. He's got me.",
+      "He's on me. It's over."
+    ],
+    "curt": [
+      "Too slow."
+    ]
   }
 }

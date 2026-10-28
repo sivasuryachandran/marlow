@@ -14,7 +14,7 @@ export function candidateActions(s: WorldState): Action[] {
 }
 
 const key = (s: WorldState) => JSON.stringify([
-  s.marlow, s.guard.step, s.alert, s.status, s.knowledge, s.doors.map(d => d.state), s.items.map(i => i.room), s.turn >= 6, s.memory.warned,
+  s.marlow, s.guard.step, s.alert, s.status, s.knowledge, s.doors.map(d => d.state), s.items.map(i => i.room), s.turn >= 6, s.memory.warned, s.chase,
 ]);
 
 /** Shortest winning plan that never exceeds `maxAlert`; null if none within `maxDepth`. */

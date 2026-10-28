@@ -1693,5 +1693,50 @@
   "audioKey": "marlow.outro.caught.v0",
   "text": "Tell the client I'm sorry. We'll go again.",
   "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.chase.v0",
+  "text": "He's coming for me! Hide or move me, boss, now!",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.chase.v1",
+  "text": "He's running at me! One move, boss! Hide or go!",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.chase.c0",
+  "text": "He's on me! Hide or move!",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.chase.escaped.v0",
+  "text": "Lost him. For now.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.chase.escaped.v1",
+  "text": "I'm clear. He's off my back, for now.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.chase.escaped.c0",
+  "text": "Clear. For now.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.chase.caught.v0",
+  "text": "Too slow, boss. He's got me.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.chase.caught.v1",
+  "text": "He's on me. It's over.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.chase.caught.c0",
+  "text": "Too slow.",
+  "speaker": "marlow"
  }
 ]

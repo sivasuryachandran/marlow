@@ -34,6 +34,13 @@ const policies: Record<string, (s: WorldState, m: Mem) => Action> = {
   },
   cautious(s, m) {
     const a = objectiveAction(s);
+    if (s.chase) { // he is running at her: hide if there is known cover, otherwise slip out quietly (a slammed door adds alert)
+      const cover = s.props.some(p => p.room === s.marlow.room && p.tags.includes("hide") && s.knowledge.props.includes(p.id));
+      if (cover) return { action: "hide" };
+      const exits = neighbors(s, s.marlow.room).filter(r => !s.rooms.find(x => x.id === r)?.offstage);
+      const to = "move" in a && exits.includes(a.move) ? a.move : exits[0];
+      return { action: "move", target: to, stance: "quiet" };
+    }
     if (!("move" in a)) return a; // take / exit are in-room, no crossing risk
     if (m.commit > 0) { m.commit--; return mv(a.move); } // after a silent listen, finish the crossing without stopping in the open
     if (m.silentAtTurn === s.turn) {

@@ -7,7 +7,24 @@ export interface IntentResponse { turnId: number; reply: unknown }
 export interface IntentAdapter { name: string; infer(req: IntentRequest): Promise<IntentResponse> }
 
 /** Marlow's knowledge only; `side` is relative to her current facing (extension to the brief's {id, spokenName, type}). */
-export function knowledgeList(s: WorldState): KnownEntity[] {
+export type KnowledgeScope = "all" | "near";
+
+export function knowledgeList(s: WorldState, scope: KnowledgeScope = "all"): KnownEntity[] {
+  const all = knowledgeAll(s);
+  if (scope === "all") return all;
+  // "near": only what an order can plausibly name now: this room, rooms behind this room's known doors, and what is in those rooms.
+  const here = s.marlow.room;
+  const adj = new Set<string>([here]);
+  for (const d of s.doors) if (s.knowledge.doors.includes(d.id) && d.between.includes(here)) for (const r of d.between) adj.add(r);
+  return all.filter(e => {
+    if (e.type === "room") return adj.has(e.id);
+    if (e.type === "door") return s.doors.find(d => d.id === e.id)!.between.includes(here);
+    const room = e.type === "prop" ? s.props.find(p => p.id === e.id)!.room : s.items.find(i => i.id === e.id)!.room;
+    return room !== null && adj.has(room);
+  });
+}
+
+function knowledgeAll(s: WorldState): KnownEntity[] {
   const k = s.knowledge, facing: Compass = s.marlow.facing;
   const out: KnownEntity[] = [];
   for (const r of s.rooms) if (k.rooms.includes(r.id)) out.push({ id: r.id, spokenName: r.spokenName, type: "room" });

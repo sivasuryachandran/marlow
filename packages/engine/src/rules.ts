@@ -63,6 +63,7 @@ export function step(prev: WorldState, action: Action, rngIn?: Rng): StepResult 
   const ev: GameEvent[] = [];
   const roll = rng.int(1_000_000);
   const warnedBefore = s.memory.warned;
+  const chasing = s.chase;
   s.memory.warned = false;
   let guardSteps = 1;
 
@@ -156,6 +157,19 @@ export function step(prev: WorldState, action: Action, rngIn?: Rng): StepResult 
     }
   }
 
+  // Chase: after being spotted the player gets exactly one turn to hide or leave the room.
+  if (chasing) {
+    if (action.action === "move" || action.action === "hide") {
+      s.chase = false;
+      ev.push({ type: "chase_escaped", perceived: true });
+    } else {
+      s.chase = false; s.status = "caught";
+      ev.push({ type: "caught", reason: "chase", perceived: true });
+      s.turn += 1; s.rngState = rng.state;
+      return { state: s, events: ev, roll };
+    }
+  }
+
   // Guard advances; spotted check after every guard step.
   for (let i = 0; i < guardSteps && s.status === "playing"; i++) {
     s.guard.step = (s.guard.step + 1) % s.guard.route.length;
@@ -164,8 +178,9 @@ export function step(prev: WorldState, action: Action, rngIn?: Rng): StepResult 
       ev.push({ type: "spotted", perceived: true });
       addAlert(2);
       addTrust(-10, "spotted", "spotted");
+      if (s.alert < 3) { s.chase = true; ev.push({ type: "chase_started", perceived: true }); break; } // he runs at her: one turn to react
     }
-    if (s.alert >= 3) { s.status = "caught"; ev.push({ type: "caught", perceived: true }); }
+    if (s.alert >= 3) { s.status = "caught"; ev.push({ type: "caught", reason: "alert", perceived: true }); }
   }
 
   s.turn += 1;

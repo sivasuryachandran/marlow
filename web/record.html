@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MARLOW — record eval commands</title>
+<style>
+body{margin:0;background:#0b0b10;color:#eceef2;font:18px/1.5 Georgia,serif}main{max-width:44rem;margin:0 auto;padding:1.25rem}
+h1{color:#e8a33d;letter-spacing:.2em;font-size:1.2rem}button{font:inherit;color:inherit;background:#1a1c26;border:2px solid #3a3d4a;border-radius:8px;padding:.7rem 1.1rem;cursor:pointer}
+button:focus-visible{outline:3px solid #e8a33d}#say{font-size:2rem;margin:1rem 0;color:#fff}#rec{width:100%;font-size:1.3rem;padding:1.2rem}#rec.on{background:#5a1f1f;border-color:#f66}
+#bar{height:8px;background:#222;border-radius:4px}#fill{height:8px;background:#e8a33d;border-radius:4px;width:0}.dim{color:#9aa0ae}
+ol{padding-left:1.4rem;font-size:15px}li.done{color:#7c7}li.cur{color:#e8a33d}
+</style></head><body><main>
+<h1>RECORD THE 50 EVAL COMMANDS</h1>
+<p class="dim">Needs <code>npm run server</code>. Say each phrase naturally, the way you would in the game. Clips are saved as 16 kHz mono WAV to <code>data/eval/audio/</code>. <b>Space</b> starts and stops. <b>R</b> redoes the previous one. <b>S</b> skips.</p>
+<div id="bar"><div id="fill"></div></div><p id="count" class="dim" role="status"></p>
+<div id="say" aria-live="assertive"></div>
+<button id="rec" type="button">Start recording (Space)</button>
+<p id="msg" role="status" class="dim"></p>
+<ol id="list"></ol>
+</main><script type="module" src="./src/record.ts"></script></body></html>

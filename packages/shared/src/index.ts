@@ -37,7 +37,7 @@ export const ScheduledEvent = z.object({ id: z.string(), turn: z.number().int(),
 
 export const WorldState = z.object({
   seed: z.number().int(), rngState: z.number().int(), turn: z.number().int(),
-  alert: z.number().int(), trust: z.number(), status: z.enum(["playing", "won", "caught"]),
+  alert: z.number().int(), chase: z.boolean().default(false), trust: z.number(), status: z.enum(["playing", "won", "caught"]),
   rooms: z.array(Room), doors: z.array(Door), props: z.array(Prop), items: z.array(Item),
   guard: Guard, marlow: Marlow, knowledge: Knowledge,
   objective: z.object({ item: z.string(), exitRoom: z.string() }),
@@ -91,7 +91,9 @@ export type GameEvent = { perceived: boolean } & (
   | { type: "alert_changed"; alert: number }
   | { type: "trust_changed"; delta: number; reason: string }
   | { type: "spotted" }
-  | { type: "caught" }
+  | { type: "caught"; reason?: "alert" | "chase" }
+  | { type: "chase_started" }
+  | { type: "chase_escaped" }
   | { type: "won"; alert: number }
   | { type: "refused"; reason: RefusalReason; target?: string }
 );

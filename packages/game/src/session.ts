@@ -1,7 +1,7 @@
 import { createInitialState, locate, step } from "@marlow/engine";
 import type { Action, GameEvent, WorldState } from "@marlow/shared";
 import { Director, type Beat } from "./director";
-import { knowledgeList, type IntentAdapter, type KnownEntity } from "./intent";
+import { knowledgeList, type IntentAdapter, type KnowledgeScope, type KnownEntity } from "./intent";
 import { localParse } from "./parser";
 import { hash, renderLine, type LineBank, type LineRef, type SpokenLine } from "./lines";
 import type { MemoryStore } from "./memory";
@@ -15,7 +15,7 @@ export interface TurnOutput {
 }
 export interface SessionConfig {
   level: unknown; bank: LineBank; beats: Beat[]; intent: IntentAdapter; seed: number; memory: MemoryStore;
-  timeoutMs?: number; runId?: string; onLog?: (row: Record<string, unknown>) => void; now?: () => number;
+  timeoutMs?: number; knowledgeScope?: KnowledgeScope; runId?: string; onLog?: (row: Record<string, unknown>) => void; now?: () => number;
 }
 
 const TIMEOUT = Symbol("timeout");
@@ -102,7 +102,7 @@ export class Session {
     }
 
     // Clarification follow-up: narrow to the named candidate, then re-ask the intent adapter.
-    let request = { transcript, knowledge: knowledgeList(s) };
+    let request = { transcript, knowledge: knowledgeList(s, this.cfg.knowledgeScope) };
     if (this.pending) {
       const pick = resolveCandidate(transcript, this.pending.candidates, s);
       if (pick) request = { transcript: this.pending.transcript, knowledge: knowledgeList(s).filter(e => e.id === pick) };

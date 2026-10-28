@@ -8,6 +8,16 @@ Status date: 2026-10-28 (evening). Real Meta model calls are now wired and measu
 
 Stage-one requirement ("real use of Meta models") is now met by: Voice Transcribe (speech → text), Muse Spark (speech → one legal action or a clarify question), Muse Image (Case File), plus Spark Open on Baseten as the alternate backend.
 
+## Latest changes (decisions applied)
+
+1. **Spotted = chase, not +3.** Being spotted still adds alert +2 and −10 trust, but now the guard runs at Marlow: the player has exactly one turn to **hide (known cover) or leave the room**, otherwise caught ("Too slow, boss"). A refused order (e.g. hide with no cover) doesn't use the turn. Slamming a closed door next to him adds noise alert, so quiet exits matter. New lines (`marlow.chase`, `.escaped`, `.caught`) and a chase cue (`sfx.chase`: fast footsteps + siren sweep, top priority, ducked music). 7 new engine tests.
+   - Simulator, 1000 seeds (`simulation.md`): **reckless 43.4% win, 18.4% clean win**, 56.6% caught · **cautious-simple 50.7% win (44.1% clean)**, 49.3% caught (it now reacts to a chase; before that it was 44.1% / 44.1%) · expert 100% clean (150 seeds).
+   - Honest read: the chase barely hurts reckless players (always moving already satisfies the rule); it punishes players who stop to wait or listen after being seen. Reckless still wins ~43% overall because the guard is often upstairs or far for the 6-turn dash. If "reckless rarely wins" is a hard goal, the remaining levers are route density near the objective or noise rules, not the chase.
+2. **Model vs local parser, seed-9 demo run (11 turns):** 8 local (73%), 3 model calls (27%): "peek the vault door", "peek the door", "take the ledger" (`npx tsx tools/path-share.ts`).
+3. **Baseten vs Spark latency** is side by side in `metrics.md` (latest full run: Spark p50 2.1 s / p95 5.0 s; Spark Open p50 0.9 s / p95 8.3 s on the same 50 commands). Spark Open is faster at the median, with a heavier tail.
+4. **Prompt shrink experiment** (`knowledgeScope: "near"`: only this room, rooms behind its known doors, and their contents; late-game knowledge so the lists differ; same 50 commands): Spark p50 2171 → 2572 ms, p95 5747 → 8565 ms; Spark Open p50 1164 → 1062 ms, p95 8185 → 7340 ms; accuracy 92% → 96% on both. **No reliable latency gain** (differences are inside run-to-run noise): latency is dominated by network and reasoning, not by the ~14 knowledge entries. Kept as an option (`knowledgeScope`), default stays "all". Files: `metrics.full.md` vs `metrics.full.near.md`.
+5. **Real-speech eval:** `npm run server` + open `http://localhost:5173/record.html` (Space starts/stops, R redoes the last, S skips). It saves `data/eval/audio/cNN.wav` (16 kHz mono) through the server. `npm run eval` then runs every clip through Muse Voice Transcribe, reports word error rate and STT latency, and re-scores each backend **from what was heard** (end-to-end). Pipeline smoke-tested with 3 macOS `say` clips (0% WER, STT p50 ~0.8 s); those test clips were deleted, so no real-speech numbers exist yet.
+
 ## What changed today
 
 - **Adapters, from the official docs** (no guessing): Spark `POST /chat/completions` with `reasoning_effort`, strict `response_format: json_schema`; Voice Transcribe multipart `request` + 16 kHz mono WAV, reply `transcript`; Muse Image `POST /images/generations` (`b64_json`); Baseten OpenAI-compatible chat, JSON mode. Request shapes are pinned by `server/src/adapters/adapters.test.ts`.
@@ -27,14 +37,14 @@ Stage-one requirement ("real use of Meta models") is now met by: Voice Transcrib
 | Intent accuracy (50 commands, correct transcript) | mock 100% (wiring only) · **Spark 96%** · **Spark Open 92%** in the latest run (target ≥ 90). Across three runs Spark scored 98 / 92 (after fixing a harness bug) / 96 and Spark Open 92 / 96 / 92: the models are not deterministic, so quote it as ~92–98% |
 | Invalid actions accepted | **0** on all backends; adversarial V2: 2000 bad replies, 0 illegal reached the engine |
 | Latency release → result (intent path only) | Spark p50 ~2.1–2.6 s / p95 5.0–6.6 s · Spark Open p50 ~0.8–1.0 s / p95 7.7–9.5 s · Voice Transcribe ~0.7–1.1 s. One Spark call exceeded the 8 s eval timeout in one run |
-| Replay determinism | 100% of generated seeded runs |
-| Balance (1000 seeds; expert 150) | expert **100%** clean win · cautious 44% (all clean) · reckless 43% win but only **18% clean**, 57% caught (`simulation.md`) |
+| Replay determinism | 100% of generated seeded runs (logs carry a level hash; logs from an older level are skipped as stale) |
+| Balance (1000 seeds; expert 150) | with the chase rule: expert **100%** clean win · cautious-simple 51% (44% clean) · reckless 43% win, **18% clean**, 57% caught (`simulation.md`) |
 
 Misses (latest run): Spark: "open the safe" and "banana" got a refusal instead of "Say again". Spark Open: two "take the ledger" (refused as not-known instead of unknown), "banana" refused, and "peek the door" answered "Say again" instead of a clarify. All are safe outcomes; none executed. (The harness once counted `stance:"normal"` as a miss; fixed.)
 
 ## Known issues / honest caveats
 
-- **Reckless still wins 43% of runs** because one spot (+2) is survivable (caught at alert 3). "Reckless rarely wins" holds for clean wins (18%), not for any win. If you want it lower, the lever is a rule change (e.g. spotted = +3), which I have not made without your say-so.
+- **Reckless still wins 43% of runs** (18% cleanly); see item 1 above for why the chase does not change that.
 - The "cautious" policy in the simulator is deliberately simple (44%); the expert policy shows the level is cleanly winnable by a player who counts the guard's loop. Real players land in between: that is the playtest question.
 - **Nobody has listened to the audio yet.** Everything audible is still synthesized placeholders (footsteps, creak, phone, stinger, music, reverb IRs) and Marlow's voice is placeholder tones until Kokoro is rendered. The browser run showed the audio context running and the text log mirroring every cue; it can't tell if it sounds good.
 - The intent latency (≈3–5 s with Spark) is above the ~3 s design target; the wait is filled with ambience and the guard pacing where he was last heard.
@@ -42,6 +52,7 @@ Misses (latest run): Spark: "open the safe" and "banana" got a refusal instead o
 
 ## Needs you
 
+0. **Record your 50 commands** (`/record.html`, ~5 min) so the eval has real speech.
 1. **Listen tonight** (headphones, blindfold, M3: locate the guard left/right/ahead/behind ≥ 8/10). If the synth sounds cheap, drop CC0 files at `assets/audio/sfx/<cueId>.wav` (they replace the synth automatically) and log them in CREDITS.md.
 2. **Kokoro**: `npm i -D kokoro-js` locally (dev-only; espeak-ng/GPL concern noted in CREDITS.md), then `npm run render-lines` (339 files). Review only `DEMO_LINES.md`.
 3. Recruit the blind / low-vision tester; make the repo public; record the video (`DEMO_SCRIPT.md`, rehearsed with `tools/rehearse-demo.ts`).

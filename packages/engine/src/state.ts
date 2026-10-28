@@ -19,7 +19,7 @@ export function createInitialState(
   if (errs.length) throw new Error("invalid level: " + errs.join("; "));
   const rng = new Rng(seed >>> 0);
   const s: WorldState = {
-    seed, rngState: 0, turn: 0, alert: 0, trust: carry.trust ?? 50, status: "playing",
+    seed, rngState: 0, turn: 0, alert: 0, chase: false, trust: carry.trust ?? 50, status: "playing",
     rooms: level.rooms, doors: structuredClone(level.doors), props: level.props, items: structuredClone(level.items),
     guard: { ...level.guard, step: rng.int(level.guard.route.length) },
     marlow: { room: level.start.room, facing: level.start.facing, hidden: false, carrying: null, prevRoom: null },

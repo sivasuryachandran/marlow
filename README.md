@@ -16,12 +16,14 @@ npm run dev             # game on http://localhost:5173  (add ?debug=1&seed=7)
 npm run eval            # V3 regression harness -> metrics.json + metrics.md
 npm run replay          # replay every runs/*.jsonl and assert identical event logs
 npm run check-access    # real calls to Spark, Voice Transcribe, Baseten (--image, --wonder opt-in)
+npx tsx tools/path-share.ts # local-parser vs model-call share of a scripted run
+# real-speech eval: npm run server, open http://localhost:5173/record.html, record the 50 commands, then npm run eval
 npx tsx tools/simulate.ts   # balance: cautious / reckless / expert over 1000 seeds
 ```
 
 Copy `.env.example` to `.env` for keys. **The game is playable with no keys**: typed input or browser speech recognition, an in-browser deterministic intent mock, placeholder tones where pre-rendered voice lines are missing. With keys and `npm run server` it uses Muse Voice Transcribe and the Spark backend you pick. Headphones recommended.
 
-Controls: hold **Space** or the big button to talk; or type. Try "listen", "go to the hall", "peek the left door quietly", "take the ledger", "go back", "exit". Ambiguous orders get a spoken clarifying question; impossible ones get a refusal and the world does not change.
+Controls: hold **Space** or the big button to talk; or type. Try "listen", "go to the hall", "peek the left door quietly", "take the ledger", "go back", "exit". Ambiguous orders get a spoken clarifying question; impossible ones get a refusal and the world does not change. If the guard spots Marlow he runs at her: you get exactly one turn to hide or leave the room.
 
 ## How it works
 

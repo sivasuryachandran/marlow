@@ -2,12 +2,13 @@
  * V3 regression harness. Usage: npx tsx tools/eval.ts [--backends mock,meta,baseten]
  * Writes metrics.json + metrics.md. Backends that are not configured are reported as SKIP, never faked.
  */
-import { readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { createInitialState, revealRoom, step, validate, candidateActions, Rng } from "../packages/engine/src/index";
 import { InMemoryStore, Session, MockIntent, verify, type IntentAdapter } from "../packages/game/src/index";
 import type { Action, WorldState } from "../packages/shared/src/index";
 import { makeIntent } from "../server/src/adapters/intent";
 import { NotConfigured } from "../server/src/adapters/errors";
+import { MetaStt } from "../server/src/adapters/stt";
 import { loadConfig } from "../server/src/config";
 import { replayRows } from "../server/src/replay";
 import { bank, beats, level, pct, quantile, readRuns } from "./lib";
@@ -23,6 +24,7 @@ function presetState(p: Cmd["state"]): WorldState {
   s.guard.step = 0; // stairwell: far from every preset room
   s.marlow.room = p.room; s.marlow.facing = FACING[p.room]; s.marlow.prevRoom = PREV[p.room] ?? null;
   revealRoom(s, p.room, true);
+  if (process.env.EVAL_FULL_KNOWLEDGE === "1") for (const r of s.rooms) if (!r.offstage) revealRoom(s, r.id, true); // late-game prompt size
   if (p.carrying) { s.marlow.carrying = p.carrying; s.items.find(i => i.id === p.carrying)!.room = null; }
   return s;
 }
@@ -39,7 +41,7 @@ async function evalBackend(name: string, adapter: IntentAdapter, cmds: Cmd[]) {
   const results: { id: string; ok: boolean; kind: string; ms: number; said: string; got?: unknown }[] = [];
   let invalidAccepted = 0, clarifies = 0;
   for (const c of cmds) {
-    const sess = new Session({ level, bank, beats, intent: adapter, seed: 1, memory: new InMemoryStore(), timeoutMs: 8000 });
+    const sess = new Session({ level, bank, beats, intent: adapter, seed: 1, memory: new InMemoryStore(), timeoutMs: 8000, knowledgeScope: (process.env.EVAL_SCOPE as "all" | "near" | undefined) ?? "all" });
     sess.state = presetState(c.state);
     const t0 = performance.now();
     let o;
@@ -111,6 +113,14 @@ function determinism() {
   })();
 }
 
+const words = (s: string) => s.toLowerCase().replace(/[^a-z0-9' ]+/g, " ").split(/\s+/).filter(Boolean);
+function editDistance(a: string[], b: string[]) {
+  const d = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)] as number[]);
+  for (let j = 1; j <= b.length; j++) d[0][j] = j;
+  for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+  return d[a.length][b.length];
+}
+
 const bi = process.argv.indexOf("--backends");
 const want = (process.argv.find(a => a.startsWith("--backends="))?.split("=")[1] ?? (bi >= 0 ? process.argv[bi + 1] : "mock,meta,baseten")).split(",");
 const cmds = readFileSync("data/eval/commands.jsonl", "utf8").trim().split("\n").map(l => JSON.parse(l) as Cmd);
@@ -119,9 +129,29 @@ const backends: any[] = [];
 for (const b of want) backends.push(await evalBackend(b === "meta" ? "meta-spark" : b === "baseten" ? "baseten-spark-open" : "mock", makeIntent(cfg, b as any), cmds));
 const adv = adversarial();
 const det = await determinism();
-const hasAudio = cmds.filter(c => c.audioPath).length;
-const metrics = { commands: cmds.length, transcription: hasAudio ? "TODO" : "n/a (no recorded audio / no STT access yet)", backends, adversarialV2: adv, determinism: det };
-writeFileSync("metrics.json", JSON.stringify(metrics, null, 2));
+// Real speech: every data/eval/audio/<id>.wav goes through Muse Voice Transcribe; intent is then scored on what was HEARD.
+const clip = (id: string) => `data/eval/audio/${id}.wav`;
+const spoken = cmds.filter(c => existsSync(clip(c.id)));
+let transcription: any = "n/a (no recordings: run the recorder, see README)";
+const e2e: any[] = [];
+if (spoken.length && process.env.MODEL_API_KEY) {
+  const stt = new MetaStt(cfg), heard: Cmd[] = [], ms: number[] = [], mis: string[] = [];
+  let edits = 0, refWords = 0;
+  for (const c of spoken) {
+    const buf = readFileSync(clip(c.id)), t0 = performance.now();
+    const { text } = await stt.transcribe(buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength) as ArrayBuffer, "audio/wav");
+    ms.push(performance.now() - t0);
+    const e = editDistance(words(c.saidText), words(text));
+    edits += e; refWords += words(c.saidText).length;
+    if (e) mis.push(`${c.id} said "${c.saidText}" heard "${text}"`);
+    heard.push({ ...c, saidText: text });
+  }
+  transcription = { clips: spoken.length, wordErrorRate: pct(edits, refWords), clipsWithAnError: mis.length, sttLatencyMs: { p50: Math.round(quantile(ms, 0.5) ?? 0), p95: Math.round(quantile(ms, 0.95) ?? 0) }, errors: mis };
+  for (const b of want) e2e.push(await evalBackend(b === "meta" ? "meta-spark" : b === "baseten" ? "baseten-spark-open" : "mock", makeIntent(cfg, b as any), heard));
+}
+const metrics = { commands: cmds.length, transcription, endToEndFromSpeech: e2e, backends, adversarialV2: adv, determinism: det };
+const suffix = `${process.env.EVAL_FULL_KNOWLEDGE === "1" ? ".full" : ""}${process.env.EVAL_SCOPE === "near" ? ".near" : ""}`;
+writeFileSync(`metrics${suffix}.json`, JSON.stringify(metrics, null, 2));
 
 const row = (f: (b: any) => string) => backends.map(f).join(" | ");
 const md = `# MARLOW metrics
@@ -135,7 +165,7 @@ Generated by \`npx tsx tools/eval.ts\` on ${new Date().toISOString().slice(0, 10
 | Invalid actions accepted (must be 0) | ${row(b => ("skipped" in b ? "—" : String(b.invalidAccepted)))} |
 | Latency p50 / p95, release → result (ms, adapter + pipeline) | ${row(b => ("skipped" in b ? "—" : `${b.latencyMs.p50} / ${b.latencyMs.p95}`))} |
 
-Transcription error rate: ${metrics.transcription}.
+${typeof transcription === "string" ? `Transcription error rate: ${transcription}.` : `**Transcription (Muse Voice Transcribe, ${transcription.clips} real recordings):** word error rate ${transcription.wordErrorRate}%, ${transcription.clipsWithAnError} clips with at least one error, STT latency p50 / p95 ${transcription.sttLatencyMs.p50} / ${transcription.sttLatencyMs.p95} ms.\n\nEnd-to-end (speech → STT → intent → V1/V2): ${e2e.map((b: any) => "skipped" in b ? `${b.name} SKIP` : `${b.name} ${b.intentAccuracy}% (${b.invalidAccepted} invalid accepted)`).join(" · ")}.\n${transcription.errors.map((x: string) => `- ${x}`).join("\n")}`}
 
 **Adversarial V2 check:** ${adv.sent} hallucinated/illegal model replies across 5 rooms; ${adv.executed} passed V2 as legal actions; **${adv.executedIllegal} illegal actions reached the engine** (must be 0).
 
@@ -144,6 +174,6 @@ Transcription error rate: ${metrics.transcription}.
 Notes: the mock backend is a deterministic keyword NLU written alongside the cases, so its 100% only shows the pipeline is wired. The meta-spark (muse-spark-1.3, reasoning_effort minimal, strict JSON schema) and baseten-spark-open (meta-models/muse-spark-open, JSON mode) rows are real calls. Their latency is end-to-end including network and reasoning tokens; the local parser answers wait/listen/hide/exit/go-to-room orders without any call. A "miss" is any difference from the expected outcome, including a different refusal reason; no miss executed an invalid action.
 ${backends.filter((b: any) => b.failures?.length).map((b: any) => `\n### ${b.name} misses\n${b.failures.map((f: any) => `- ${f.id} "${f.said}" → ${JSON.stringify(f.got)} (${f.kind})`).join("\n")}`).join("\n")}
 `;
-writeFileSync("metrics.md", md);
+writeFileSync(`metrics${suffix}.md`, md);
 console.log(md);
 process.exit(adv.executedIllegal || det.pct !== 100 || backends.some((b: any) => b.invalidAccepted) ? 1 : 0);

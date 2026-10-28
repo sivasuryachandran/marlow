@@ -117,7 +117,7 @@ describe("Session", () => {
     expect(o.lines[0].id).toMatch(/^marlow\.refuse\./);
   });
   it("asks a template clarify, then resolves it from the follow-up", async () => {
-    const s = mkSession({ seed: 5 }); s.start();
+    const s = mkSession({ seed: 7 }); s.start();
     await s.submit("go to hall"); // local parser
     expect(s.state.marlow.room).toBe("hall");
     const turnBefore = s.state.turn;
@@ -243,5 +243,20 @@ describe("a full run by typed words, and run-to-run memory", () => {
     const s = mk();
     expect(candidateActions(s).every(a => step(s, a).events[0].type !== "refused")).toBe(true);
     expect(new Rng(1).next()).toBeLessThan(1);
+  });
+});
+
+describe("knowledge scope", () => {
+  it("near scope sends only this room, rooms behind its known doors, and what is in them", () => {
+    const s = mk(1, inHall);
+    const all = knowledgeList(s).map(e => e.id), near = knowledgeList(s, "near").map(e => e.id);
+    expect(near.length).toBeLessThanOrEqual(all.length);
+    for (const id of ["hall", "lobby", "door_lobby_hall", "arch_hall_gallery", "door_hall_office", "door_hall_stairwell"]) expect(near).toContain(id);
+    const late = mk(1, s => { s.marlow.room = "office"; s.marlow.facing = "east"; for (const r of s.rooms) if (!r.offstage) revealRoom(s, r.id, true); });
+    expect(knowledgeList(late).length).toBeGreaterThan(knowledgeList(late, "near").length); // far props/items drop out in the late game
+    const far = mk(1); // in the lobby: only the lobby door and the hall behind it
+    const n = knowledgeList(far, "near").map(e => e.id);
+    expect(n).toEqual(expect.arrayContaining(["lobby", "door_lobby_hall"]));
+    expect(n).not.toContain("door_hall_office");
   });
 });
