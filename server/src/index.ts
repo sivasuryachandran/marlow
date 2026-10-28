@@ -50,15 +50,16 @@ app.post("/api/casefile/:runId", async c => {
 });
 
 // Dev tool: tools/record-commands page uploads one 16 kHz WAV per eval command.
-const EVAL_AUDIO = "data/eval/audio";
-app.get("/api/eval-audio", c => c.json(existsSync(EVAL_AUDIO) ? readdirSync(EVAL_AUDIO).filter(f => /^c\d{2}\.wav$/.test(f)).map(f => f.slice(0, 3)) : []));
+const evalDir = (set?: string) => (set === "heldout" ? "data/eval/heldout-audio" : "data/eval/audio");
+app.get("/api/eval-audio", c => { const d = evalDir(c.req.query("set")); return c.json(existsSync(d) ? readdirSync(d).filter(f => /^[ch]\d{2}\.wav$/.test(f)).map(f => f.slice(0, 3)) : []); });
 app.post("/api/eval-audio/:id", async c => {
   const id = c.req.param("id");
-  if (!/^c\d{2}$/.test(id)) return c.json({ error: "bad id" }, 400);
+  if (!/^[ch]\d{2}$/.test(id)) return c.json({ error: "bad id" }, 400);
   const buf = Buffer.from(await c.req.arrayBuffer());
   if (buf.length < 100 || buf.length > 4_000_000 || buf.toString("ascii", 0, 4) !== "RIFF") return c.json({ error: "expected a RIFF/WAV body under 4 MB" }, 400);
-  mkdirSync(EVAL_AUDIO, { recursive: true });
-  writeFileSync(`${EVAL_AUDIO}/${id}.wav`, buf);
+  const dir = evalDir(c.req.query("set"));
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(`${dir}/${id}.wav`, buf);
   return c.json({ ok: true, bytes: buf.length });
 });
 

@@ -38,8 +38,8 @@ function matches(exp: Cmd["expected"], got: { kind: string; action?: Action; lin
 }
 
 async function evalBackend(name: string, adapter: IntentAdapter, cmds: Cmd[]) {
-  const results: { id: string; ok: boolean; kind: string; ms: number; said: string; got?: unknown }[] = [];
-  let invalidAccepted = 0, clarifies = 0;
+  const results: { id: string; ok: boolean; kind: string; ms: number; said: string; got?: unknown; wrong?: boolean }[] = [];
+  let invalidAccepted = 0, clarifies = 0, wrongTarget = 0;
   for (const c of cmds) {
     const sess = new Session({ level, bank, beats, intent: adapter, seed: 1, memory: new InMemoryStore(), timeoutMs: 8000, knowledgeScope: (process.env.EVAL_SCOPE as "all" | "near" | undefined) ?? "all" });
     sess.state = presetState(c.state);
@@ -54,12 +54,16 @@ async function evalBackend(name: string, adapter: IntentAdapter, cmds: Cmd[]) {
     if (o.kind === "clarify") clarifies++;
     // an order that was meant to be refused (or was gibberish) must not have executed; with real speech this can be a legal action triggered by a mishearing
     if ((c.expected.refuse || c.expected.sayagain) && o.kind === "ok") invalidAccepted++;
-    results.push({ id: c.id, ok, kind: o.kind, ms, said: c.saidText, got: o.action ?? reasonLine });
+    // Wrong-target: an executed action aimed at something other than what the order named (e.g. "vault door" -> a real door).
+    const tgt = (o.action as { target?: string } | undefined)?.target;
+    const wrong = o.kind === "ok" && tgt !== undefined && !(c.expected.action && c.expected.target === tgt);
+    if (wrong) wrongTarget++;
+    results.push({ id: c.id, ok, kind: o.kind, ms, said: c.saidText, got: o.action ?? reasonLine, wrong });
   }
   const ms = results.map(r => r.ms);
   return {
     name, n: results.length, intentAccuracy: pct(results.filter(r => r.ok).length, results.length),
-    clarificationRate: pct(clarifies, results.length), invalidAccepted,
+    clarificationRate: pct(clarifies, results.length), invalidAccepted, wrongTarget, wrongTargetCases: results.filter(r => r.wrong).map(r => `${r.id} "${r.said}" -> ${JSON.stringify(r.got)}`),
     latencyMs: { p50: Math.round((quantile(ms, 0.5) ?? 0) * 100) / 100, p95: Math.round((quantile(ms, 0.95) ?? 0) * 100) / 100 },
     failures: results.filter(r => !r.ok),
   };
@@ -77,7 +81,7 @@ function adversarial() {
       const reply = rng.int(8) === 0 ? { clarify: { candidates: [ids[rng.int(ids.length)], ids[rng.int(ids.length)]] } }
         : { action: verbs[rng.int(verbs.length)], target: ids[rng.int(ids.length)], ...(rng.int(3) === 0 ? { stance: "quiet" } : {}) };
       sent++;
-      const v = verify(s, reply);
+      const v = verify(s, reply, "x");
       if (v.kind !== "action") continue;
       executed++;
       const known = new Set([...s.knowledge.rooms, ...s.knowledge.doors, ...s.knowledge.props, ...s.knowledge.items]);
@@ -86,6 +90,65 @@ function adversarial() {
     }
   }
   return { sent, executed, executedIllegal };
+}
+
+/**
+ * Wrong-target stress: for every verb, every phrase a player might say (names, aliases, side words, invented nouns) and EVERY
+ * possible target id, a model that claims the phrase names that target must be stopped unless the phrase really names it.
+ * The oracle reads names straight from level.json, independently of the game's matcher.
+ */
+function targetStress() {
+  const sing = (w: string) => (w.length > 3 && w.endsWith("s") ? w.slice(0, -1) : w);
+  const toks = (s: string) => s.toLowerCase().replace(/[^a-z ]+/g, " ").split(/\s+/).filter(w => w && !["the", "a"].includes(w)).map(sing);
+  const GEN = new Set(["door", "arch", "room"]);
+  const lv: any = level;
+  const entity = (id: string) => lv.rooms.find((x: any) => x.id === id) ?? lv.doors.find((x: any) => x.id === id) ?? lv.items.find((x: any) => x.id === id);
+  const tk = (id: string) => { const e = entity(id); return new Set<string>(e ? [e.spokenName, ...e.aliases].flatMap(toks).filter((w: string) => !GEN.has(w)) : []); };
+  const doorBetween = (a: string, b: string) => lv.doors.find((d: any) => d.between.includes(a) && d.between.includes(b));
+  /** Does `phrase` really name `target` when Marlow is in `here` and says `verb`? Independent of the game's matcher: reads level.json only. */
+  const named = (verb: string, here: string, target: string, phrase: string): boolean | null => {
+    const words = toks(phrase);
+    const content = words.filter(w => !GEN.has(w) && !["left", "right", "ahead", "behind", "front", "forward", "back", "straight"].includes(w));
+    if (!content.length) return null; // generic reference: judged separately
+    const hasDoorWord = words.some(w => w === "door" || w === "arch");
+    let allowed = new Set<string>();
+    if (verb === "take") { if (words.some(w => GEN.has(w))) return false; allowed = tk(target); }
+    else if (verb === "peek") {
+      const d = entity(target); if (!d || !lv.doors.includes(d) || !d.between.includes(here)) return false;
+      allowed = new Set([...tk(target), ...tk(d.between.find((r: string) => r !== here))]);
+    } else {
+      const dest = target.startsWith("door:") ? lv.doors.find((d: any) => d.id === target.slice(5))?.between.find((r: string) => r !== here) : target;
+      const d = dest ? doorBetween(here, dest) : null; if (!dest || !d || !lv.rooms.find((r: any) => r.id === dest)) return false;
+      allowed = new Set([...tk(dest), ...[...tk(d.id)].filter(w => hasDoorWord || !tk(here).has(w))]);
+    }
+    return content.every(w => allowed.has(w));
+  };
+  const nouns = ["office", "study", "ledger", "book", "logbook", "lobby", "entrance", "hall", "hallway", "gallery", "archway", "stairwell", "stairs", "vault", "safe", "wall", "window", "kitchen", "basement", "roof", "elevator", "gold", "left door", "right door", "door", "left", "ahead door", "behind door"];
+  const targets = ["lobby", "hall", "office", "gallery", "stairwell", "upstairs", "door_lobby_hall", "arch_hall_gallery", "door_hall_office", "door_hall_stairwell", "stairs_up", "ledger", "case_1", "desk_1", "unknown", "door:door_hall_office", "door:arch_hall_gallery", "door:door_lobby_hall", "door:door_hall_stairwell"];
+  let sent = 0, executed = 0, wrong = 0, offTranscript = 0;
+  const examples: string[] = [];
+  for (const room of ["lobby", "hall", "office", "gallery", "stairwell"]) {
+    for (const full of [false, true]) {
+      const s = presetState({ room });
+      if (full) for (const r of s.rooms) if (!r.offstage) revealRoom(s, r.id, true);
+      for (const verb of ["move", "peek", "take"] as const) for (const noun of nouns) for (const tg of targets) {
+        for (const claimed of [noun, "office door"]) { // the second claims a phrase that may not be in the order at all
+          sent++;
+          const v = verify(s, { action: verb, target: tg, matched: claimed }, `${verb} the ${noun}`);
+          if (v.kind !== "action") continue;
+          executed++;
+          if (!`${verb} the ${noun}`.includes(claimed)) { offTranscript++; continue; }
+          const t = (v.action as any).target as string;
+          const ok = named(verb, room, tg, claimed);
+          const doorsHere = s.doors.filter(d => d.between.includes(s.marlow.room) && s.knowledge.doors.includes(d.id));
+          const generic = ok === null ? (verb === "take" ? false : doorsHere.length === 1 || /left|right|ahead|behind/.test(claimed)) : false;
+          if (ok === false || (ok === null && !generic)) { wrong++; if (examples.length < 12) examples.push(`${room}${full ? "+" : ""} ${verb} "${claimed}" target ${tg} -> ${JSON.stringify(v.action)}`); }
+          void t;
+        }
+      }
+    }
+  }
+  return { sent, executed, wrongTargetExecuted: wrong, quoteNotInOrderExecuted: offTranscript, examples };
 }
 
 function determinism() {
@@ -123,14 +186,16 @@ function editDistance(a: string[], b: string[]) {
 
 const bi = process.argv.indexOf("--backends");
 const want = (process.argv.find(a => a.startsWith("--backends="))?.split("=")[1] ?? (bi >= 0 ? process.argv[bi + 1] : "mock,meta,baseten")).split(",");
-const cmds = readFileSync("data/eval/commands.jsonl", "utf8").trim().split("\n").map(l => JSON.parse(l) as Cmd);
+const HELD = process.env.EVAL_SET === "heldout";
+const cmds = readFileSync(HELD ? "data/eval/heldout.jsonl" : "data/eval/commands.jsonl", "utf8").trim().split("\n").map(l => JSON.parse(l) as Cmd);
 const cfg = loadConfig();
 const backends: any[] = [];
 for (const b of want) backends.push(await evalBackend(b === "meta" ? "meta-spark" : b === "baseten" ? "baseten-spark-open" : "mock", makeIntent(cfg, b as any), cmds));
 const adv = adversarial();
+const stress = targetStress();
 const det = await determinism();
 // Real speech: every data/eval/audio/<id>.wav goes through Muse Voice Transcribe; intent is then scored on what was HEARD.
-const clip = (id: string) => `data/eval/audio/${id}.wav`;
+const clip = (id: string) => `data/eval/${HELD ? "heldout-audio" : "audio"}/${id}.wav`;
 const spoken = cmds.filter(c => existsSync(clip(c.id)));
 let transcription: any = "n/a (no recordings: run the recorder, see README)";
 const e2e: any[] = [];
@@ -149,23 +214,26 @@ if (spoken.length && process.env.MODEL_API_KEY) {
   transcription = { clips: spoken.length, wordErrorRate: pct(edits, refWords), clipsWithAnError: mis.length, sttLatencyMs: { p50: Math.round(quantile(ms, 0.5) ?? 0), p95: Math.round(quantile(ms, 0.95) ?? 0) }, errors: mis };
   for (const b of want) e2e.push(await evalBackend(b === "meta" ? "meta-spark" : b === "baseten" ? "baseten-spark-open" : "mock", makeIntent(cfg, b as any), heard));
 }
-const metrics = { commands: cmds.length, transcription, endToEndFromSpeech: e2e, backends, adversarialV2: adv, determinism: det };
-const suffix = `${process.env.EVAL_FULL_KNOWLEDGE === "1" ? ".full" : ""}${process.env.EVAL_SCOPE === "near" ? ".near" : ""}`;
+const metrics = { commands: cmds.length, transcription, endToEndFromSpeech: e2e, backends, adversarialV2: adv, wrongTargetStress: stress, determinism: det };
+const suffix = `${HELD ? ".heldout" : ""}${process.env.EVAL_FULL_KNOWLEDGE === "1" ? ".full" : ""}${process.env.EVAL_SCOPE === "near" ? ".near" : ""}`;
 writeFileSync(`metrics${suffix}.json`, JSON.stringify(metrics, null, 2));
 
 const row = (f: (b: any) => string) => backends.map(f).join(" | ");
-const md = `# MARLOW metrics
+const md = `# MARLOW metrics${HELD ? " (HELD-OUT set)" : ""}
 
-Generated by \`npx tsx tools/eval.ts\` on ${new Date().toISOString().slice(0, 10)}. ${cmds.length} commands in data/eval/commands.jsonl.
+${HELD ? "> **Held-out:** these commands were written once and frozen before this run. No prompt, parser, keyword or rule was tuned on them. Report them as-is.\n\n" : ""}Generated by \`npx tsx tools/eval.ts\` on ${new Date().toISOString().slice(0, 10)}. ${cmds.length} commands in ${HELD ? "data/eval/heldout.jsonl" : "data/eval/commands.jsonl"}.
 
 | Metric | ${backends.map(b => b.name).join(" | ")} |
 |---|${backends.map(() => "---").join("|")}|
 | Intent accuracy (correct transcript, target ≥ 90%) | ${row(b => ("skipped" in b ? `SKIP: ${b.skipped}` : `${b.intentAccuracy}%`))} |
 | Clarification rate | ${row(b => ("skipped" in b ? "—" : `${b.clarificationRate}%`))} |
 | Intended-invalid orders that executed (engine-illegal actions are always 0, see adversarial check) | ${row(b => ("skipped" in b ? "—" : String(b.invalidAccepted)))} |
+| Wrong-target actions executed (must be 0) | ${row(b => ("skipped" in b ? "—" : String(b.wrongTarget)))} |
 | Latency p50 / p95, release → result (ms, adapter + pipeline) | ${row(b => ("skipped" in b ? "—" : `${b.latencyMs.p50} / ${b.latencyMs.p95}`))} |
 
-${typeof transcription === "string" ? `Transcription error rate: ${transcription}.` : `**Transcription (Muse Voice Transcribe, ${transcription.clips} real recordings):** word error rate ${transcription.wordErrorRate}%, ${transcription.clipsWithAnError} clips with at least one error, STT latency p50 / p95 ${transcription.sttLatencyMs.p50} / ${transcription.sttLatencyMs.p95} ms.\n\nEnd-to-end (speech → STT → intent → V1/V2): ${e2e.map((b: any) => "skipped" in b ? `${b.name} SKIP` : `${b.name} ${b.intentAccuracy}% (${b.invalidAccepted} intended-invalid order executed)`).join(" · ")}.\n${transcription.errors.map((x: string) => `- ${x}`).join("\n")}`}
+${typeof transcription === "string" ? `Transcription error rate: ${transcription}.` : `**Transcription (Muse Voice Transcribe, ${transcription.clips} real recordings):** word error rate ${transcription.wordErrorRate}%, ${transcription.clipsWithAnError} clips with at least one error, STT latency p50 / p95 ${transcription.sttLatencyMs.p50} / ${transcription.sttLatencyMs.p95} ms.\n\nEnd-to-end (speech → STT → intent → V1/V2): ${e2e.map((b: any) => "skipped" in b ? `${b.name} SKIP` : `${b.name} ${b.intentAccuracy}% (${b.invalidAccepted} intended-invalid executed, ${b.wrongTarget} wrong-target)`).join(" · ")}.\n${transcription.errors.map((x: string) => `- ${x}`).join("\n")}`}
+
+**Wrong-target stress (matched-phrase check):** ${stress.sent} model replies (3 verbs × every phrase × every possible target id × 5 rooms, partial and full knowledge); ${stress.executed} executed, **${stress.wrongTargetExecuted} executed against a target the phrase does not name** and **${stress.quoteNotInOrderExecuted} with a quote that is not in the order** (both must be 0).
 
 **Adversarial V2 check:** ${adv.sent} hallucinated/illegal model replies across 5 rooms; ${adv.executed} passed V2 as legal actions; **${adv.executedIllegal} illegal actions reached the engine** (must be 0).
 
@@ -176,4 +244,4 @@ ${backends.filter((b: any) => b.failures?.length).map((b: any) => `\n### ${b.nam
 `;
 writeFileSync(`metrics${suffix}.md`, md);
 console.log(md);
-process.exit(adv.executedIllegal || det.pct !== 100 || backends.some((b: any) => b.invalidAccepted) ? 1 : 0);
+process.exit(adv.executedIllegal || stress.wrongTargetExecuted || stress.quoteNotInOrderExecuted || det.pct !== 100 || backends.some((b: any) => b.invalidAccepted) ? 1 : 0);

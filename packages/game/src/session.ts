@@ -104,9 +104,10 @@ export class Session {
 
     // Clarification follow-up: narrow to the named candidate, then re-ask the intent adapter.
     let request = { transcript, knowledge: knowledgeList(s, this.cfg.knowledgeScope) };
+    let pendingScope: string[] | undefined;
     if (this.pending) {
       const pick = resolveCandidate(transcript, this.pending.candidates, s);
-      if (pick) request = { transcript: this.pending.transcript, knowledge: knowledgeList(s).filter(e => e.id === pick) };
+      if (pick) { request = { transcript: this.pending.transcript, knowledge: knowledgeList(s).filter(e => e.id === pick) }; pendingScope = [pick]; }
       else this.pending = null;
     }
 
@@ -121,7 +122,7 @@ export class Session {
       }
       if (res === null) return null; // superseded
       reply = res;
-      verdict = verify(this.state, reply);
+      verdict = verify(this.state, reply, request.transcript, { scope: pendingScope });
       if (!(verdict.kind === "sayagain" && verdict.why === "schema")) break; // V1 retry once
     }
     const intentMs = Math.round(this.now() - tIntent);

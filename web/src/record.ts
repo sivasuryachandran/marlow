@@ -1,4 +1,8 @@
-import raw from "../../data/eval/commands.jsonl?raw";
+import dev from "../../data/eval/commands.jsonl?raw";
+import heldout from "../../data/eval/heldout.jsonl?raw";
+
+const SET = new URLSearchParams(location.search).get("set") === "heldout" ? "heldout" : "dev";
+const raw = SET === "heldout" ? heldout : dev;
 import { toWav16k } from "./stt";
 
 const cmds = raw.trim().split("\n").map(l => JSON.parse(l) as { id: string; saidText: string });
@@ -29,7 +33,7 @@ async function toggle() {
   try {
     const wav = await toWav16k(new Blob(chunks, { type: r.mimeType }));
     const id = cmds[cur].id;
-    const res = await fetch(`/api/eval-audio/${id}`, { method: "POST", headers: { "Content-Type": "audio/wav" }, body: wav });
+    const res = await fetch(`/api/eval-audio/${id}?set=${SET}`, { method: "POST", headers: { "Content-Type": "audio/wav" }, body: wav });
     if (!res.ok) throw new Error(String(res.status));
     done.add(id); $("msg").textContent = `Saved ${id} (${Math.round(wav.size / 1024)} KB).`; cur++;
   } catch (e) { $("msg").textContent = `Save failed (${e}). Is npm run server running? Try again.`; }
@@ -42,5 +46,5 @@ document.addEventListener("keydown", e => {
   else if (e.key.toLowerCase() === "s" && !recorder) { cur = Math.min(cmds.length, cur + 1); paint(); }
 });
 $("rec").addEventListener("click", () => void toggle());
-fetch("/api/eval-audio").then(r => r.json()).then((ids: string[]) => { ids.forEach(i => done.add(i)); cur = Math.max(0, cmds.findIndex(c => !done.has(c.id))); if (cur < 0) cur = cmds.length; paint(); }).catch(() => { $("msg").textContent = "Server not reachable: start npm run server."; paint(); });
+fetch(`/api/eval-audio?set=${SET}`).then(r => r.json()).then((ids: string[]) => { ids.forEach(i => done.add(i)); cur = Math.max(0, cmds.findIndex(c => !done.has(c.id))); if (cur < 0) cur = cmds.length; paint(); }).catch(() => { $("msg").textContent = "Server not reachable: start npm run server."; paint(); });
 paint();

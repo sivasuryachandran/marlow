@@ -18,11 +18,12 @@ export function strictSchema(req: IntentRequest) {
   const targets = [...ids, ...req.knowledge.filter(k => k.type === "door").map(k => `door:${k.id}`), "unknown"];
   const nullable = (e: unknown[]) => ({ type: ["string", "null"], enum: [...e, null] });
   return {
-    type: "object", additionalProperties: false, required: ["action", "target", "stance", "clarify"],
+    type: "object", additionalProperties: false, required: ["action", "target", "stance", "matched", "clarify"],
     properties: {
       action: nullable(["move", "peek", "listen", "wait", "hide", "take", "exit"]),
       target: nullable(targets),
       stance: nullable(["normal", "quiet"]),
+      matched: { type: ["string", "null"] },
       clarify: { anyOf: [{ type: "null" }, { type: "object", additionalProperties: false, required: ["candidates"],
         properties: { candidates: { type: "array", minItems: 2, items: { type: "string", enum: ids } } } }] },
     },

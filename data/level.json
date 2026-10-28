@@ -8,7 +8,11 @@
       ],
       "reverb": "marble",
       "spokenName": "the lobby",
-      "footsteps": "marble"
+      "footsteps": "marble",
+      "aliases": [
+        "entrance",
+        "foyer"
+      ]
     },
     {
       "id": "hall",
@@ -18,7 +22,11 @@
       ],
       "reverb": "marble",
       "spokenName": "the hall",
-      "footsteps": "marble"
+      "footsteps": "marble",
+      "aliases": [
+        "hallway",
+        "corridor"
+      ]
     },
     {
       "id": "gallery",
@@ -28,7 +36,11 @@
       ],
       "reverb": "marble",
       "spokenName": "the gallery",
-      "footsteps": "marble"
+      "footsteps": "marble",
+      "aliases": [
+        "exhibit room",
+        "exhibition"
+      ]
     },
     {
       "id": "office",
@@ -38,7 +50,10 @@
       ],
       "reverb": "dry",
       "spokenName": "the office",
-      "footsteps": "carpet"
+      "footsteps": "carpet",
+      "aliases": [
+        "study"
+      ]
     },
     {
       "id": "stairwell",
@@ -48,7 +63,11 @@
       ],
       "reverb": "metal",
       "spokenName": "the stairwell",
-      "footsteps": "metal"
+      "footsteps": "metal",
+      "aliases": [
+        "stairs",
+        "stair"
+      ]
     },
     {
       "id": "upstairs",
@@ -59,7 +78,8 @@
       "reverb": "metal",
       "spokenName": "upstairs",
       "footsteps": "metal",
-      "offstage": true
+      "offstage": true,
+      "aliases": []
     }
   ],
   "doors": [
@@ -75,7 +95,12 @@
       },
       "state": "closed",
       "kind": "door",
-      "spokenName": "the lobby door"
+      "spokenName": "the lobby door",
+      "aliases": [
+        "front door",
+        "entrance door",
+        "main door"
+      ]
     },
     {
       "id": "arch_hall_gallery",
@@ -89,7 +114,10 @@
       },
       "state": "open",
       "kind": "arch",
-      "spokenName": "the gallery arch"
+      "spokenName": "the gallery arch",
+      "aliases": [
+        "archway"
+      ]
     },
     {
       "id": "door_hall_office",
@@ -103,7 +131,10 @@
       },
       "state": "closed",
       "kind": "door",
-      "spokenName": "the office door"
+      "spokenName": "the office door",
+      "aliases": [
+        "study door"
+      ]
     },
     {
       "id": "door_hall_stairwell",
@@ -117,7 +148,11 @@
       },
       "state": "closed",
       "kind": "door",
-      "spokenName": "the stairwell door"
+      "spokenName": "the stairwell door",
+      "aliases": [
+        "stair door",
+        "stairs door"
+      ]
     },
     {
       "id": "stairs_up",
@@ -131,7 +166,8 @@
       },
       "state": "open",
       "kind": "stairs",
-      "spokenName": "the stairs"
+      "spokenName": "the stairs",
+      "aliases": []
     }
   ],
   "props": [
@@ -142,7 +178,11 @@
       "tags": [
         "hide"
       ],
-      "spokenName": "the display case"
+      "spokenName": "the display case",
+      "aliases": [
+        "glass case",
+        "display"
+      ]
     },
     {
       "id": "desk_1",
@@ -151,14 +191,22 @@
       "tags": [
         "hide"
       ],
-      "spokenName": "the desk"
+      "spokenName": "the desk",
+      "aliases": [
+        "writing desk"
+      ]
     }
   ],
   "items": [
     {
       "id": "ledger",
       "room": "office",
-      "spokenName": "the ledger"
+      "spokenName": "the ledger",
+      "aliases": [
+        "book",
+        "logbook",
+        "account book"
+      ]
     }
   ],
   "guard": {

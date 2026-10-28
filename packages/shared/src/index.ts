@@ -9,20 +9,20 @@ export type Dist = z.infer<typeof Dist>;
 export type Dir = Side | "here";
 
 export const Room = z.object({
-  id: z.string(), pos: z.tuple([z.number(), z.number()]),
+  id: z.string(), aliases: z.array(z.string()).default([]), pos: z.tuple([z.number(), z.number()]),
   reverb: z.string(), spokenName: z.string(), footsteps: z.string().default("carpet"),
   /** Off-stage rooms exist for the guard only: Marlow can never learn of or enter them. */
   offstage: z.boolean().default(false),
 });
 export const Door = z.object({
-  id: z.string(), between: z.tuple([z.string(), z.string()]),
+  id: z.string(), aliases: z.array(z.string()).default([]), between: z.tuple([z.string(), z.string()]),
   side: z.record(Side), state: z.enum(["open", "closed", "locked"]),
   kind: z.enum(["door", "arch", "stairs"]).default("door"), spokenName: z.string().default("the door"),
 });
 export const Prop = z.object({
-  id: z.string(), room: z.string(), side: Side, tags: z.array(z.string()), spokenName: z.string(),
+  id: z.string(), aliases: z.array(z.string()).default([]), room: z.string(), side: Side, tags: z.array(z.string()), spokenName: z.string(),
 });
-export const Item = z.object({ id: z.string(), room: z.string().nullable(), spokenName: z.string() });
+export const Item = z.object({ id: z.string(), aliases: z.array(z.string()).default([]), room: z.string().nullable(), spokenName: z.string() });
 export const Guard = z.object({ id: z.string(), route: z.array(z.string()).min(2), step: z.number().int().min(0) });
 export const Marlow = z.object({
   room: z.string(), facing: Compass, hidden: z.boolean(),
@@ -66,6 +66,8 @@ export const Action = z.discriminatedUnion("action", [
   z.object({ action: z.literal("exit") }),
 ]);
 export type Action = z.infer<typeof Action>;
+/** The model's reply wraps an engine Action; `matched` is the exact words of the order that name the target (move/peek/take). */
+export const Matched = z.object({ matched: z.string().optional() });
 export const Clarify = z.object({ clarify: z.object({ candidates: z.array(z.string()).min(2) }) });
 /** V1: intent reply is exactly one of these shapes. */
 export const IntentReply = z.union([Action, Clarify]);

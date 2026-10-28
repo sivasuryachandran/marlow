@@ -88,17 +88,52 @@ describe("V1 / V2", () => {
   });
   it("V2 blocks hallucinated, unseen and illegal targets; none is executable", () => {
     const s = mk();
-    expect(verify(s, { action: "peek", target: "door_vault" })).toMatchObject({ kind: "refuse", reason: "unknown_target" });
-    expect(verify(s, { action: "peek", target: "door_hall_office" })).toMatchObject({ kind: "refuse", reason: "not_known" });
-    expect(verify(s, { action: "take", target: "ledger" })).toMatchObject({ kind: "refuse", reason: "not_known" });
-    expect(verify(s, { action: "move", target: "office" })).toMatchObject({ kind: "refuse" });
-    expect(verify(s, { action: "exit" })).toMatchObject({ kind: "refuse", reason: "not_ready_to_exit" });
-    expect(verify(s, { clarify: { candidates: ["door_lobby_hall", "door_secret"] } })).toMatchObject({ kind: "sayagain" });
-    expect(verify(s, { nonsense: 1 })).toMatchObject({ kind: "sayagain" });
+    expect(verify(s, { action: "peek", target: "door_vault", matched: "vault door" }, "peek the vault door")).toMatchObject({ kind: "refuse", reason: "unknown_target" });
+    expect(verify(s, { action: "peek", target: "door_hall_office", matched: "office door" }, "peek the office door")).toMatchObject({ kind: "refuse", reason: "not_known" });
+    expect(verify(s, { action: "take", target: "ledger", matched: "ledger" }, "take the ledger")).toMatchObject({ kind: "refuse", reason: "not_known" });
+    expect(verify(s, { action: "move", target: "office", matched: "office" }, "go to the office")).toMatchObject({ kind: "refuse" });
+    expect(verify(s, { action: "exit" }, "exit")).toMatchObject({ kind: "refuse", reason: "not_ready_to_exit" });
+    expect(verify(s, { clarify: { candidates: ["door_lobby_hall", "door_secret"] } }, "x")).toMatchObject({ kind: "sayagain" });
+    expect(verify(s, { nonsense: 1 }, "x")).toMatchObject({ kind: "sayagain" });
   });
   it("a move may name a door; it resolves to the room beyond", () => {
     const s = mk(1, inHall);
-    expect(verify(s, { action: "move", target: "door:door_hall_office" })).toMatchObject({ kind: "action", action: { action: "move", target: "office" } });
+    expect(verify(s, { action: "move", target: "door:door_hall_office", matched: "office door" }, "go through the office door")).toMatchObject({ kind: "action", action: { action: "move", target: "office" } });
+  });
+});
+
+describe("matched-phrase check (wrong-target actions must be 0)", () => {
+  const inOffice = () => mk(1, s => { s.marlow.room = "office"; s.marlow.facing = "east"; revealRoom(s, "office", true); });
+  it("'peek the vault door' never becomes a real door, even when the model claims it did", () => {
+    const s = mk();
+    const r = verify(s, { action: "peek", target: "door_lobby_hall", matched: "vault door" }, "peek the vault door");
+    expect(r).toMatchObject({ kind: "refuse", reason: "unknown_target" });
+    expect(verify(s, { action: "peek", target: "door_lobby_hall", matched: "wall door" }, "peek the wall door")).toMatchObject({ kind: "refuse" });
+  });
+  it("a quote that is not in the order is a broken contract: say again, never executed", () => {
+    const s = mk(1, inHall);
+    expect(verify(s, { action: "peek", target: "door_hall_office", matched: "office door" }, "peek the left door")).toMatchObject({ kind: "sayagain" });
+    expect(verify(s, { action: "peek", target: "door_hall_office" }, "peek the office door")).toMatchObject({ kind: "sayagain" });
+  });
+  it("the quote must name THIS target: names, aliases, and the room beyond a door all count", () => {
+    const s = mk(1, inHall);
+    expect(verify(s, { action: "peek", target: "door_hall_office", matched: "office door" }, "peek the office door").kind).toBe("action");
+    expect(verify(s, { action: "peek", target: "door_hall_office", matched: "study door" }, "peek the study door").kind).toBe("action"); // alias
+    expect(verify(s, { action: "peek", target: "door_hall_stairwell", matched: "stairs" }, "peek the stairs").kind).toBe("action");   // alias, plural
+    expect(verify(s, { action: "peek", target: "door_hall_stairwell", matched: "office door" }, "peek the office door")).toMatchObject({ kind: "refuse" }); // wrong door
+    expect(inOffice() && verify(inOffice(), { action: "take", target: "ledger", matched: "book" }, "grab the book").kind).toBe("action"); // alias
+  });
+  it("generic references: unique fits pass, several fits ask, a side must agree with the target's side", () => {
+    expect(verify(mk(), { action: "peek", target: "door_lobby_hall", matched: "door" }, "peek the door").kind).toBe("action"); // one door in the lobby
+    const hall = mk(1, inHall);
+    expect(verify(hall, { action: "peek", target: "arch_hall_gallery", matched: "door" }, "peek the door")).toMatchObject({ kind: "clarify" });
+    expect(verify(hall, { action: "peek", target: "arch_hall_gallery", matched: "left door" }, "peek the left door").kind).toBe("action");
+    expect(verify(hall, { action: "peek", target: "door_hall_office", matched: "left door" }, "peek the left door")).toMatchObject({ kind: "refuse" }); // that door is on the right
+    expect(verify(hall, { action: "peek", target: "door_hall_office", matched: "left office door" }, "peek the left office door")).toMatchObject({ kind: "refuse" });
+  });
+  it("a clarify answer scopes the next check to the chosen candidate", () => {
+    const hall = mk(1, inHall);
+    expect(verify(hall, { action: "peek", target: "arch_hall_gallery", matched: "door" }, "peek the door", { scope: ["arch_hall_gallery"] }).kind).toBe("action");
   });
 });
 

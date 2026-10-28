@@ -6,3 +6,4 @@ export * from "./narrate";
 export * from "./director";
 export * from "./memory";
 export * from "./session";
+export * from "./match";

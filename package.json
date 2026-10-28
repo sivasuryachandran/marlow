@@ -18,7 +18,8 @@
     "render-lines": "tsx tools/render-lines.ts",
     "author-mission": "tsx tools/author-mission.ts --validate",
     "casefile": "tsx tools/casefile.ts",
-    "typecheck": "tsc --noEmit -p ."
+    "typecheck": "tsc --noEmit -p .",
+    "eval:heldout": "EVAL_SET=heldout node --env-file=.env --import tsx tools/eval.ts --backends meta,baseten"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

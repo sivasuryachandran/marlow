@@ -1,12 +1,15 @@
 import { validate } from "@marlow/engine";
 import type { Action, RefusalReason, WorldState } from "@marlow/shared";
 import { v1, type IntentRequest } from "./intent";
+import { checkMatch } from "./match";
 
 export type Verified =
   | { kind: "action"; action: Action }
   | { kind: "clarify"; candidates: string[]; ctype: "door" | "room" | "other" }
   | { kind: "refuse"; reason: RefusalReason; target?: string }
   | { kind: "sayagain"; why: "schema" | "unknown" | "bad_clarify" };
+
+export interface VerifyOpts { scope?: string[] }
 
 const entityIds = (s: WorldState) => new Set([
   ...s.knowledge.rooms, ...s.knowledge.doors, ...s.knowledge.props, ...s.knowledge.items,
@@ -16,7 +19,7 @@ const entityIds = (s: WorldState) => new Set([
  * V1 (schema) is the caller's retry loop; this applies V1 shape check + V2:
  * target must be in Marlow's knowledge, action legal now, clarify candidates real and known.
  */
-export function verify(s: WorldState, reply: unknown): Verified {
+export function verify(s: WorldState, reply: unknown, transcript: string, opts: VerifyOpts = {}): Verified {
   if (reply && typeof reply === "object" && (reply as any).__unknown) return { kind: "sayagain", why: "unknown" };
   const shaped = v1(normalizeMove(s, reply));
   if (!shaped.ok) return { kind: "sayagain", why: "schema" };
@@ -34,8 +37,22 @@ export function verify(s: WorldState, reply: unknown): Verified {
     const exists = [...s.rooms, ...s.doors, ...s.props, ...s.items].some(x => x.id === r.target);
     return { kind: "refuse", reason: exists ? "not_known" : "unknown_target", target: r.target };
   }
+  // V2b: the quoted words must be in the order and must actually name this target (never "vault door" -> a real door).
+  if ("target" in r && (r.action === "move" || r.action === "peek" || r.action === "take")) {
+    const m = checkMatch(s, transcript, r, opts.scope);
+    if (!m.ok) {
+      if (m.why === "no_phrase" || m.why === "not_in_transcript") return { kind: "sayagain", why: "schema" }; // broken contract: retry once
+      if (m.why === "ambiguous") {
+        const c = m.candidates.slice(0, 2);
+        const isDoor = c.every(id => s.doors.some(d => d.id === id)), isRoom = c.every(id => s.rooms.some(x => x.id === id));
+        return { kind: "clarify", candidates: c, ctype: isDoor ? "door" : isRoom ? "room" : "other" };
+      }
+      return { kind: "refuse", reason: "unknown_target", target: r.target };
+    }
+  }
   const v = validate(s, r);
-  return v.ok ? { kind: "action", action: r } : { kind: "refuse", reason: v.reason, target: v.target };
+  const { matched: _m, ...engineAction } = r as Action & { matched?: string };
+  return v.ok ? { kind: "action", action: engineAction as Action } : { kind: "refuse", reason: v.reason, target: v.target };
 }
 
 /** A move expressed as a door id (`door:<id>`) means the room on the other side. */
