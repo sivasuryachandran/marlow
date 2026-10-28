@@ -83,7 +83,9 @@ export function cuesFor(prev: WorldState, next: WorldState, events: GameEvent[])
     switch (e.type) {
       case "moved": cues.push({ id: `sfx.footsteps.${material(e.to)}`, kind: "sfx", priority: 1, dir: "here", dist: "near", reverb, caption: "Marlow's footsteps" }); break;
       case "door_noise": cues.push({ id: "sfx.door.creak", kind: "sfx", priority: 2, dir: "here", dist: "near", reverb, caption: "A door creaks" }); break;
-      case "guard_heard": guardCue(e); break;
+      case "guard_heard":
+        if (e.via === "footsteps" && events.some(x => x.type === "guard_heard" && x.via === "listen")) break; // one guard cue per turn
+        guardCue(e); break;
       case "sound_heard": cues.push({ id: "sfx.phone.ring", kind: "world", priority: 3, dir: e.dir, dist: e.dist, reverb, caption: `Phone ringing, ${spokenDir(e.dir)}, ${e.dist}` }); break;
       case "spotted": cues.push({ id: "sfx.stinger.spotted", kind: "sfx", priority: 6, reverb, caption: "Alarm stinger: Marlow has been spotted" }); break;
     }

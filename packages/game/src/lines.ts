@@ -32,7 +32,7 @@ export function fill(tpl: string, slots: Record<string, string>): string {
     return DIR_WORDS[raw] ?? DIST_WORDS[raw] ?? raw;
   });
 }
-const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+const cap = (s: string) => s.replace(/(^|[.!?]\s+)([a-z])/g, (_, a, b) => a + b.toUpperCase());
 
 export function renderLine(bank: LineBank, ref: LineRef, opts: { seed: number; turnId: number; curt: boolean }): SpokenLine | null {
   const def = bank[ref.id];

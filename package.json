@@ -2,13 +2,23 @@
   "name": "marlow",
   "private": true,
   "type": "module",
-  "workspaces": ["packages/*", "server", "web"],
+  "workspaces": [
+    "packages/*",
+    "server",
+    "web"
+  ],
   "scripts": {
     "test": "vitest run",
     "dev": "vite web",
     "build": "vite build web",
     "check-access": "tsx tools/check-access.ts",
-    "replay": "tsx tools/replay.ts"
+    "replay": "tsx tools/replay.ts",
+    "server": "tsx server/src/index.ts",
+    "eval": "tsx tools/eval.ts",
+    "render-lines": "tsx tools/render-lines.ts",
+    "author-mission": "tsx tools/author-mission.ts --validate",
+    "casefile": "tsx tools/casefile.ts",
+    "typecheck": "tsc --noEmit -p ."
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

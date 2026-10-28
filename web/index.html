@@ -1,12 +1,63 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>MARLOW</title>
-<style>body{font:16px/1.5 system-ui;max-width:42rem;margin:2rem auto;padding:0 1rem;background:#111;color:#eee}
-input{width:100%;padding:.6rem;font:inherit;background:#222;color:#eee;border:1px solid #888}
-#log p{margin:.3rem 0}#debug{white-space:pre;font:12px monospace;background:#000;padding:.5rem;margin-top:1rem}</style></head>
-<body><h1>MARLOW</h1>
-<div id="log" role="log" aria-live="polite"></div>
-<form id="f"><label for="cmd">Order for Marlow (e.g. "peek lobby door", "go to hall", "listen", "wait", "hide", "take ledger", "exit", "go back")</label>
-<input id="cmd" autocomplete="off" autofocus></form>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MARLOW — a heist you play by ear</title>
+<style>
+:root{--bg:#0b0b10;--fg:#eceef2;--dim:#9aa0ae;--amber:#e8a33d;--line:#3a3d4a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:18px/1.55 Georgia,serif}
+main{max-width:46rem;margin:0 auto;padding:1.25rem}
+h1{letter-spacing:.35em;color:var(--amber);margin:.2em 0}.tag{color:var(--dim);margin:0 0 1rem}
+button,input,select,summary{font:inherit;color:var(--fg)}
+button{background:#1a1c26;border:2px solid var(--line);border-radius:8px;padding:.7rem 1.1rem;cursor:pointer}
+button:hover{border-color:var(--amber)}:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+#ptt{width:100%;font-size:1.3rem;padding:1.4rem;margin:.8rem 0}#ptt[aria-pressed="true"]{background:#5a1f1f;border-color:#f66}
+#start{font-size:1.2rem;padding:1rem 1.6rem}
+input[type=text]{width:100%;background:#14161e;border:2px solid var(--line);border-radius:8px;padding:.7rem}
+#status{color:var(--dim);min-height:1.5em}
+#log{border-top:1px solid var(--line);margin-top:1rem;padding-top:.5rem;max-height:46vh;overflow:auto}
+#log p{margin:.35rem 0}.you{color:var(--dim)}.marlow{color:#fff}.client{color:#c9b6ff}.cue{color:var(--amber);font-style:italic}.sys{color:var(--dim)}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+details{margin:1rem 0;border:1px solid var(--line);border-radius:8px;padding:.5rem .9rem}summary{cursor:pointer}
+label{display:block;margin:.5rem 0}input[type=range]{width:100%}
+#end{border:2px solid var(--amber);border-radius:8px;padding:1rem;margin-top:1rem}
+#debug{font:12px/1.3 ui-monospace,monospace;background:#000;border:1px solid var(--line);padding:.6rem;margin-top:1rem;white-space:pre-wrap}
+#map{background:#05050a;border:1px solid var(--line);width:100%;max-width:420px;display:block}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+<h1>MARLOW</h1>
+<p class="tag">You're the voice in her earpiece. She's the only one who can see. Headphones recommended.</p>
+<button id="start" type="button">Start the job</button>
+<div id="game" hidden>
+  <p id="status" role="status"></p>
+  <button id="ptt" type="button" aria-pressed="false" aria-keyshortcuts="Space">Hold to talk (or hold Space)</button>
+  <form id="f">
+    <label for="cmd">Or type an order, for example "peek the left door quietly", "go to the hall", "listen", "wait"</label>
+    <input id="cmd" type="text" autocomplete="off" enterkeyhint="send">
+  </form>
+  <div id="partial" class="sys" aria-hidden="true"></div>
+  <div id="log" role="log" aria-live="polite" aria-label="Transcript of everything you hear"></div>
+  <div id="end" hidden>
+    <p id="endText"></p>
+    <button id="again" type="button">Run it again (Marlow remembers)</button>
+    <button id="casefile" type="button">Make the Case File</button>
+    <p id="casefileOut" role="status"></p>
+  </div>
+</div>
+<details><summary>Sound and display settings</summary>
+  <label>Voice <input id="vVoice" type="range" min="0" max="1" step="0.05" value="1"></label>
+  <label>Music <input id="vMusic" type="range" min="0" max="1" step="0.05" value="0.5"></label>
+  <label>Effects <input id="vSfx" type="range" min="0" max="1" step="0.05" value="0.9"></label>
+  <label><input id="mono" type="checkbox"> Mono audio</label>
+  <label><input id="captions" type="checkbox" checked> Show captions on screen (the transcript stays available to screen readers)</label>
+  <button id="forget" type="button">Forget Marlow's memory of past runs</button>
+</details>
 <pre id="debug" hidden></pre>
-<script type="module" src="./src/main.ts"></script></body></html>
+<svg id="map" viewBox="0 0 420 300" role="img" aria-label="Engine map (debug)" hidden></svg>
+</main>
+<script type="module" src="./src/main.ts"></script>
+</body>
+</html>

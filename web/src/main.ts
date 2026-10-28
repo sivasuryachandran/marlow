@@ -1,79 +1,186 @@
+import linesJson from "../../data/lines.json";
+import beatsJson from "../../data/beats.json";
 import level from "../../data/level.json";
-import { createInitialState, step, validate, locate, type StepResult } from "@marlow/engine";
-import type { Action, GameEvent, WorldState } from "@marlow/shared";
+import { Session, loadBank, renderLine, type Beat, type SpokenLine, type TurnOutput } from "@marlow/game";
+import type { GameEvent } from "@marlow/shared";
+import { AudioEngine, type AudioSettings } from "./audio";
+import { renderDebug } from "./debug";
+import { HttpIntent } from "./intent-client";
+import { loadPrefs, LocalStore, savePrefs } from "./storage";
+import { BrowserStt, ServerStt, type Stt } from "./stt";
 
 const q = new URLSearchParams(location.search);
-const seed = Number(q.get("seed") ?? Date.now() % 100000);
-let state: WorldState = createInitialState(level, seed);
+const debug = q.get("debug") === "1";
+const fixedSeed = q.has("seed") ? Number(q.get("seed")) : null;
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
-const say = (t: string) => { const p = document.createElement("p"); p.textContent = t; $("log").append(p); };
 
-/** M1 stand-in for the local parser; M2 replaces this with the real L1 pipeline. */
-function parse(text: string, s: WorldState): Action | string {
-  const t = text.toLowerCase().trim();
-  if (["wait", "stop"].includes(t)) return { action: "wait" };
-  if (t === "listen") return { action: "listen" };
-  if (t === "hide") return { action: "hide" };
-  if (t === "exit") return { action: "exit" };
-  if (t === "go back") return s.marlow.prevRoom ? { action: "move", target: s.marlow.prevRoom } : "Nowhere to go back to.";
-  const quiet = /quiet/.test(t) ? ("quiet" as const) : undefined;
-  const room = s.rooms.find(r => t.includes(r.id));
-  if (/^(go|move)/.test(t) && room) return { action: "move", target: room.id, stance: quiet };
-  if (t.startsWith("peek")) {
-    const door = s.doors.find(d => d.between.some(b => t.includes(b)) && d.between.includes(s.marlow.room));
-    return door ? { action: "peek", target: door.id } : "Peek which door?";
+const bank = loadBank(linesJson);
+const audio = new AudioEngine();
+const store = new LocalStore();
+const intent = new HttpIntent();
+let session: Session;
+let seed = fixedSeed ?? Math.floor(Math.random() * 1e6);
+let stt: Stt | null = null;
+let recording = false;
+let lastEvents: GameEvent[] = [];
+const latencies: number[] = [];
+
+// ---------- log (everything audible is also text) ----------
+function log(cls: string, text: string) {
+  const p = document.createElement("p"); p.className = cls; p.textContent = text;
+  const box = $("log"); box.append(p); box.scrollTop = box.scrollHeight;
+}
+const status = (t: string) => { $("status").textContent = t; };
+function showTurn(out: TurnOutput) {
+  for (const c of out.cues) if (c.caption) log("cue", `[${c.caption}]`);
+  for (const l of out.lines) log(l.speaker === "client" ? "client" : "marlow", `${l.speaker === "client" ? "Client" : "Marlow"}: ${l.text}`);
+  if (out.kind === "timeout") log("sys", "[Static burst: signal's bad]");
+}
+
+// ---------- settings ----------
+const prefs = loadPrefs<AudioSettings & { captions: boolean }>("marlow.prefs.v1", { voice: 1, music: 0.5, sfx: 0.9, mono: false, captions: true });
+function bindSettings() {
+  const map: [string, keyof AudioSettings][] = [["vVoice", "voice"], ["vMusic", "music"], ["vSfx", "sfx"]];
+  for (const [id, key] of map) {
+    const el = $<HTMLInputElement>(id); el.value = String(prefs[key]);
+    el.addEventListener("input", () => { prefs[key] = Number(el.value) as never; audio.applySettings({ [key]: prefs[key] }); savePrefs("marlow.prefs.v1", prefs); });
   }
-  if (t.startsWith("take")) { const it = s.items.find(i => t.includes(i.id)); return it ? { action: "take", target: it.id } : "Take what?"; }
-  return "Say again, boss?";
+  const mono = $<HTMLInputElement>("mono"); mono.checked = prefs.mono;
+  mono.addEventListener("change", () => { prefs.mono = mono.checked; audio.applySettings({ mono: mono.checked }); savePrefs("marlow.prefs.v1", prefs); });
+  const cap = $<HTMLInputElement>("captions"); cap.checked = prefs.captions;
+  const applyCaps = () => { $("log").classList.toggle("sr-only", !cap.checked); $("partial").hidden = !cap.checked; };
+  cap.addEventListener("change", () => { prefs.captions = cap.checked; applyCaps(); savePrefs("marlow.prefs.v1", prefs); });
+  applyCaps();
+  Object.assign(audio.settings, prefs);
+  $("forget").addEventListener("click", () => { store.reset(); status("Marlow has forgotten your past runs."); });
 }
 
-const name = (s: WorldState, id: string) =>
-  [...s.rooms, ...s.doors, ...s.props, ...s.items].find(x => x.id === id)?.spokenName ?? id;
-
-function narrate(s: WorldState, e: GameEvent): string | null {
-  if (!e.perceived) return null;
-  switch (e.type) {
-    case "moved": return `Moving to ${name(s, e.to)}.`;
-    case "door_noise": return "The door creaks.";
-    case "door_peeked": return `Through ${name(s, e.door)}: ${name(s, e.sees)}. ${e.guardSeen ? "A guard." : "No guard."}`;
-    case "guard_heard": return `Footsteps, ${e.dir}, ${e.dist}.`;
-    case "listen_quiet": return "Quiet.";
-    case "waited": return "Holding.";
-    case "hid": return `Hiding at ${name(s, e.prop)}.`;
-    case "item_taken": return `Got ${name(s, e.item)}.`;
-    case "warning": return "Guard's close, boss.";
-    case "sound_heard": return `${e.sound}, ${e.dir}, ${e.dist}.`;
-    case "spotted": return "He saw me!";
-    case "caught": return "Caught. Run over.";
-    case "won": return "Out clean. Run over.";
-    case "refused": return `Can't do that (${e.reason}).`;
-    default: return null;
-  }
+// ---------- session ----------
+function postLog(runId: string, row: Record<string, unknown>) {
+  fetch("/api/log", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ runId, row }) }).catch(() => {});
+}
+function newSession() {
+  const runId = `${seed}-${Date.now().toString(36)}`;
+  session = new Session({
+    level, bank, beats: beatsJson as Beat[], intent, seed, memory: store, runId,
+    timeoutMs: Number((q.get("timeout") ?? 4000)), onLog: row => postLog(runId, row),
+  });
+  $("log").replaceChildren(); $("end").hidden = true; $("casefileOut").textContent = "";
 }
 
-function render() {
-  const dbg = $("debug");
-  dbg.hidden = q.get("debug") !== "1";
-  if (dbg.hidden) return;
-  dbg.textContent = JSON.stringify({
-    turn: state.turn, alert: state.alert, trust: state.trust, status: state.status,
-    marlow: state.marlow, guard: { room: state.guard.route[state.guard.step], ...state.guard },
-    knowledge: state.knowledge, guardFromMarlow: locate(state, state.guard.route[state.guard.step]),
-  }, null, 1);
+function refresh() {
+  const dbg = debug ? { intentBackend: intent.usingFallback ? "mock (in-browser)" : intent.name, sttBackend: stt?.name ?? "typed", missingAssets: [...audio.missing], latencyMs: summarize() } : {};
+  if (debug) renderDebug(session, lastEvents, dbg);
+}
+function summarize() {
+  if (!latencies.length) return null;
+  const a = [...latencies].sort((x, y) => x - y);
+  return { n: a.length, p50: Math.round(a[Math.floor(a.length * 0.5)]), p95: Math.round(a[Math.min(a.length - 1, Math.floor(a.length * 0.95))]) };
 }
 
-$("f").addEventListener("submit", ev => {
-  ev.preventDefault();
-  const input = $<HTMLInputElement>("cmd");
-  const text = input.value; input.value = "";
-  if (!text) return;
-  say(`> ${text}`);
-  const a = parse(text, state);
-  if (typeof a === "string") { say(a); return; }
-  const r: StepResult = step(state, a);
-  for (const e of r.events) { const line = narrate(state, e); if (line) say(line); }
-  state = r.state;
-  render();
+async function begin() {
+  $("start").hidden = true; $("game").hidden = false;
+  await audio.unlock();
+  audio.applySettings(prefs);
+  await intent.init();
+  const h = await fetch("/api/health").then(r => r.json()).catch(() => null);
+  stt = h?.stt ? new ServerStt() : BrowserStt.available() ? new BrowserStt() : null;
+  if (!stt) $("ptt").textContent = "Voice input unavailable in this browser. Type your orders below.";
+  newSession();
+  const intro = session.start();
+  status("The client is on the line…");
+  showTurn(intro);
+  refresh();
+  await audio.playTurn(intro);
+  status(`Marlow is in position. Run ${session.runNumber}. ${stt ? "Hold the button or Space to talk." : "Type an order."}`);
+}
+
+async function handleTranscript(text: string) {
+  log("you", `You: ${text}`);
+  status("Marlow is working it out…");
+  audio.startWaiting(session.state.knowledge.guardLastHeard as never, session.state.rooms.find(r => r.id === session.state.marlow.room)!.reverb);
+  const t0 = performance.now();
+  const out = await session.submit(text);
+  audio.stopWaiting();
+  if (!out) return; // superseded by a newer turn: reply discarded
+  latencies.push(performance.now() - t0);
+  lastEvents = out.events;
+  showTurn(out);
+  if (out.kind === "timeout") audio.playStatic();
+  refresh();
+  await audio.playTurn(out);
+  if (out.state.status !== "playing") finish(out);
+  else status("Your move.");
+}
+
+function finish(out: TurnOutput) {
+  $("end").hidden = false;
+  $("endText").textContent = out.state.status === "won"
+    ? `Job done in ${out.state.turn} turns. Alert ${out.state.alert} of 3. Trust ${Math.round(out.state.trust)}.`
+    : `Marlow was caught after ${out.state.turn} turns. Trust ${Math.round(out.state.trust)}.`;
+  status("The run is over.");
+  $<HTMLButtonElement>("again").focus();
+}
+
+// ---------- push to talk ----------
+async function pttDown() {
+  if (recording || !stt || !session) return;
+  recording = true; $("ptt").setAttribute("aria-pressed", "true");
+  status("Listening…");
+  stt.start(t => { $("partial").textContent = t; });
+}
+async function pttUp() {
+  if (!recording || !stt) return;
+  recording = false; $("ptt").setAttribute("aria-pressed", "false");
+  const ackLine = renderLine(bank, { id: "system.ack", slots: {} }, { seed, turnId: session.currentTurn + 1, curt: false });
+  void audio.playAck(ackLine ?? undefined); // instant radio click + "Copy."
+  let text: string | null = null;
+  try { text = await stt.stop(); } catch { text = null; }
+  $("partial").textContent = "";
+  if (!text) { log("sys", "[No speech picked up. Try again, or type.]"); status("Didn't catch that."); return; }
+  void handleTranscript(text);
+}
+function wirePtt() {
+  const b = $("ptt");
+  b.addEventListener("pointerdown", e => { e.preventDefault(); void pttDown(); });
+  for (const ev of ["pointerup", "pointercancel", "pointerleave"]) b.addEventListener(ev, () => void pttUp());
+  b.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); void (recording ? pttUp() : pttDown()); } });
+  document.addEventListener("keydown", e => {
+    const t = e.target as HTMLElement;
+    if (e.code !== "Space" || t.tagName === "INPUT" || $("game").hidden) return;
+    e.preventDefault(); if (!e.repeat) void pttDown();
+  });
+  document.addEventListener("keyup", e => {
+    const t = e.target as HTMLElement;
+    if (e.code !== "Space" || t.tagName === "INPUT" || $("game").hidden) return;
+    e.preventDefault(); void pttUp();
+  });
+}
+
+// ---------- wiring ----------
+bindSettings(); wirePtt();
+$("start").addEventListener("click", () => void begin());
+$("f").addEventListener("submit", e => {
+  e.preventDefault();
+  const el = $<HTMLInputElement>("cmd"); const text = el.value.trim(); el.value = "";
+  if (!text || !session) return;
+  void audio.playAck(); void handleTranscript(text);
 });
-say(`Seed ${seed}. You're in the van. Marlow is in the lobby.`);
-render();
+$("again").addEventListener("click", async () => {
+  seed = (fixedSeed ?? seed) + 1; if (fixedSeed != null) { /* stay reproducible: run 2 = seed+1 */ }
+  newSession();
+  const intro = session.start(); showTurn(intro); refresh();
+  status(`Run ${session.runNumber}.`); await audio.playTurn(intro); status("Marlow is in position.");
+});
+$("casefile").addEventListener("click", async () => {
+  const out = $("casefileOut"); out.textContent = "Drawing the Case File…";
+  try {
+    const r = await fetch(`/api/casefile/${session.runId}`, { method: "POST" });
+    if (!r.ok) throw new Error(String(r.status));
+    const j = await r.json();
+    out.innerHTML = `Ready: <a href="${j.url}" target="_blank" rel="noopener">open the Case File</a> (${j.panels} panels, ${j.sources.join(", ")}).`;
+  } catch {
+    out.textContent = `The Case File needs the server (npm run server). From a terminal: npx tsx tools/casefile.ts ${session.runId}`;
+  }
+});
+if (debug) { (window as any).__marlow = { get session() { return session; }, audio }; }
