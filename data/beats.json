@@ -1,0 +1,13 @@
+[
+  { "id": "intro_first", "trigger": { "start": true, "first_run": true }, "lineIds": ["client.intro.a", "client.intro.b", "marlow.intro"], "cueIds": ["sfx.phone.ring", "music.calm"], "once": true },
+  { "id": "intro_repeat", "trigger": { "start": true, "repeat_run": true }, "lineIds": ["client.intro.repeat", "marlow.intro"], "cueIds": ["music.calm"], "once": true },
+  { "id": "callback_spotted", "trigger": { "start": true, "repeat_run": true, "last_trust_loss": "spotted" }, "lineIds": ["marlow.callback.spotted"], "cueIds": [], "once": true },
+  { "id": "callback_ignored", "trigger": { "start": true, "repeat_run": true, "last_trust_loss": "ignored_warning" }, "lineIds": ["marlow.callback.ignored_warning"], "cueIds": [], "once": true },
+  { "id": "callback_none", "trigger": { "start": true, "repeat_run": true, "last_trust_loss": null }, "lineIds": ["marlow.callback.none"], "cueIds": [], "once": true },
+  { "id": "alert_2_first", "trigger": { "alert_gte": 2 }, "lineIds": ["marlow.alert2"], "cueIds": ["music.tension.on", "sfx.radio.static"], "once": true },
+  { "id": "ledger_twist", "trigger": { "taken": "ledger" }, "lineIds": ["marlow.twist.tape"], "cueIds": ["sfx.radio.static"], "once": true },
+  { "id": "turn_8_nudge", "trigger": { "turn_gte": 8, "no_objective": true }, "lineIds": ["marlow.nudge"], "cueIds": [], "once": true },
+  { "id": "low_trust", "trigger": { "trust_lt": 30 }, "lineIds": ["marlow.lowtrust"], "cueIds": [], "once": true },
+  { "id": "extraction_win", "trigger": { "status": "won" }, "lineIds": ["marlow.outro.win"], "cueIds": ["music.tension.off"], "once": true },
+  { "id": "extraction_caught", "trigger": { "status": "caught" }, "lineIds": ["marlow.outro.caught"], "cueIds": ["music.tension.off"], "once": true }
+]
