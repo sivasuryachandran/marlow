@@ -109,3 +109,8 @@ Paid calls were stopped after ~$1 of Baseten Spark Open usage (about 434K output
 
 ## Resumed (2026-10-29): Meta credits applied
 `INTENT_BACKEND=meta` restored. Dev eval re-run on Meta only (`--backends mock,meta`; Spark Open skipped to avoid Baseten billing, so `metrics.md` has no Spark Open column now; its last numbers are in the entries above): **Spark 100% intent accuracy, 0 timeouts, 0 wrong-target, p50 1.75 s / p95 3.87 s**; speech: WER 8.5%, end-to-end 90% (misses are all transcription errors: "wall door", "bananapeek", "he tried quietly"…, none executed a wrong action).
+
+## Eval after recording the held-out audio (2026-10-29, Spark only)
+- Dev set (50): intent 98% (miss: "open the safe" refused instead of the expected reason), 0 timeouts, 0 wrong-target, p50 1.42 s / p95 3.88 s. Speech: WER 11.3% (was 8.5% on the previous run of the same clips, so STT varies run to run), end-to-end 92%.
+- Held-out (30, frozen, real speech now recorded): intent 96.7% typed (one 8 s harness timeout on "stay where you are"), **100% end-to-end from speech**, WER 7%, 0 wrong-target, 0 illegal. p50 2.12 s / p95 4.73 s.
+- Spark Open was not run (Baseten billing); its earlier held-out 76.7% stands as the last measurement.
