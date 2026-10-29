@@ -8,6 +8,7 @@ import { renderDebug } from "./debug";
 import { HttpIntent } from "./intent-client";
 import { loadPrefs, LocalStore, savePrefs } from "./storage";
 import { BrowserStt, ServerStt, type Stt } from "./stt";
+import { HandsFree } from "./vad";
 
 const q = new URLSearchParams(location.search);
 const debug = q.get("debug") === "1";
@@ -22,6 +23,9 @@ let session: Session;
 let seed = fixedSeed ?? Math.floor(Math.random() * 1e6);
 let stt: Stt | null = null;
 let recording = false;
+let hf: HandsFree | null = null, muted = false, busy = false;
+const hfPause = () => { if (hf) { hf.paused = true; hf.reset(); } };
+const hfResume = () => { if (hf && !muted) setTimeout(() => { if (!busy) hf!.paused = false; }, 500); };
 let lastEvents: GameEvent[] = [];
 const latencies: number[] = [];
 
@@ -88,15 +92,20 @@ async function begin() {
   stt = h?.stt ? new ServerStt() : BrowserStt.available() ? new BrowserStt() : null;
   if (!stt) $("ptt").textContent = "Voice input unavailable in this browser. Type your orders below.";
   newSession();
+  if (stt instanceof ServerStt) await startHandsFree();
   const intro = session.start();
   status("The client is on the line…");
   showTurn(intro);
   refresh();
-  await audio.playTurn(intro);
-  status(`Marlow is in position. Run ${session.runNumber}. ${stt ? "Hold the button or Space to talk." : "Type an order."}`);
+  hfPause(); await audio.playTurn(intro); hfResume();
+  status(`Marlow is in position. Run ${session.runNumber}. ${hf ? "Just speak; the mic is always listening." : stt ? "Hold the button or Space to talk." : "Type an order."}`);
 }
 
 async function handleTranscript(text: string) {
+  busy = true; hfPause();
+  try { await handleTranscript1(text); } finally { busy = false; hfResume(); }
+}
+async function handleTranscript1(text: string) {
   log("you", `You: ${text}`);
   status("Marlow is working it out…");
   audio.startWaiting(session.state.knowledge.guardLastHeard as never, session.state.rooms.find(r => r.id === session.state.marlow.room)!.reverb);
@@ -123,6 +132,39 @@ function finish(out: TurnOutput) {
   $<HTMLButtonElement>("again").focus();
 }
 
+// ---------- always-on listening ----------
+async function startHandsFree() {
+  try {
+    hf = new HandsFree({
+      onSegment: async wav => {
+        if (busy || muted) return;
+        busy = true; hfPause();
+        void audio.playAck(); status("Got it…");
+        let text: string | null = null;
+        try {
+          const r = await fetch("/api/transcribe", { method: "POST", headers: { "Content-Type": "audio/wav" }, body: wav });
+          if (r.ok) text = ((await r.json()) as { text: string }).text?.trim() || null;
+        } catch { /* fall through */ }
+        busy = false;
+        if (!text) { log("sys", "[No speech picked up.]"); status("Didn't catch that."); hfResume(); return; }
+        void handleTranscript(text);
+      },
+      onLevel: (_r, speaking) => { if (speaking && !busy) status("Listening…"); },
+    });
+    await hf.start();
+    const b = $("ptt"); b.textContent = "Listening. Tap to mute"; b.setAttribute("aria-pressed", "false");
+  } catch {
+    hf = null; log("sys", "[Microphone unavailable. Hold the button or Space to talk, or type.]");
+  }
+}
+function toggleMute() {
+  if (!hf) return;
+  muted = !muted; const b = $("ptt");
+  b.setAttribute("aria-pressed", String(muted)); b.textContent = muted ? "Muted. Tap to listen" : "Listening. Tap to mute";
+  if (muted) hfPause(); else hf.paused = false;
+  status(muted ? "Mic muted." : "Listening.");
+}
+
 // ---------- push to talk ----------
 async function pttDown() {
   if (recording || !stt || !session) return;
@@ -147,17 +189,17 @@ async function pttUp() {
 }
 function wirePtt() {
   const b = $("ptt");
-  b.addEventListener("pointerdown", e => { e.preventDefault(); void pttDown(); });
-  for (const ev of ["pointerup", "pointercancel", "pointerleave"]) b.addEventListener(ev, () => void pttUp());
-  b.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); void (recording ? pttUp() : pttDown()); } });
+  b.addEventListener("pointerdown", e => { e.preventDefault(); if (hf) toggleMute(); else void pttDown(); });
+  for (const ev of ["pointerup", "pointercancel", "pointerleave"]) b.addEventListener(ev, () => { if (!hf) void pttUp(); });
+  b.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); if (hf) toggleMute(); else void (recording ? pttUp() : pttDown()); } });
   document.addEventListener("keydown", e => {
     const t = e.target as HTMLElement;
-    if (e.code !== "Space" || t.tagName === "INPUT" || $("game").hidden) return;
+    if (e.code !== "Space" || t.tagName === "INPUT" || $("game").hidden || hf) return;
     e.preventDefault(); if (!e.repeat) void pttDown();
   });
   document.addEventListener("keyup", e => {
     const t = e.target as HTMLElement;
-    if (e.code !== "Space" || t.tagName === "INPUT" || $("game").hidden) return;
+    if (e.code !== "Space" || t.tagName === "INPUT" || $("game").hidden || hf) return;
     e.preventDefault(); void pttUp();
   });
 }
@@ -175,7 +217,7 @@ $("again").addEventListener("click", async () => {
   seed = (fixedSeed ?? seed) + 1; if (fixedSeed != null) { /* stay reproducible: run 2 = seed+1 */ }
   newSession();
   const intro = session.start(); showTurn(intro); refresh();
-  status(`Run ${session.runNumber}.`); await audio.playTurn(intro); status("Marlow is in position.");
+  status(`Run ${session.runNumber}.`); hfPause(); await audio.playTurn(intro); hfResume(); status("Marlow is in position.");
 });
 $("casefile").addEventListener("click", async () => {
   const out = $("casefileOut"); out.textContent = "Drawing the Case File…";
