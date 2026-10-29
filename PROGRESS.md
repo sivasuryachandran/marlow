@@ -106,3 +106,6 @@ Paid calls were stopped after ~$1 of Baseten Spark Open usage (about 434K output
 - `metrics.md` meta/baseten rows and `DEMO_SCRIPT.md` latencies predate the last prompt change (door `leadsTo`, speech-error hint). Re-run `npm run eval` and `tools/rehearse-demo.ts --live` once credits are back.
 - `npm run eval:dry` prints how many paid calls an eval would make and a worst-case output-token bound, and sends nothing. Run it first.
 - Offline checks done: clean clone installs, typechecks, passes 101 tests and builds; no keys or recordings in the tree or any commit; every sound cue has a synthesized fallback; the line manifest has 360 entries, none rendered yet (needs `kokoro-js`).
+
+## Resumed (2026-10-29): Meta credits applied
+`INTENT_BACKEND=meta` restored. Dev eval re-run on Meta only (`--backends mock,meta`; Spark Open skipped to avoid Baseten billing, so `metrics.md` has no Spark Open column now; its last numbers are in the entries above): **Spark 100% intent accuracy, 0 timeouts, 0 wrong-target, p50 1.75 s / p95 3.87 s**; speech: WER 8.5%, end-to-end 90% (misses are all transcription errors: "wall door", "bananapeek", "he tried quietly"…, none executed a wrong action).
