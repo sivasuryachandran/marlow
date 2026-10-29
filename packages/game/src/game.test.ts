@@ -146,7 +146,7 @@ describe("matched-phrase check (wrong-target actions must be 0)", () => {
 describe("Session", () => {
   it("opens with the client call (first run) and Marlow's intro", () => {
     const o = mkSession().start();
-    expect(o.lines.map(l => l.id)).toEqual(["client.intro.a", "client.intro.b", "marlow.intro"]);
+    expect(o.lines.map(l => l.id)).toEqual(["client.intro.a", "client.intro.b", "client.intro.c", "marlow.intro"]);
     expect(o.lines.every(l => l.audioKey.length > 0)).toBe(true);
   });
   it("a refusal leaves the world byte-identical and speaks a template", async () => {
@@ -346,5 +346,25 @@ describe("natural pointing and instant local replies", () => {
     expect(out?.kind).toBe("sayagain");
     expect(plausibleOrder("banana", mk())).toBe(false);
     expect(plausibleOrder("slip into the study", mk())).toBe(true);
+  });
+});
+
+describe("story", () => {
+  it("each room's first entry has its own story beat, spoken once", async () => {
+    const sess = mkSession(); sess.start();
+    const a = await sess.submit("go to hall");
+    expect(a?.lines.map(l => l.id)).toContain("marlow.story.hall");
+    await sess.submit("go to lobby"); const b = await sess.submit("go to hall");
+    expect(b?.lines.map(l => l.id)).not.toContain("marlow.story.hall");
+  });
+  it("the ending is a spoken choice after a win: burn or send; anything else asks again", async () => {
+    const sess = mkSession({ seed: 5 }); sess.start();
+    (sess as unknown as { state: WorldState }).state.status = "won";
+    const retry = await sess.submit("hmm");
+    expect(retry?.lines.map(l => l.id)).toEqual(["marlow.epilogue.retry"]);
+    const sent = await sess.submit("send it to the press");
+    expect(sent?.lines.map(l => l.id)).toEqual(["marlow.epilogue.send", "client.after.send"]);
+    expect(sess.ending).toBe("send");
+    expect((await sess.submit("burn it"))?.lines.map(l => l.id)).toEqual(["marlow.refuse.game_over"]);
   });
 });

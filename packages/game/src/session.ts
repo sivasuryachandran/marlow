@@ -59,6 +59,9 @@ export class Session {
     };
   }
 
+  /** How the story ended, once chosen after a win. */
+  ending: "burn" | "send" | null = null;
+
   /** Mission intro: the Director's start beats. */
   start(): TurnOutput {
     const b = this.beatOutput([], true, 0, this.state.trust);
@@ -86,6 +89,14 @@ export class Session {
       return o;
     };
 
+    // The ending is a choice made by voice after a win: burn the tape or send it. Local, no model, nothing in the world changes.
+    if (s.status === "won" && !this.ending) {
+      const t = transcript.toLowerCase();
+      const choice = /\b(burn|burned|destroy|fire|ash|ashes|torch|shred)\b/.test(t) ? "burn" : /\b(send|sent|publish|press|broadcast|expose|post|release|leak|tell|everyone|police)\b/.test(t) ? "send" : null;
+      if (!choice) return out("local", [{ id: "marlow.epilogue.retry", slots: {} }], {}, { parsed: "epilogue_retry" });
+      this.ending = choice;
+      return out("local", [{ id: `marlow.epilogue.${choice}`, slots: {} }, { id: `client.after.${choice}`, slots: {} }], {}, { parsed: `epilogue_${choice}` });
+    }
     if (s.status !== "playing") return out("refused", [{ id: "marlow.refuse.game_over", slots: {} }]);
 
     const local = localParse(transcript, s);

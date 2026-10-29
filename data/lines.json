@@ -26,13 +26,23 @@
   },
   "marlow.look.room": {
     "speaker": "marlow",
-    "text": ["I'm in {room}, boss.", "Still in {room}."],
-    "curt": ["In {room}."]
+    "text": [
+      "I'm in {room}, boss.",
+      "Still in {room}."
+    ],
+    "curt": [
+      "In {room}."
+    ]
   },
   "marlow.look.door": {
     "speaker": "marlow",
-    "text": ["There's a way to {room}, {dir}.", "{room}, {dir} of me."],
-    "curt": ["{room}, {dir}."]
+    "text": [
+      "There's a way to {room}, {dir}.",
+      "{room}, {dir} of me."
+    ],
+    "curt": [
+      "{room}, {dir}."
+    ]
   },
   "system.ready": {
     "speaker": "marlow",
@@ -64,13 +74,13 @@
   "client.intro.a": {
     "speaker": "client",
     "text": [
-      "They said you retired. They said you can't do this anymore."
+      "They said you retired. They said you can't do this anymore. I never believed them."
     ]
   },
   "client.intro.b": {
     "speaker": "client",
     "text": [
-      "The gallery keeps a ledger in the office off the main hall. Marlow is already in the lobby. Bring it out, quietly, and I will forget the rest."
+      "It's Ines, Owl. The Hale Gallery keeps a ledger in the office off the main hall. Marlow is already in the lobby. Bring it out, quietly, and I will forget the rest."
     ]
   },
   "client.intro.repeat": {
@@ -428,7 +438,7 @@
   "marlow.twist.tape": {
     "speaker": "marlow",
     "text": [
-      "Boss. There's a tape in the drawer. Labeled with a date. The night you lost your sight. I'm bringing it out."
+      "Boss. There's a tape in the drawer under the ledger. A pen label: Fenwick, the ninth. That's the night you lost your sight. I'm bringing it out too."
     ]
   },
   "marlow.nudge": {
@@ -450,7 +460,7 @@
   "marlow.outro.win": {
     "speaker": "marlow",
     "text": [
-      "Debrief at the van. Case file's coming. For once, they're the ones who need a description."
+      "In the van now, boss. Rain's stopped."
     ]
   },
   "marlow.outro.caught": {
@@ -497,6 +507,118 @@
     ],
     "curt": [
       "He heard. Coming, {dir}."
+    ]
+  },
+  "client.intro.c": {
+    "speaker": "client",
+    "text": [
+      "One thing. Don't read it. It's only numbers."
+    ]
+  },
+  "client.checkin": {
+    "speaker": "client",
+    "text": [
+      "Report. Do you have it yet? Don't dawdle, Owl.",
+      "Owl. Time matters. Tell me you're close."
+    ]
+  },
+  "client.got": {
+    "speaker": "client",
+    "text": [
+      "You have it? Good. Now come out. And Owl, don't open anything else."
+    ]
+  },
+  "marlow.story.hall": {
+    "speaker": "marlow",
+    "text": [
+      "Portraits all down the hall, boss. Hale and his friends, pleased with themselves. Above us, a slow step and then a drag. That'll be Halloran."
+    ],
+    "curt": [
+      "Portraits. And a limp above us. Halloran."
+    ]
+  },
+  "marlow.story.gallery": {
+    "speaker": "marlow",
+    "text": [
+      "There's a music box playing in here, some art piece. A slow lullaby. Boss, that's the tune you hum when you think."
+    ],
+    "curt": [
+      "A music box. Your tune, boss."
+    ]
+  },
+  "marlow.story.office": {
+    "speaker": "marlow",
+    "text": [
+      "A photograph on the desk. A woman laughing, her arm around you, boss. You're younger. You can see. On the back it says: Owl and I, Fenwick, last good night."
+    ],
+    "curt": [
+      "A photo of you and a woman. Fenwick, last good night."
+    ]
+  },
+  "marlow.story.stairwell": {
+    "speaker": "marlow",
+    "text": [
+      "Stairs going up. There's a radio playing low up there, a ball game I think. He has all night. The metal rings under everything."
+    ],
+    "curt": [
+      "Stairs. A radio up there. The metal rings."
+    ]
+  },
+  "marlow.story.machine": {
+    "speaker": "marlow",
+    "text": [
+      "The answering machine picked up. A man says: Ines, it's Hale. Burn the ledger before Owl reads it. Call me. Boss, isn't Ines the client?"
+    ],
+    "curt": [
+      "The machine: Hale to Ines. Burn the ledger before Owl reads it."
+    ]
+  },
+  "marlow.story.machine.late": {
+    "speaker": "marlow",
+    "text": [
+      "The answering machine is blinking. I played it. A man says: Ines, it's Hale. Burn the ledger before Owl reads it. Call me. Boss, isn't Ines the client?"
+    ],
+    "curt": [
+      "The machine: Hale to Ines. Burn the ledger before Owl reads it."
+    ]
+  },
+  "marlow.epilogue.ask": {
+    "speaker": "marlow",
+    "text": [
+      "I played the tape in the cab. It's her, Ines. She tells Hale to make sure you're inside when the lights go. What do I do with it? Burn it, or send it?"
+    ],
+    "curt": [
+      "It's her on the tape. Burn it, or send it?"
+    ]
+  },
+  "marlow.epilogue.retry": {
+    "speaker": "marlow",
+    "text": [
+      "Burn it, or send it, boss?"
+    ]
+  },
+  "marlow.epilogue.burn": {
+    "speaker": "marlow",
+    "text": [
+      "Burning it. Ashes in the rain. It stays between you and her, boss, whenever you want to ask her why."
+    ]
+  },
+  "marlow.epilogue.send": {
+    "speaker": "marlow",
+    "text": [
+      "Sending it. By morning the whole city hears her voice, and what happened at Fenwick. I'm sorry, Owl. I'll be here."
+    ]
+  },
+  "client.after.burn": {
+    "speaker": "client",
+    "text": [
+      "Owl. I know you have it. Thank you. I'll never ask for anything again."
+    ]
+  },
+  "client.after.send": {
+    "speaker": "client",
+    "text": [
+      "Owl, pick up. Please. Owl."
     ]
   }
 }

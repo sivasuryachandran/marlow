@@ -124,8 +124,8 @@ export class AudioEngine {
   }
 
   /** One footstep: a low heel thump (survives distance and occlusion filtering) plus a surface-specific click and a lighter toe tap. */
-  private footstep(dest: AudioNode, t: number, mat: string, k: number) {
-    const c = this.ctx, v = 0.85 + 0.3 * (((k * 37 + 11) % 10) / 10);
+  private footstep(dest: AudioNode, t: number, mat: string, k: number, level = 1) {
+    const c = this.ctx, v = (0.85 + 0.3 * (((k * 37 + 11) % 10) / 10)) * level;
     const p = ({ marble: { body: 105, click: 2300, q: 2.5, cg: 0.55, bg: 0.9 }, carpet: { body: 85, click: 650, q: 0.7, cg: 0.2, bg: 0.9 }, metal: { body: 120, click: 1700, q: 4, cg: 0.55, bg: 0.7 } } as const)[mat as "marble"] ?? { body: 100, click: 1500, q: 1, cg: 0.4, bg: 0.8 };
     const o = c.createOscillator(), g = c.createGain();
     o.type = "sine"; o.frequency.setValueAtTime(p.body * v * 1.6, t); o.frequency.exponentialRampToValueAtTime(p.body * v * 0.6, t + 0.1);
@@ -137,9 +137,13 @@ export class AudioEngine {
   }
 
   /** Placeholder synth for every cue id; a real file at /audio/sfx/<id>.wav replaces it. Returns duration in seconds. */
-  private synth(id: string, dest: AudioNode, t: number): number {
+  private synth(id: string, dest: AudioNode, t: number, limp = false): number {
     const mat = id.startsWith("sfx.footsteps.") ? id.split(".")[2] : "";
     if (mat) {
+      if (limp) { // Halloran: a heavy step, then the other foot dragging, over and over
+        [0, 1.0].forEach((g, k) => { this.footstep(dest, t + g, mat, k, 1.1); this.footstep(dest, t + g + 0.46, "carpet", k + 3, 0.5); });
+        return 1.9;
+      }
       const gaps = [0, 0.46, 0.9, 1.38]; // slightly uneven, like a person walking
       gaps.forEach((g, k) => this.footstep(dest, t + g, mat, k));
       return 1.8;
@@ -325,7 +329,7 @@ export class AudioEngine {
     dry.connect(this.sfxGain); wet.connect(this.reverbs[cue.reverb] ?? this.reverbs.marble);
     const buf = await this.asset(`/audio/sfx/${cue.id}.wav`);
     if (buf) { const s = c.createBufferSource(); s.buffer = buf; s.connect(out); s.start(t); return buf.duration; }
-    return this.synth(cue.id, out, t);
+    return this.synth(cue.id, out, t, cue.kind === "world" && cue.id.startsWith("sfx.footsteps.")); // the guard limps; Marlow's own steps are even
   }
   private setPos(p: PannerNode, x: number, z: number, t: number) {
     p.positionX.setValueAtTime(x, t); p.positionY.setValueAtTime(0, t); p.positionZ.setValueAtTime(z, t);

@@ -451,12 +451,12 @@
  },
  {
   "audioKey": "client.intro.a.v0",
-  "text": "They said you retired. They said you can't do this anymore.",
+  "text": "They said you retired. They said you can't do this anymore. I never believed them.",
   "speaker": "client"
  },
  {
   "audioKey": "client.intro.b.v0",
-  "text": "The gallery keeps a ledger in the office off the main hall. Marlow is already in the lobby. Bring it out, quietly, and I will forget the rest.",
+  "text": "It's Ines, Owl. The Hale Gallery keeps a ledger in the office off the main hall. Marlow is already in the lobby. Bring it out, quietly, and I will forget the rest.",
   "speaker": "client"
  },
  {
@@ -2051,7 +2051,7 @@
  },
  {
   "audioKey": "marlow.twist.tape.v0",
-  "text": "Boss. There's a tape in the drawer. Labeled with a date. The night you lost your sight. I'm bringing it out.",
+  "text": "Boss. There's a tape in the drawer under the ledger. A pen label: Fenwick, the ninth. That's the night you lost your sight. I'm bringing it out too.",
   "speaker": "marlow"
  },
  {
@@ -2076,7 +2076,7 @@
  },
  {
   "audioKey": "marlow.outro.win.v0",
-  "text": "Debrief at the van. Case file's coming. For once, they're the ones who need a description.",
+  "text": "In the van now, boss. Rain's stopped.",
   "speaker": "marlow"
  },
  {
@@ -2188,5 +2188,120 @@
   "audioKey": "marlow.guard.alerted.c0.dir=right",
   "text": "He heard. Coming, right.",
   "speaker": "marlow"
+ },
+ {
+  "audioKey": "client.intro.c.v0",
+  "text": "One thing. Don't read it. It's only numbers.",
+  "speaker": "client"
+ },
+ {
+  "audioKey": "client.checkin.v0",
+  "text": "Report. Do you have it yet? Don't dawdle, Owl.",
+  "speaker": "client"
+ },
+ {
+  "audioKey": "client.checkin.v1",
+  "text": "Owl. Time matters. Tell me you're close.",
+  "speaker": "client"
+ },
+ {
+  "audioKey": "client.got.v0",
+  "text": "You have it? Good. Now come out. And Owl, don't open anything else.",
+  "speaker": "client"
+ },
+ {
+  "audioKey": "marlow.story.hall.v0",
+  "text": "Portraits all down the hall, boss. Hale and his friends, pleased with themselves. Above us, a slow step and then a drag. That'll be Halloran.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.story.hall.c0",
+  "text": "Portraits. And a limp above us. Halloran.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.story.gallery.v0",
+  "text": "There's a music box playing in here, some art piece. A slow lullaby. Boss, that's the tune you hum when you think.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.story.gallery.c0",
+  "text": "A music box. Your tune, boss.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.story.office.v0",
+  "text": "A photograph on the desk. A woman laughing, her arm around you, boss. You're younger. You can see. On the back it says: Owl and I, Fenwick, last good night.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.story.office.c0",
+  "text": "A photo of you and a woman. Fenwick, last good night.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.story.stairwell.v0",
+  "text": "Stairs going up. There's a radio playing low up there, a ball game I think. He has all night. The metal rings under everything.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.story.stairwell.c0",
+  "text": "Stairs. A radio up there. The metal rings.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.story.machine.v0",
+  "text": "The answering machine picked up. A man says: Ines, it's Hale. Burn the ledger before Owl reads it. Call me. Boss, isn't Ines the client?",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.story.machine.c0",
+  "text": "The machine: Hale to Ines. Burn the ledger before Owl reads it.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.story.machine.late.v0",
+  "text": "The answering machine is blinking. I played it. A man says: Ines, it's Hale. Burn the ledger before Owl reads it. Call me. Boss, isn't Ines the client?",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.story.machine.late.c0",
+  "text": "The machine: Hale to Ines. Burn the ledger before Owl reads it.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.epilogue.ask.v0",
+  "text": "I played the tape in the cab. It's her, Ines. She tells Hale to make sure you're inside when the lights go. What do I do with it? Burn it, or send it?",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.epilogue.ask.c0",
+  "text": "It's her on the tape. Burn it, or send it?",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.epilogue.retry.v0",
+  "text": "Burn it, or send it, boss?",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.epilogue.burn.v0",
+  "text": "Burning it. Ashes in the rain. It stays between you and her, boss, whenever you want to ask her why.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.epilogue.send.v0",
+  "text": "Sending it. By morning the whole city hears her voice, and what happened at Fenwick. I'm sorry, Owl. I'll be here.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "client.after.burn.v0",
+  "text": "Owl. I know you have it. Thank you. I'll never ask for anything again.",
+  "speaker": "client"
+ },
+ {
+  "audioKey": "client.after.send.v0",
+  "text": "Owl, pick up. Please. Owl.",
+  "speaker": "client"
  }
 ]

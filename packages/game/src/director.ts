@@ -4,7 +4,7 @@ import type { LineBank } from "./lines";
 
 export interface Trigger {
   start?: boolean; first_run?: boolean; repeat_run?: boolean; last_trust_loss?: string | null;
-  alert_gte?: number; taken?: string; turn_gte?: number; no_objective?: boolean; trust_lt?: number; status?: "won" | "caught";
+  alert_gte?: number; entered?: string; heard?: string; in_room?: string; unless_fired?: string[]; taken?: string; turn_gte?: number; no_objective?: boolean; trust_lt?: number; status?: "won" | "caught";
 }
 export interface Beat { id: string; trigger: Trigger; lineIds: string[]; cueIds: string[]; once: boolean }
 export interface DirectorCtx { runNumber: number; start: boolean }
@@ -22,6 +22,7 @@ export class Director {
       if (out.length >= MAX_BEATS) break;
       if (b.once && this.fired.has(b.id)) continue;
       if (!matches(b.trigger, s, events, ctx)) continue;
+      if (b.trigger.unless_fired?.some(id => this.fired.has(id))) continue;
       this.fired.add(b.id);
       out.push(b);
     }
@@ -35,6 +36,9 @@ function matches(t: Trigger, s: WorldState, events: GameEvent[], ctx: DirectorCt
   if (t.repeat_run && ctx.runNumber < 2) return false;
   if ("last_trust_loss" in t && t.last_trust_loss !== s.memory.lastTrustLoss) return false;
   if (t.alert_gte !== undefined && s.alert < t.alert_gte) return false;
+  if (t.entered && !events.some(e => e.type === "moved" && e.to === t.entered)) return false;
+  if (t.heard && !events.some(e => e.type === "sound_heard" && e.sound === t.heard)) return false;
+  if (t.in_room && s.marlow.room !== t.in_room) return false;
   if (t.taken && !events.some(e => e.type === "item_taken" && e.item === t.taken)) return false;
   if (t.turn_gte !== undefined && s.turn < t.turn_gte) return false;
   if (t.no_objective && s.marlow.carrying === s.objective.item) return false;
@@ -53,6 +57,8 @@ export function validateBeats(beats: Beat[], bank: LineBank, cues: string[], lev
     ids.add(b.id);
     for (const l of b.lineIds) if (!bank[l]) errs.push(`beat ${b.id}: unknown line ${l}`);
     for (const c of b.cueIds) if (!cues.includes(c)) errs.push(`beat ${b.id}: unknown cue ${c}`);
+    for (const r of [b.trigger.entered, b.trigger.in_room]) if (r && !entities.has(r)) errs.push(`beat ${b.id}: unknown room ${r}`);
+    for (const u of b.trigger.unless_fired ?? []) if (!beats.some(x => x.id === u)) errs.push(`beat ${b.id}: unless_fired names unknown beat ${u}`);
     if (b.trigger.taken && !entities.has(b.trigger.taken)) errs.push(`beat ${b.id}: unknown item ${b.trigger.taken}`);
     if (!Object.keys(b.trigger).length) errs.push(`beat ${b.id}: empty trigger`);
   }
