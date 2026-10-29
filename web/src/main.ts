@@ -42,13 +42,15 @@ function showTurn(out: TurnOutput) {
 }
 
 // ---------- settings ----------
-const prefs = loadPrefs<AudioSettings & { captions: boolean }>("marlow.prefs.v1", { voice: 1, music: 0.5, sfx: 0.9, mono: false, captions: true });
+const prefs = loadPrefs<AudioSettings & { captions: boolean }>("marlow.prefs.v1", { voice: 1, music: 0.35, sfx: 1, mono: false, ambience: false, captions: true });
 function bindSettings() {
   const map: [string, keyof AudioSettings][] = [["vVoice", "voice"], ["vMusic", "music"], ["vSfx", "sfx"]];
   for (const [id, key] of map) {
     const el = $<HTMLInputElement>(id); el.value = String(prefs[key]);
     el.addEventListener("input", () => { prefs[key] = Number(el.value) as never; audio.applySettings({ [key]: prefs[key] }); savePrefs("marlow.prefs.v1", prefs); });
   }
+  const amb = $<HTMLInputElement>("ambience"); amb.checked = prefs.ambience;
+  amb.addEventListener("change", () => { prefs.ambience = amb.checked; audio.applySettings({ ambience: amb.checked }); savePrefs("marlow.prefs.v1", prefs); });
   const mono = $<HTMLInputElement>("mono"); mono.checked = prefs.mono;
   mono.addEventListener("change", () => { prefs.mono = mono.checked; audio.applySettings({ mono: mono.checked }); savePrefs("marlow.prefs.v1", prefs); });
   const cap = $<HTMLInputElement>("captions"); cap.checked = prefs.captions;

@@ -1,8 +1,8 @@
-import { createInitialState, locate, step } from "@marlow/engine";
+import { createInitialState, locate, RULES_VERSION, sideRelativeToFacing, step } from "@marlow/engine";
 import type { Action, GameEvent, WorldState } from "@marlow/shared";
 import { Director, type Beat } from "./director";
 import { knowledgeList, type IntentAdapter, type KnowledgeScope, type KnownEntity } from "./intent";
-import { cleanTranscript, localParse } from "./parser";
+import { cleanTranscript, localParse, plausibleOrder } from "./parser";
 import { hash, renderLine, type LineBank, type LineRef, type SpokenLine } from "./lines";
 import type { MemoryStore } from "./memory";
 import { cuesFor, narrate, type Cue } from "./narrate";
@@ -42,7 +42,7 @@ export class Session {
     this.runId = cfg.runId ?? `run-${cfg.seed}-${this.runNumber}`;
     this.director = new Director(cfg.beats);
     this.now = cfg.now ?? (() => performance.now());
-    this.write({ type: "start", levelHash: hash(JSON.stringify(cfg.level)), runId: this.runId, seed: cfg.seed, trust: mem.trust, lastTrustLoss: mem.lastTrustLoss, runNumber: this.runNumber });
+    this.write({ type: "start", rulesVersion: RULES_VERSION, levelHash: hash(JSON.stringify(cfg.level)), runId: this.runId, seed: cfg.seed, trust: mem.trust, lastTrustLoss: mem.lastTrustLoss, runNumber: this.runNumber });
   }
 
   private write(row: Record<string, unknown>) { this.log.push(row); this.cfg.onLog?.(row); }
@@ -97,11 +97,15 @@ export class Session {
         case "yes": case "no":
           if (this.pending) return out("clarify", [this.clarifyRef(this.pending.candidates, s)], {}, { parsed: local.kind });
           return out("local", [{ id: "system.nothing_pending", slots: {} }], {}, { parsed: local.kind });
+        case "look": return out("local", this.lookRefs(s), {}, { parsed: "look" });
         case "ready": return out("local", [{ id: "system.ready", slots: {} }], {}, { parsed: "ready" });
         case "no_back": return out("refused", [{ id: "marlow.refuse.not_adjacent", slots: {} }], {}, { parsed: "go back" });
         case "action": { this.pending = null; return this.execute(turnId, transcript, local.action, t0, "local"); }
       }
     }
+
+    // Small talk has nothing the game could act on: answer at once instead of waiting on a model.
+    if (!this.pending && !plausibleOrder(transcript, s)) return out("sayagain", [SAYAGAIN], {}, { parsed: "no_order_words" });
 
     // Clarification follow-up: narrow to the named candidate, then re-ask the intent adapter.
     let request = { transcript, knowledge: knowledgeList(s, this.cfg.knowledgeScope) };
@@ -141,6 +145,19 @@ export class Session {
     }
   }
 
+  /** What Marlow can already see from where she stands: only things the player has been told about. Reads state, changes nothing. */
+  private lookRefs(s: WorldState): LineRef[] {
+    const here = s.marlow.room, name = (id: string) => s.rooms.find(r => r.id === id)!.spokenName;
+    const refs: LineRef[] = [{ id: "marlow.look.room", slots: { room: name(here) } }];
+    for (const d of s.doors) {
+      if (!d.between.includes(here) || !s.knowledge.doors.includes(d.id)) continue;
+      const other = d.between[0] === here ? d.between[1] : d.between[0];
+      refs.push({ id: "marlow.look.door", slots: { room: name(other), dir: sideRelativeToFacing(d.side[here], s.marlow.facing) } });
+    }
+    for (const i of s.items) if (i.room === here && s.knowledge.items.includes(i.id)) refs.push({ id: "marlow.arrive.item", slots: { item: i.spokenName } });
+    for (const p of s.props) if (p.room === here && p.tags.includes("hide") && s.knowledge.props.includes(p.id)) refs.push({ id: "marlow.arrive.hide", slots: { prop: p.spokenName } });
+    return refs;
+  }
   private clarifyRef(cands: string[], s: WorldState, ctype?: string): LineRef {
     const name = (id: string) => [...s.rooms, ...s.doors, ...s.props, ...s.items].find(x => x.id === id)!.spokenName;
     const type = ctype ?? (s.doors.some(d => d.id === cands[0]) ? "door" : s.rooms.some(r => r.id === cands[0]) ? "room" : "other");

@@ -71,6 +71,9 @@ function advanceGuard(s: WorldState) {
   } else { g.step = (g.step + 1) % g.route.length; g.at = null; }
 }
 
+/** Bump when a rule changes behaviour, so logs recorded under older rules are reported stale instead of as nondeterminism. */
+export const RULES_VERSION = 4;
+
 export function step(prev: WorldState, action: Action, rngIn?: Rng): StepResult {
   const v = validate(prev, action);
   if (!v.ok) return { state: prev, events: [{ type: "refused", reason: v.reason, target: v.target, perceived: true }], roll: -1 };

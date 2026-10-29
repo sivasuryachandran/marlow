@@ -1,7 +1,7 @@
 import type { Cue, SpokenLine, TurnOutput } from "@marlow/game";
 import type { Dir, Dist } from "@marlow/shared";
 
-export interface AudioSettings { voice: number; music: number; sfx: number; mono: boolean }
+export interface AudioSettings { voice: number; music: number; sfx: number; mono: boolean; ambience: boolean }
 const AZ: Record<string, number> = { ahead: 0, right: 90, behind: 180, left: 270 };
 const RADIUS: Record<Dist, number> = { near: 2, mid: 6, far: 12 };
 const CUTOFF: Record<Dist, number> = { near: 9000, mid: 4500, far: 2200 };
@@ -12,13 +12,13 @@ function lcg(seed: number) { let s = seed >>> 0; return () => ((s = (Math.imul(s
 
 export class AudioEngine {
   ctx!: AudioContext;
-  settings: AudioSettings = { voice: 1, music: 0.5, sfx: 0.9, mono: false };
+  settings: AudioSettings = { voice: 1, music: 0.35, sfx: 1, mono: false, ambience: false };
   /** Assets that fell back to synthesized placeholders (listed as TODO in PROGRESS.md). */
   missing = new Set<string>();
   private master!: GainNode; private monoNode!: GainNode; private duck!: GainNode;
   private voiceGain!: GainNode; private musicGain!: GainNode; private sfxGain!: GainNode;
   private earpiece!: GainNode; private noiseBuf!: AudioBuffer; private pinkBuf!: AudioBuffer; private brownBuf!: AudioBuffer;
-  private timers: ReturnType<typeof setTimeout>[] = []; private tensionTimer?: ReturnType<typeof setInterval>;
+  private timers: ReturnType<typeof setTimeout>[] = []; private ambTimers: ReturnType<typeof setTimeout>[] = []; private tensionTimer?: ReturnType<typeof setInterval>;
   private reverbs: Record<string, ConvolverNode> = {};
   private calm?: GainNode; private tension?: GainNode;
   private voicePlaying = 0;
@@ -42,7 +42,6 @@ export class AudioEngine {
     const lp = c.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 3400;
     const mid = c.createBiquadFilter(); mid.type = "peaking"; mid.frequency.value = 1500; mid.gain.value = 4;
     this.earpiece.connect(hp); hp.connect(mid); mid.connect(lp); lp.connect(this.voiceGain);
-    this.loopNoise(this.earpiece, 0.012, 2500, 1.2); // faint open-channel static
     this.applySettings(); this.routeMaster();
     for (const kind of ["marble", "dry", "metal"]) {
       const cv = c.createConvolver(); cv.buffer = this.makeIR(kind); cv.connect(this.sfxGain); this.reverbs[kind] = cv;
@@ -59,6 +58,7 @@ export class AudioEngine {
     this.musicGain.gain.setTargetAtTime(this.settings.music, t, 0.02);
     this.sfxGain.gain.setTargetAtTime(this.settings.sfx, t, 0.02);
     this.routeMaster();
+    this.applyAmbience();
   }
   private routeMaster() {
     this.master.disconnect(); this.monoNode.disconnect();
@@ -228,13 +228,19 @@ export class AudioEngine {
     };
     this.timers.push(setTimeout(bell, 3500));
 
-    // Ambience bed (never reveals state): rain on glass with random drips, a low room rumble, Marlow's slow breathing.
+    this.applyAmbience();
+  }
+  private applyAmbience() {
+    if (!this.ctx) return;
+    if (!this.settings.ambience) { this.ambience?.stop(); this.ambience = undefined; return; }
+    if (this.ambience) return;
+    const c = this.ctx;
     const rain = this.loopNoise(this.sfxGain, 0.07, 1000, 0.3, "highpass", this.pinkBuf);
     const rainLp = this.loopNoise(this.sfxGain, 0.05, 5500, 0.3, "lowpass", this.pinkBuf);
     const rumble = this.loopNoise(this.sfxGain, 0.16, 170, 0.5, "lowpass", this.brownBuf);
     const drip = () => {
       this.burst(this.sfxGain, c.currentTime + 0.02, { freq: 2500 + Math.random() * 3500, q: 9, dur: 0.035, gain: 0.05 + Math.random() * 0.07 });
-      this.timers.push(setTimeout(drip, 120 + Math.random() * 900));
+      this.ambTimers.push(setTimeout(drip, 120 + Math.random() * 900));
     };
     drip();
     const breath = () => {
@@ -242,10 +248,10 @@ export class AudioEngine {
       src.buffer = this.pinkBuf; f.type = "bandpass"; f.frequency.value = 650; f.Q.value = 0.6;
       g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.03, t + 0.9); g.gain.linearRampToValueAtTime(0.0001, t + 2);
       src.connect(f); f.connect(g); g.connect(this.sfxGain); src.start(t, Math.random() * 10); src.stop(t + 2.1);
-      this.timers.push(setTimeout(breath, 3400));
+      this.ambTimers.push(setTimeout(breath, 3400));
     };
-    this.timers.push(setTimeout(breath, 1500));
-    this.ambience = { stop: () => { rain.stop(); rainLp.stop(); rumble.stop(); clearInterval(padT); this.timers.forEach(clearTimeout); this.timers = []; } };
+    this.ambTimers.push(setTimeout(breath, 1500));
+    this.ambience = { stop: () => { rain.stop(); rainLp.stop(); rumble.stop(); this.ambTimers.forEach(clearTimeout); this.ambTimers = []; } };
   }
   private thump(dest: AudioNode, t: number, freq: number, gain: number) {
     const o = this.ctx.createOscillator(), g = this.ctx.createGain();

@@ -7,7 +7,7 @@ import { createInitialState, solve, candidateActions, step, Rng, revealRoom } fr
 import type { Action, Level, WorldState } from "@marlow/shared";
 import {
   loadBank, localParse, mockInfer, knowledgeList, verify, v1, MockIntent, Session, InMemoryStore, validateBeats,
-  expandLine, type IntentAdapter, type Beat,
+  expandLine, checkMatch, plausibleOrder, type IntentAdapter, type Beat,
 } from "./index";
 
 const bank = loadBank(linesJson);
@@ -207,7 +207,7 @@ describe("turn-ID guard", () => {
   });
   it("timeout: static line, state unchanged, late reply discarded and logged", async () => {
     const s = mkSession({ intent: slow(60), timeoutMs: 20 }); s.start();
-    const o = (await s.submit("do something clever"))!;
+    const o = (await s.submit("go do something clever"))!;
     expect(o.kind).toBe("timeout");
     expect(o.lines[0].id).toBe("system.timeout");
     expect(o.beatCueIds).toContain("sfx.radio.static");
@@ -217,8 +217,8 @@ describe("turn-ID guard", () => {
   });
   it("superseded turn: first reply dropped, second acts", async () => {
     const s = mkSession({ intent: slow(30), timeoutMs: 500 }); s.start();
-    const first = s.submit("do something clever");
-    const second = s.submit("do something else");
+    const first = s.submit("go do something clever");
+    const second = s.submit("go do something else");
     const [a, b] = await Promise.all([first, second]);
     expect(a).toBeNull();
     expect(b).not.toBeNull();
@@ -227,7 +227,7 @@ describe("turn-ID guard", () => {
   });
   it("a reply carrying the wrong turn id is dropped", async () => {
     const s = mkSession({ intent: slow(1, 7), timeoutMs: 500 }); s.start();
-    const o = await s.submit("do something clever");
+    const o = await s.submit("go do something clever");
     expect(o).toBeNull();
     expect(s.log.some((r: any) => r.discarded && r.reason === "turn_id_mismatch")).toBe(true);
     expect(s.state.turn).toBe(0);
@@ -316,5 +316,35 @@ describe("speech-recognition artifacts", () => {
     const req = (t: string) => ({ turnId: 1, transcript: t, currentRoom: s.marlow.room, knowledge: knowledgeList(s) });
     expect(mockInfer(req("Pick the left door."))).toMatchObject({ action: "peek", target: "arch_hall_gallery" });
     expect(mockInfer(req("pick up the ledger"))).toMatchObject({ action: "take" });
+  });
+});
+
+describe("natural pointing and instant local replies", () => {
+  it("'in front of you' / 'over there' point at the one door in the lobby; pronouns are not names", () => {
+    const s = mk();
+    expect(checkMatch(s, "what do you see in front of you", { action: "peek", target: "door_lobby_hall", matched: "in front of you" })).toEqual({ ok: true });
+    expect(checkMatch(s, "what do you see over there", { action: "peek", target: "door_lobby_hall", matched: "over there" })).toEqual({ ok: true });
+  });
+  it("pointing words still cannot name a different thing", () => {
+    const s = mk(); inHall(s);
+    // hall has several doors: 'in front of you' fits only the door that is actually ahead
+    expect(checkMatch(s, "peek in front of you", { action: "peek", target: "door_hall_office", matched: "in front of you" }).ok).toBe(false);
+  });
+  it("'what do you see' is a free local description: no model, no turn, state unchanged", async () => {
+    const intent = { name: "never", init: async () => {}, infer: async () => { throw new Error("model must not be called"); } } as unknown as IntentAdapter;
+    const sess = mkSession({ intent }); sess.start();
+    const before = JSON.stringify(sess.state);
+    const out = await sess.submit("what do you see in front of you?");
+    expect(out?.kind).toBe("local");
+    expect(out?.lines.map(l => l.id)).toEqual(expect.arrayContaining(["marlow.look.room", "marlow.look.door"]));
+    expect(JSON.stringify(sess.state)).toBe(before);
+  });
+  it("small talk never waits on a model", async () => {
+    const intent = { name: "never", init: async () => {}, infer: async () => { throw new Error("model must not be called"); } } as unknown as IntentAdapter;
+    const sess = mkSession({ intent }); sess.start();
+    const out = await sess.submit("yeah this time we did good");
+    expect(out?.kind).toBe("sayagain");
+    expect(plausibleOrder("banana", mk())).toBe(false);
+    expect(plausibleOrder("slip into the study", mk())).toBe(true);
   });
 });

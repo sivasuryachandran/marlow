@@ -24,6 +24,16 @@
       "You're breaking up. Say again?"
     ]
   },
+  "marlow.look.room": {
+    "speaker": "marlow",
+    "text": ["I'm in {room}, boss.", "Still in {room}."],
+    "curt": ["In {room}."]
+  },
+  "marlow.look.door": {
+    "speaker": "marlow",
+    "text": ["There's a way to {room}, {dir}.", "{room}, {dir} of me."],
+    "curt": ["{room}, {dir}."]
+  },
   "system.ready": {
     "speaker": "marlow",
     "text": [

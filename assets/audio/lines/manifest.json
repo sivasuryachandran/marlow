@@ -35,6 +35,381 @@
   "speaker": "marlow"
  },
  {
+  "audioKey": "marlow.look.room.v0.room=the_lobby",
+  "text": "I'm in the lobby, boss.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.room.v0.room=the_hall",
+  "text": "I'm in the hall, boss.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.room.v0.room=the_gallery",
+  "text": "I'm in the gallery, boss.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.room.v0.room=the_office",
+  "text": "I'm in the office, boss.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.room.v0.room=the_stairwell",
+  "text": "I'm in the stairwell, boss.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.room.v1.room=the_lobby",
+  "text": "Still in the lobby.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.room.v1.room=the_hall",
+  "text": "Still in the hall.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.room.v1.room=the_gallery",
+  "text": "Still in the gallery.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.room.v1.room=the_office",
+  "text": "Still in the office.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.room.v1.room=the_stairwell",
+  "text": "Still in the stairwell.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.room.c0.room=the_lobby",
+  "text": "In the lobby.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.room.c0.room=the_hall",
+  "text": "In the hall.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.room.c0.room=the_gallery",
+  "text": "In the gallery.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.room.c0.room=the_office",
+  "text": "In the office.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.room.c0.room=the_stairwell",
+  "text": "In the stairwell.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.v0.dir=ahead.room=the_lobby",
+  "text": "There's a way to the lobby, ahead.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.v0.dir=behind.room=the_lobby",
+  "text": "There's a way to the lobby, behind.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.v0.dir=left.room=the_lobby",
+  "text": "There's a way to the lobby, left.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.v0.dir=right.room=the_lobby",
+  "text": "There's a way to the lobby, right.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.v0.dir=ahead.room=the_hall",
+  "text": "There's a way to the hall, ahead.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.v0.dir=behind.room=the_hall",
+  "text": "There's a way to the hall, behind.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.v0.dir=left.room=the_hall",
+  "text": "There's a way to the hall, left.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.v0.dir=right.room=the_hall",
+  "text": "There's a way to the hall, right.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.v0.dir=ahead.room=the_gallery",
+  "text": "There's a way to the gallery, ahead.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.v0.dir=behind.room=the_gallery",
+  "text": "There's a way to the gallery, behind.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.v0.dir=left.room=the_gallery",
+  "text": "There's a way to the gallery, left.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.v0.dir=right.room=the_gallery",
+  "text": "There's a way to the gallery, right.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.v0.dir=ahead.room=the_office",
+  "text": "There's a way to the office, ahead.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.v0.dir=behind.room=the_office",
+  "text": "There's a way to the office, behind.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.v0.dir=left.room=the_office",
+  "text": "There's a way to the office, left.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.v0.dir=right.room=the_office",
+  "text": "There's a way to the office, right.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.v0.dir=ahead.room=the_stairwell",
+  "text": "There's a way to the stairwell, ahead.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.v0.dir=behind.room=the_stairwell",
+  "text": "There's a way to the stairwell, behind.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.v0.dir=left.room=the_stairwell",
+  "text": "There's a way to the stairwell, left.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.v0.dir=right.room=the_stairwell",
+  "text": "There's a way to the stairwell, right.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.v1.dir=ahead.room=the_lobby",
+  "text": "The lobby, ahead of me.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.v1.dir=behind.room=the_lobby",
+  "text": "The lobby, behind of me.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.v1.dir=left.room=the_lobby",
+  "text": "The lobby, left of me.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.v1.dir=right.room=the_lobby",
+  "text": "The lobby, right of me.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.v1.dir=ahead.room=the_hall",
+  "text": "The hall, ahead of me.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.v1.dir=behind.room=the_hall",
+  "text": "The hall, behind of me.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.v1.dir=left.room=the_hall",
+  "text": "The hall, left of me.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.v1.dir=right.room=the_hall",
+  "text": "The hall, right of me.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.v1.dir=ahead.room=the_gallery",
+  "text": "The gallery, ahead of me.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.v1.dir=behind.room=the_gallery",
+  "text": "The gallery, behind of me.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.v1.dir=left.room=the_gallery",
+  "text": "The gallery, left of me.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.v1.dir=right.room=the_gallery",
+  "text": "The gallery, right of me.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.v1.dir=ahead.room=the_office",
+  "text": "The office, ahead of me.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.v1.dir=behind.room=the_office",
+  "text": "The office, behind of me.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.v1.dir=left.room=the_office",
+  "text": "The office, left of me.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.v1.dir=right.room=the_office",
+  "text": "The office, right of me.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.v1.dir=ahead.room=the_stairwell",
+  "text": "The stairwell, ahead of me.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.v1.dir=behind.room=the_stairwell",
+  "text": "The stairwell, behind of me.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.v1.dir=left.room=the_stairwell",
+  "text": "The stairwell, left of me.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.v1.dir=right.room=the_stairwell",
+  "text": "The stairwell, right of me.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.c0.dir=ahead.room=the_lobby",
+  "text": "The lobby, ahead.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.c0.dir=behind.room=the_lobby",
+  "text": "The lobby, behind.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.c0.dir=left.room=the_lobby",
+  "text": "The lobby, left.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.c0.dir=right.room=the_lobby",
+  "text": "The lobby, right.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.c0.dir=ahead.room=the_hall",
+  "text": "The hall, ahead.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.c0.dir=behind.room=the_hall",
+  "text": "The hall, behind.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.c0.dir=left.room=the_hall",
+  "text": "The hall, left.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.c0.dir=right.room=the_hall",
+  "text": "The hall, right.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.c0.dir=ahead.room=the_gallery",
+  "text": "The gallery, ahead.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.c0.dir=behind.room=the_gallery",
+  "text": "The gallery, behind.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.c0.dir=left.room=the_gallery",
+  "text": "The gallery, left.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.c0.dir=right.room=the_gallery",
+  "text": "The gallery, right.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.c0.dir=ahead.room=the_office",
+  "text": "The office, ahead.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.c0.dir=behind.room=the_office",
+  "text": "The office, behind.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.c0.dir=left.room=the_office",
+  "text": "The office, left.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.c0.dir=right.room=the_office",
+  "text": "The office, right.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.c0.dir=ahead.room=the_stairwell",
+  "text": "The stairwell, ahead.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.c0.dir=behind.room=the_stairwell",
+  "text": "The stairwell, behind.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.c0.dir=left.room=the_stairwell",
+  "text": "The stairwell, left.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.look.door.c0.dir=right.room=the_stairwell",
+  "text": "The stairwell, right.",
+  "speaker": "marlow"
+ },
+ {
   "audioKey": "system.ready.v0",
   "text": "Standing by, boss. Tell me where to go.",
   "speaker": "marlow"

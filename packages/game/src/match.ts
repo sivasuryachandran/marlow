@@ -13,7 +13,7 @@ export type MatchResult =
   | { ok: false; why: "mismatch" }                                  // the player named something else: refusal template
   | { ok: false; why: "ambiguous"; candidates: string[] };          // generic reference fits several: clarify template
 
-const GENERIC = new Set(["the", "a", "an", "that", "this", "one", "it", "there", "door", "doors", "room", "arch", "way", "through", "to", "into", "in", "of", "on", "at", "thing", "side", "please", "hand", "toward", "towards", "up", "out"]);
+const GENERIC = new Set(["the", "a", "an", "that", "this", "one", "it", "there", "door", "doors", "room", "arch", "way", "through", "to", "into", "in", "of", "on", "at", "thing", "side", "please", "hand", "toward", "towards", "up", "out", "you", "your", "yours", "me", "my", "over", "here", "us"]);
 const SIDES: Record<string, Side> = { left: "left", right: "right", ahead: "ahead", front: "ahead", forward: "ahead", straight: "ahead", behind: "behind", back: "behind" };
 
 export const tokens = (s: string) => s.toLowerCase().replace(/[^a-z0-9' ]+/g, " ").split(/\s+/).filter(Boolean).map(w => (w.length > 3 && w.endsWith("s") ? w.slice(0, -1) : w));
