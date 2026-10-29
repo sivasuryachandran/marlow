@@ -17,7 +17,8 @@ export class AudioEngine {
   missing = new Set<string>();
   private master!: GainNode; private monoNode!: GainNode; private duck!: GainNode;
   private voiceGain!: GainNode; private musicGain!: GainNode; private sfxGain!: GainNode;
-  private earpiece!: GainNode; private noiseBuf!: AudioBuffer;
+  private earpiece!: GainNode; private noiseBuf!: AudioBuffer; private pinkBuf!: AudioBuffer; private brownBuf!: AudioBuffer;
+  private timers: ReturnType<typeof setTimeout>[] = []; private tensionTimer?: ReturnType<typeof setInterval>;
   private reverbs: Record<string, ConvolverNode> = {};
   private calm?: GainNode; private tension?: GainNode;
   private voicePlaying = 0;
@@ -35,7 +36,7 @@ export class AudioEngine {
     this.earpiece = c.createGain();
     this.sfxGain.connect(this.duck); this.musicGain.connect(this.duck); this.duck.connect(this.master);
     this.voiceGain.connect(this.master);
-    this.noiseBuf = this.makeNoise(2);
+    this.noiseBuf = this.makeNoise(8); this.pinkBuf = this.makeColored(20, "pink", 11); this.brownBuf = this.makeColored(20, "brown", 13);
     // Earpiece bus: band-pass radio voice + faint static, mono and centred.
     const hp = c.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 300;
     const lp = c.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 3400;
@@ -71,6 +72,22 @@ export class AudioEngine {
     for (let i = 0; i < d.length; i++) d[i] = r();
     return b;
   }
+  /** Pink (1/f) or brown (1/f^2) noise: what rain and room rumble actually sound like, unlike harsh white noise. */
+  private makeColored(sec: number, kind: "pink" | "brown", seed: number): AudioBuffer {
+    const b = this.ctx.createBuffer(1, this.ctx.sampleRate * sec, this.ctx.sampleRate), d = b.getChannelData(0), r = lcg(seed);
+    let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0, last = 0, peak = 0;
+    for (let i = 0; i < d.length; i++) {
+      const w = r();
+      if (kind === "pink") {
+        b0 = 0.99886 * b0 + w * 0.0555179; b1 = 0.99332 * b1 + w * 0.0750759; b2 = 0.969 * b2 + w * 0.153852;
+        b3 = 0.8665 * b3 + w * 0.3104856; b4 = 0.55 * b4 + w * 0.5329522; b5 = -0.7616 * b5 - w * 0.016898;
+        d[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * 0.5362; b6 = w * 0.115926;
+      } else { last = (last + 0.02 * w) / 1.02; d[i] = last; }
+      peak = Math.max(peak, Math.abs(d[i]));
+    }
+    for (let i = 0; i < d.length; i++) d[i] /= peak || 1;
+    return b;
+  }
   private makeIR(kind: string): AudioBuffer {
     const rate = this.ctx.sampleRate, len = { marble: 2.3, dry: 0.28, metal: 1.4 }[kind] ?? 1;
     const b = this.ctx.createBuffer(2, rate * len, rate);
@@ -86,11 +103,11 @@ export class AudioEngine {
     }
     return b;
   }
-  private loopNoise(dest: AudioNode, gain: number, freq: number, q: number, type: BiquadFilterType = "bandpass") {
-    const src = this.ctx.createBufferSource(); src.buffer = this.noiseBuf; src.loop = true;
+  private loopNoise(dest: AudioNode, gain: number, freq: number, q: number, type: BiquadFilterType = "bandpass", buf?: AudioBuffer) {
+    const src = this.ctx.createBufferSource(); src.buffer = buf ?? this.noiseBuf; src.loop = true;
     const f = this.ctx.createBiquadFilter(); f.type = type; f.frequency.value = freq; f.Q.value = q;
     const g = this.ctx.createGain(); g.gain.value = gain;
-    src.connect(f); f.connect(g); g.connect(dest); src.start();
+    src.connect(f); f.connect(g); g.connect(dest); src.start(0, Math.random() * src.buffer!.duration);
     return { src, g, stop: () => { try { src.stop(); } catch { /* already stopped */ } } };
   }
   private burst(dest: AudioNode, t: number, o: { freq: number; q: number; dur: number; gain: number; type?: BiquadFilterType }) {
@@ -106,25 +123,39 @@ export class AudioEngine {
     o.connect(g); g.connect(dest); o.start(t); o.stop(t + dur + 0.05);
   }
 
+  /** One footstep: a low heel thump (survives distance and occlusion filtering) plus a surface-specific click and a lighter toe tap. */
+  private footstep(dest: AudioNode, t: number, mat: string, k: number) {
+    const c = this.ctx, v = 0.85 + 0.3 * (((k * 37 + 11) % 10) / 10);
+    const p = ({ marble: { body: 105, click: 2300, q: 2.5, cg: 0.55, bg: 0.9 }, carpet: { body: 85, click: 650, q: 0.7, cg: 0.2, bg: 0.9 }, metal: { body: 120, click: 1700, q: 4, cg: 0.55, bg: 0.7 } } as const)[mat as "marble"] ?? { body: 100, click: 1500, q: 1, cg: 0.4, bg: 0.8 };
+    const o = c.createOscillator(), g = c.createGain();
+    o.type = "sine"; o.frequency.setValueAtTime(p.body * v * 1.6, t); o.frequency.exponentialRampToValueAtTime(p.body * v * 0.6, t + 0.1);
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(p.bg * 0.55 * v, t + 0.006); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.13);
+    o.connect(g); g.connect(dest); o.start(t); o.stop(t + 0.16);
+    this.burst(dest, t, { freq: p.click * v, q: p.q, dur: 0.05, gain: p.cg * v });
+    this.burst(dest, t + 0.07, { freq: p.click * 0.8 * v, q: p.q, dur: 0.035, gain: p.cg * 0.45 * v }); // toe
+    if (mat === "metal") this.tone(dest, t, 1250 * v, 0.22, 0.03, "triangle");
+  }
+
   /** Placeholder synth for every cue id; a real file at /audio/sfx/<id>.wav replaces it. Returns duration in seconds. */
   private synth(id: string, dest: AudioNode, t: number): number {
     const mat = id.startsWith("sfx.footsteps.") ? id.split(".")[2] : "";
     if (mat) {
-      const p = { marble: { freq: 2600, q: 3, dur: 0.07 }, carpet: { freq: 500, q: 0.8, dur: 0.12 }, metal: { freq: 1900, q: 6, dur: 0.14 } }[mat] ?? { freq: 1000, q: 1, dur: 0.1 };
-      for (let i = 0; i < 4; i++) {
-        this.burst(dest, t + i * 0.42, { ...p, gain: 0.9 });
-        if (mat === "metal") this.tone(dest, t + i * 0.42, 880, 0.12, 0.04, "triangle");
-      }
-      return 4 * 0.42;
+      const gaps = [0, 0.46, 0.9, 1.38]; // slightly uneven, like a person walking
+      gaps.forEach((g, k) => this.footstep(dest, t + g, mat, k));
+      return 1.8;
     }
     switch (id) {
       case "sfx.door.creak": {
-        const o = this.ctx.createOscillator(), g = this.ctx.createGain(), f = this.ctx.createBiquadFilter();
-        o.type = "sawtooth"; o.frequency.setValueAtTime(190, t); o.frequency.exponentialRampToValueAtTime(95, t + 0.8);
-        f.type = "bandpass"; f.frequency.value = 700; f.Q.value = 4;
-        g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.18, t + 0.1); g.gain.linearRampToValueAtTime(0, t + 0.85);
-        o.connect(f); f.connect(g); g.connect(dest); o.start(t); o.stop(t + 0.9);
-        return 0.9;
+        // Two-stage hinge groan: wobbling sawtooth under a sweeping resonance, a latch click first, a little air noise over it.
+        this.burst(dest, t, { freq: 2600, q: 2, dur: 0.03, gain: 0.5 });
+        const o = this.ctx.createOscillator(), g = this.ctx.createGain(), f = this.ctx.createBiquadFilter(), lfo = this.ctx.createOscillator(), lg = this.ctx.createGain();
+        o.type = "sawtooth"; o.frequency.setValueAtTime(150, t + 0.05); o.frequency.exponentialRampToValueAtTime(82, t + 0.55); o.frequency.exponentialRampToValueAtTime(118, t + 0.9); o.frequency.exponentialRampToValueAtTime(70, t + 1.2);
+        lfo.frequency.value = 9; lg.gain.value = 9; lfo.connect(lg); lg.connect(o.frequency);
+        f.type = "bandpass"; f.Q.value = 5; f.frequency.setValueAtTime(520, t); f.frequency.linearRampToValueAtTime(980, t + 0.6); f.frequency.linearRampToValueAtTime(640, t + 1.2);
+        g.gain.setValueAtTime(0, t + 0.05); g.gain.linearRampToValueAtTime(0.42, t + 0.25); g.gain.setValueAtTime(0.26, t + 0.6); g.gain.linearRampToValueAtTime(0.38, t + 0.85); g.gain.linearRampToValueAtTime(0, t + 1.25);
+        o.connect(f); f.connect(g); g.connect(dest); o.start(t + 0.05); lfo.start(t + 0.05); o.stop(t + 1.3); lfo.stop(t + 1.3);
+        this.burst(dest, t + 0.1, { freq: 1400, q: 0.6, dur: 1.0, gain: 0.05 });
+        return 1.3;
       }
       case "sfx.phone.ring":
         for (let i = 0; i < 3; i++) { this.tone(dest, t + i * 0.9, 440, 0.4, 0.1); this.tone(dest, t + i * 0.9, 480, 0.4, 0.1); }
@@ -142,7 +173,7 @@ export class AudioEngine {
         return 0.35;
       }
       case "sfx.chase": {
-        for (let i = 0; i < 9; i++) this.burst(dest, t + i * 0.2, { freq: 2200, q: 3, dur: 0.07, gain: 1 });
+        for (let i = 0; i < 9; i++) this.footstep(dest, t + i * 0.2, "marble", i);
         const o = this.ctx.createOscillator(), g = this.ctx.createGain();
         o.type = "sawtooth"; o.frequency.setValueAtTime(420, t); o.frequency.linearRampToValueAtTime(900, t + 0.9); o.frequency.linearRampToValueAtTime(420, t + 1.8);
         g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.14, t + 0.1); g.gain.linearRampToValueAtTime(0, t + 1.8);
@@ -171,27 +202,65 @@ export class AudioEngine {
   private startMusic() {
     const c = this.ctx;
     this.calm = c.createGain(); this.calm.gain.value = 0; this.calm.connect(this.musicGain);
-    [110, 164.8, 277.2].forEach((f, i) => {
-      const o = c.createOscillator(), g = c.createGain(), lfo = c.createOscillator(), lg = c.createGain();
-      o.type = "sine"; o.frequency.value = f; g.gain.value = 0.05; lfo.frequency.value = 0.07 + i * 0.03; lg.gain.value = 0.02;
-      lfo.connect(lg); lg.connect(g.gain); o.connect(g); g.connect(this.calm!); o.start(); lfo.start();
-    });
     this.tension = c.createGain(); this.tension.gain.value = 0; this.tension.connect(this.musicGain);
-    const o = c.createOscillator(), og = c.createGain(), lfo = c.createOscillator(), lg = c.createGain();
-    o.type = "square"; o.frequency.value = 55; og.gain.value = 0.05; lfo.frequency.value = 2; lg.gain.value = 0.04;
-    lfo.connect(lg); lg.connect(og.gain); o.connect(og); og.connect(this.tension); o.start(); lfo.start();
-    this.loopNoise(this.tension, 0.03, 200, 0.8, "lowpass");
+    this.loopNoise(this.tension, 0.5, 220, 0.7, "lowpass", this.brownBuf); // low swell under the heartbeat
     this.calm.gain.setTargetAtTime(1, c.currentTime, 1.5);
-    // rain, HVAC, Marlow breathing: ambience bed that never reveals state
-    const rain = this.loopNoise(this.sfxGain, 0.05, 3500, 0.4);
-    const hvac = this.ctx.createOscillator(), hg = c.createGain(); hvac.frequency.value = 60; hg.gain.value = 0.02; hvac.connect(hg); hg.connect(this.sfxGain); hvac.start();
-    const breath = this.loopNoise(this.sfxGain, 0.0, 600, 0.5, "lowpass");
-    const lfo2 = c.createOscillator(), lg2 = c.createGain(); lfo2.frequency.value = 0.22; lg2.gain.value = 0.02; lfo2.connect(lg2); lg2.connect(breath.g.gain); lfo2.start();
-    this.ambience = { stop: () => { rain.stop(); hvac.stop(); breath.stop(); } };
+
+    // Calm: a slow minor pad (Am - F - G - E) with sparse bell notes. Chords overlap, so there is never silence or a click.
+    const chords = [[110, 164.81, 220, 261.63], [87.31, 130.81, 174.61, 220], [98, 146.83, 196, 246.94], [82.41, 123.47, 164.81, 207.65]];
+    let ci = 0;
+    const pad = () => {
+      const t = c.currentTime + 0.05;
+      for (const f of chords[ci++ % chords.length]) for (const det of [-7, 7]) {
+        const o = c.createOscillator(), g = c.createGain(), lp = c.createBiquadFilter();
+        o.type = "triangle"; o.frequency.value = f; o.detune.value = det; lp.type = "lowpass"; lp.frequency.value = 900;
+        g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.03, t + 3); g.gain.setValueAtTime(0.03, t + 5); g.gain.linearRampToValueAtTime(0, t + 9.5);
+        o.connect(lp); lp.connect(g); g.connect(this.calm!); o.start(t); o.stop(t + 9.6);
+      }
+    };
+    pad(); const padT = setInterval(pad, 7000);
+    const bell = () => {
+      const t = c.currentTime + 0.05, f = [440, 523.25, 659.25, 783.99][Math.floor(Math.random() * 4)];
+      const o = c.createOscillator(), g = c.createGain();
+      o.type = "sine"; o.frequency.value = f; g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.022, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + 3.2);
+      o.connect(g); g.connect(this.calm!); o.start(t); o.stop(t + 3.3);
+      this.timers.push(setTimeout(bell, 5000 + Math.random() * 7000));
+    };
+    this.timers.push(setTimeout(bell, 3500));
+
+    // Ambience bed (never reveals state): rain on glass with random drips, a low room rumble, Marlow's slow breathing.
+    const rain = this.loopNoise(this.sfxGain, 0.07, 1000, 0.3, "highpass", this.pinkBuf);
+    const rainLp = this.loopNoise(this.sfxGain, 0.05, 5500, 0.3, "lowpass", this.pinkBuf);
+    const rumble = this.loopNoise(this.sfxGain, 0.16, 170, 0.5, "lowpass", this.brownBuf);
+    const drip = () => {
+      this.burst(this.sfxGain, c.currentTime + 0.02, { freq: 2500 + Math.random() * 3500, q: 9, dur: 0.035, gain: 0.05 + Math.random() * 0.07 });
+      this.timers.push(setTimeout(drip, 120 + Math.random() * 900));
+    };
+    drip();
+    const breath = () => {
+      const t = c.currentTime + 0.05, src = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
+      src.buffer = this.pinkBuf; f.type = "bandpass"; f.frequency.value = 650; f.Q.value = 0.6;
+      g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.03, t + 0.9); g.gain.linearRampToValueAtTime(0.0001, t + 2);
+      src.connect(f); f.connect(g); g.connect(this.sfxGain); src.start(t, Math.random() * 10); src.stop(t + 2.1);
+      this.timers.push(setTimeout(breath, 3400));
+    };
+    this.timers.push(setTimeout(breath, 1500));
+    this.ambience = { stop: () => { rain.stop(); rainLp.stop(); rumble.stop(); clearInterval(padT); this.timers.forEach(clearTimeout); this.timers = []; } };
+  }
+  private thump(dest: AudioNode, t: number, freq: number, gain: number) {
+    const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+    o.type = "sine"; o.frequency.setValueAtTime(freq * 1.5, t); o.frequency.exponentialRampToValueAtTime(freq * 0.7, t + 0.14);
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(gain, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
+    o.connect(g); g.connect(dest); o.start(t); o.stop(t + 0.25);
   }
   setTension(on: boolean) {
     if (!this.ctx) return;
     this.tension?.gain.setTargetAtTime(on ? 1 : 0, this.ctx.currentTime, 1.2);
+    if (this.tensionTimer) { clearInterval(this.tensionTimer); this.tensionTimer = undefined; }
+    if (on && this.tension) {
+      const beat = () => { const t = this.ctx.currentTime + 0.02; this.thump(this.tension!, t, 58, 0.6); this.thump(this.tension!, t + 0.27, 50, 0.4); };
+      beat(); this.tensionTimer = setInterval(beat, 900);
+    }
     if (!on) this.calm?.gain.setTargetAtTime(0.4, this.ctx.currentTime, 2);
   }
 

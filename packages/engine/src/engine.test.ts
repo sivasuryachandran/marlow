@@ -287,6 +287,13 @@ describe("chase", () => {
     expect(step(refused.state, { action: "move", target: "lobby", stance: "quiet" }).state.status).toBe("playing");
     expect(step(refused.state, { action: "move", target: "lobby" }).state.status).toBe("caught"); // slamming the door adds alert 1 -> 3
   });
+  it("escaping by leaving buys a turn: he cannot follow into her new room on the same step", () => {
+    const r = step(spottedIn("hall"), { action: "move", target: "office", stance: "quiet" });
+    expect(types(r)).toContain("chase_escaped");
+    expect(types(r)).not.toContain("spotted");
+    expect(r.state.alert).toBe(2);
+    expect(r.state.status).toBe("playing");
+  });
   it("a second sighting after escaping reaches alert 3 and is caught", () => {
     const s = spottedIn("gallery", "west");
     const hidden = step(s, { action: "hide" }).state;

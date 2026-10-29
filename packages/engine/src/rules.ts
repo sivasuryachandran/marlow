@@ -183,9 +183,10 @@ export function step(prev: WorldState, action: Action, rngIn?: Rng): StepResult 
   }
 
   // Chase: after being spotted the player gets exactly one turn to hide or leave the room.
+  let escaped = false;
   if (chasing) {
     if (action.action === "move" || action.action === "hide") {
-      s.chase = false;
+      s.chase = false; escaped = true;
       ev.push({ type: "chase_escaped", perceived: true });
     } else {
       s.chase = false; s.status = "caught";
@@ -197,7 +198,10 @@ export function step(prev: WorldState, action: Action, rngIn?: Rng): StepResult 
 
   // Guard advances; spotted check after every guard step.
   for (let i = 0; i < guardSteps && s.status === "playing"; i++) {
+    const before = structuredClone(s.guard);
     advanceGuard(s);
+    // Slipping away from a chase buys one turn: he searches instead of following straight into her new room.
+    if (escaped && guardRoom(s) === s.marlow.room && !s.marlow.hidden) s.guard = before;
     ev.push({ type: "guard_moved", to: guardRoom(s), perceived: false });
     if (guardRoom(s) === s.marlow.room && !s.marlow.hidden) {
       ev.push({ type: "spotted", perceived: true });
