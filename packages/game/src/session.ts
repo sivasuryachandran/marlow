@@ -97,6 +97,7 @@ export class Session {
         case "yes": case "no":
           if (this.pending) return out("clarify", [this.clarifyRef(this.pending.candidates, s)], {}, { parsed: local.kind });
           return out("local", [{ id: "system.nothing_pending", slots: {} }], {}, { parsed: local.kind });
+        case "ready": return out("local", [{ id: "system.ready", slots: {} }], {}, { parsed: "ready" });
         case "no_back": return out("refused", [{ id: "marlow.refuse.not_adjacent", slots: {} }], {}, { parsed: "go back" });
         case "action": { this.pending = null; return this.execute(turnId, transcript, local.action, t0, "local"); }
       }

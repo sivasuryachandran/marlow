@@ -24,6 +24,16 @@
       "You're breaking up. Say again?"
     ]
   },
+  "system.ready": {
+    "speaker": "marlow",
+    "text": [
+      "Standing by, boss. Tell me where to go.",
+      "Ready when you are. Give me an order."
+    ],
+    "curt": [
+      "Standing by."
+    ]
+  },
   "system.nothing_pending": {
     "speaker": "marlow",
     "text": [

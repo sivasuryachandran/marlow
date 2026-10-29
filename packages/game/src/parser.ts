@@ -4,6 +4,7 @@ export type LocalParse =
   | { kind: "action"; action: Action }
   | { kind: "yes" } | { kind: "no" } | { kind: "repeat" }
   | { kind: "no_back" }
+  | { kind: "ready" }
   | null;
 
 /** Speech recognizers sometimes stutter ("the the", "Listen,Listen,", "sneak to the sneak to the hall"): collapse adjacent repeats. */
@@ -31,6 +32,9 @@ export function localParse(text: string, s: WorldState): LocalParse {
   if (["go back", "back", "back up", "retreat", "go back the way you came"].includes(t)) {
     return s.marlow.prevRoom ? { kind: "action", action: { action: "move", target: s.marlow.prevRoom } } : { kind: "no_back" };
   }
+  // "I'm ready, we can start, go ahead": acknowledgement only, not an order. Marlow answers; the world does not change.
+  const rest = t.replace(/\b(i am|i'm|im|we are|we're|we can|you can|you may|let's|lets|let us|all|is|set|good to|ready|start|begin|go ahead|go|now|and|then|so|when you are|whenever you are|okay|ok|alright)\b/g, " ").replace(/\s+/g, " ").trim();
+  if (!rest && /\b(ready|start|begin|go ahead|let's go|lets go|set)\b/.test(t)) return { kind: "ready" };
   if (["yes", "yeah", "yep", "affirmative", "correct"].includes(t)) return { kind: "yes" };
   if (["no", "nope", "negative"].includes(t)) return { kind: "no" };
   if (["repeat", "say again", "repeat that", "what", "come again", "say that again"].includes(t)) return { kind: "repeat" };

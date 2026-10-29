@@ -56,6 +56,12 @@ describe("local parser", () => {
     expect(localParse("repeat", s)).toEqual({ kind: "repeat" });
   });
   it("defers everything else", () => expect(localParse("peek the left door quietly", s)).toBeNull());
+  it("readiness talk is acknowledged locally, not sent to the model, and is not an order", () => {
+    for (const t of ["i am ready", "I am ready. We can start. Go ahead.", "i'm ready. You can start go.", "ready", "let's go", "go ahead"])
+      expect(localParse(t, mk())).toEqual({ kind: "ready" });
+    for (const t of ["go to the hall", "go ahead and take the ledger", "start the car"])
+      expect(localParse(t, mk())?.kind).not.toBe("ready");
+  });
   it("go back with no previous room is a refusal, not a guess", () => expect(localParse("go back", mk())).toEqual({ kind: "no_back" }));
 });
 

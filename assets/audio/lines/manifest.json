@@ -35,6 +35,21 @@
   "speaker": "marlow"
  },
  {
+  "audioKey": "system.ready.v0",
+  "text": "Standing by, boss. Tell me where to go.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "system.ready.v1",
+  "text": "Ready when you are. Give me an order.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "system.ready.c0",
+  "text": "Standing by.",
+  "speaker": "marlow"
+ },
+ {
   "audioKey": "system.nothing_pending.v0",
   "text": "Nothing to confirm, boss.",
   "speaker": "marlow"
