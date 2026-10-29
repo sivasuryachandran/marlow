@@ -1738,5 +1738,65 @@
   "audioKey": "marlow.chase.caught.c0",
   "text": "Too slow.",
   "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.guard.alerted.v0.dir=ahead",
+  "text": "He heard that. Footsteps turning my way, ahead.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.guard.alerted.v0.dir=behind",
+  "text": "He heard that. Footsteps turning my way, behind.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.guard.alerted.v0.dir=left",
+  "text": "He heard that. Footsteps turning my way, left.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.guard.alerted.v0.dir=right",
+  "text": "He heard that. Footsteps turning my way, right.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.guard.alerted.v1.dir=ahead",
+  "text": "That was too loud. He's coming this way, ahead.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.guard.alerted.v1.dir=behind",
+  "text": "That was too loud. He's coming this way, behind.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.guard.alerted.v1.dir=left",
+  "text": "That was too loud. He's coming this way, left.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.guard.alerted.v1.dir=right",
+  "text": "That was too loud. He's coming this way, right.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.guard.alerted.c0.dir=ahead",
+  "text": "He heard. Coming, ahead.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.guard.alerted.c0.dir=behind",
+  "text": "He heard. Coming, behind.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.guard.alerted.c0.dir=left",
+  "text": "He heard. Coming, left.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.guard.alerted.c0.dir=right",
+  "text": "He heard. Coming, right.",
+  "speaker": "marlow"
  }
 ]

@@ -192,6 +192,18 @@ const want = (process.argv.find(a => a.startsWith("--backends="))?.split("=")[1]
 const HELD = process.env.EVAL_SET === "heldout";
 const cmds = readFileSync(HELD ? "data/eval/heldout.jsonl" : "data/eval/commands.jsonl", "utf8").trim().split("\n").map(l => JSON.parse(l) as Cmd);
 const cfg = loadConfig();
+if (process.env.EVAL_DRYRUN === "1") {
+  // Upper bound on paid calls; the local parser answers some orders without a model call. Makes no requests.
+  const real = want.filter(b => b !== "mock").length;
+  const clips = cmds.filter(c => existsSync(`data/eval/${HELD ? "heldout-audio" : "audio"}/${c.id}.wav`)).length;
+  const audio = process.env.MODEL_API_KEY && process.env.EVAL_SKIP_AUDIO !== "1" ? clips : 0;
+  const maxTok = Number(process.env.SPARK_MAX_TOKENS ?? 1200);
+  console.log(`DRY RUN (no requests sent): ${cmds.length} commands, backends ${want.join(",")}`);
+  console.log(`  intent calls  <= ${real * cmds.length} typed + ${real * audio} from speech = ${real * (cmds.length + audio)}`);
+  console.log(`  transcribe calls = ${audio}`);
+  console.log(`  output tokens <= ${real * (cmds.length + audio) * maxTok} worst case at SPARK_MAX_TOKENS=${maxTok} (typical use is ~1/3 of that)`);
+  process.exit(0);
+}
 const backends: any[] = [];
 for (const b of want) backends.push(await evalBackend(b === "meta" ? "meta-spark" : b === "baseten" ? "baseten-spark-open" : "mock", makeIntent(cfg, b as any), cmds));
 const adv = adversarial();

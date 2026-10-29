@@ -48,3 +48,11 @@ To show the **sound-reactive guard**, on another take walk into the hall with a 
 - Don't claim accessibility results you didn't measure.
 - The 90 s cut: rows 0:00, 0:38, 0:55, 1:12 (+1:28 answer), 2:10, 2:25, 2:48.
 
+
+## Recording-day checklist
+1. `.env`: `INTENT_BACKEND=meta`; `npm run check-access` (one tiny call) before the take.
+2. `npx tsx tools/rehearse-demo.ts --live --runs 2` passes before every recording session.
+3. Voices rendered (`npm run render-lines`), headphones on, system audio captured.
+4. Memory reset, `?seed=7`, debug off.
+5. Take once with the tester or a friend blindfolded, then the clean take.
+6. Cut the 90 s version using the rows listed above; end card with the repo URL (repo must be public first).

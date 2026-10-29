@@ -99,3 +99,10 @@ Misses (latest run): Spark: "open the safe" and "banana" got a refusal instead o
 | Nov 2 | freeze; README / CREDITS / repo public |
 | Nov 3 | record + edit video |
 | Nov 4 | buffer; submit early |
+
+
+## Paused: paid API calls (2026-10-28)
+Paid calls were stopped after ~$1 of Baseten Spark Open usage (about 434K output tokens, mostly repeated 50-command evals). `.env` has `INTENT_BACKEND=mock` as a temporary override; set it to `meta` (or delete the line) to make Spark the default again.
+- `metrics.md` meta/baseten rows and `DEMO_SCRIPT.md` latencies predate the last prompt change (door `leadsTo`, speech-error hint). Re-run `npm run eval` and `tools/rehearse-demo.ts --live` once credits are back.
+- `npm run eval:dry` prints how many paid calls an eval would make and a worst-case output-token bound, and sends nothing. Run it first.
+- Offline checks done: clean clone installs, typechecks, passes 101 tests and builds; no keys or recordings in the tree or any commit; every sound cue has a synthesized fallback; the line manifest has 360 entries, none rendered yet (needs `kokoro-js`).
