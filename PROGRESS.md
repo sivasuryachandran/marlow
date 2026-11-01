@@ -120,3 +120,9 @@ Of 38 turns only 17 did anything; no run took the ledger. Fixed: (1) chatter and
 
 ## Demo script rewritten for the new story (2026-11-01)
 `DEMO_SCRIPT.md` now follows the Purloined Ledger run (15 turns: 6 Spark incl. one refusal and one clarify, 9 instant local). Live rehearsal with Spark: **2/2 played exactly as scripted**, Spark turns 1.2 to 4.7 s (median about 3.2 s), 6 model calls per run, win with alert 2 / trust 45 (the run includes a chase). `tools/rehearse-demo.ts` carries the new script.
+
+## Spark eval re-run on the latest code (2026-11-01)
+- **Bug found by the held-out set:** h30 "head out" executed `move hall` (wrong target; Spark quoted just "out" and the matcher accepted a generic pointer to the only door). Fixed in general: "out" and "up" cannot name a target; "head out / go out / step out" map to exit. The stress test now includes those words: old matcher 52 wrong-target executions, fixed matcher 0 over 41,040 replies. h30 is no longer a clean held-out case (disclosed in `metrics.heldout.md`).
+- **Dev set (50), Spark, four runs today:** 96%, 100%, 98%, 94%. Every miss was a network timeout or a single-run model wobble (c46 clarified once and not again); 0 wrong-target, 0 illegal. Latest run: p50 1.84 s, p95 8.0 s (the API was slower during that run: 3 timeouts above 8 s). Word error rate 7.8 to 11.3% across runs.
+- **Held-out (30), Spark, after the fix:** 93.3% typed, 0 wrong-target, WER 7.9%, p50 1.76 s / p95 3.08 s. Misses: h01 timeout, h26 "conceal yourself".
+- Spark Open (Baseten) was not re-run (billing); its last numbers stay in the older entries.

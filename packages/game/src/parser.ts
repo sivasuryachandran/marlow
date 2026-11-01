@@ -32,7 +32,7 @@ export function localParse(text: string, s: WorldState): LocalParse {
   if (["wait", "stop", "hold", "hold on", "hold up", "freeze", "stay", "stay put", "hold position"].includes(t)) return { kind: "action", action: { action: "wait" } };
   if (["listen", "listen up", "what do you hear"].includes(t)) return { kind: "action", action: { action: "listen" } };
   if (["hide", "get down", "take cover"].includes(t)) return { kind: "action", action: { action: "hide" } };
-  if (["exit", "get out", "leave", "extract"].includes(t)) return { kind: "action", action: { action: "exit" } };
+  if (["exit", "get out", "leave", "extract", "head out", "go out", "step out", "go outside", "get outside"].includes(t)) return { kind: "action", action: { action: "exit" } };
   if (["go back", "back", "back up", "retreat", "go back the way you came"].includes(t)) {
     return s.marlow.prevRoom ? { kind: "action", action: { action: "move", target: s.marlow.prevRoom } } : { kind: "no_back" };
   }

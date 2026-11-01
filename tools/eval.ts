@@ -126,7 +126,7 @@ function targetStress() {
     }
     return content.every(w => allowed.has(w));
   };
-  const nouns = ["office", "study", "ledger", "book", "logbook", "lobby", "entrance", "hall", "hallway", "gallery", "archway", "stairwell", "stairs", "vault", "safe", "wall", "window", "kitchen", "basement", "roof", "elevator", "gold", "left door", "right door", "door", "left", "ahead door", "behind door"];
+  const nouns = ["out", "outside", "up", "down", "away", "inside", "head out", "go out", "office", "study", "ledger", "book", "logbook", "lobby", "entrance", "hall", "hallway", "gallery", "archway", "stairwell", "stairs", "vault", "safe", "wall", "window", "kitchen", "basement", "roof", "elevator", "gold", "left door", "right door", "door", "left", "ahead door", "behind door"];
   const targets = ["lobby", "hall", "office", "gallery", "stairwell", "upstairs", "door_lobby_hall", "arch_hall_gallery", "door_hall_office", "door_hall_stairwell", "stairs_up", "ledger", "case_1", "desk_1", "unknown", "door:door_hall_office", "door:arch_hall_gallery", "door:door_lobby_hall", "door:door_hall_stairwell"];
   let sent = 0, executed = 0, wrong = 0, offTranscript = 0;
   const examples: string[] = [];
