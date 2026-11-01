@@ -119,3 +119,32 @@ body.audio-only .grid{grid-template-columns:minmax(0,720px);justify-content:cent
 .story img{display:block;width:100%;height:auto;aspect-ratio:7/4;object-fit:cover;animation:fadein .9s ease}
 .story figcaption{padding:.45rem .7rem;font:500 .72rem var(--mono);color:var(--dim)}
 @keyframes fadein{from{opacity:0}to{opacity:1}}
+
+.panels{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.8rem;margin:.4rem 0 1rem}
+.panels figure{margin:0;background:#0d111a;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.panels img{display:block;width:100%;aspect-ratio:7/4;object-fit:cover}
+.panels figcaption{padding:.5rem .7rem;font:500 .75rem var(--mono);color:var(--dim)}.panels figcaption b{color:var(--amber)}
+/* ---------- phones ---------- */
+@media(max-width:700px){
+  body{padding-bottom:1rem}
+  #topbar{position:static;display:grid;grid-template-columns:1fr 1fr;gap:.35rem;padding:.5rem}
+  .cell{padding:.3rem .55rem;font-size:.78rem;min-width:0}
+  .cell.freq{display:none}
+  .cell.alert{grid-column:1/-1;gap:.3rem}.cell.alert small{display:none}
+  #topbar .chip{flex:1;text-align:center;white-space:nowrap;font-size:.62rem;padding:.25rem .15rem}
+  .cell:has(#hTrust){grid-column:1/-1}.meter{flex:1;width:auto}
+  #audioOnly{justify-content:center}
+  #tabs{flex-wrap:nowrap;overflow-x:auto;white-space:nowrap;padding:.3rem .5rem 0;scrollbar-width:none}
+  #tabs button{padding:.55rem .65rem;font-size:.7rem;flex:none}
+  main{padding:.6rem .5rem}
+  .panel{padding:.8rem}
+  /* controls first: talk, last words, choices; then the log; the sonar last */
+  .grid>.mid{order:1}.grid>[aria-labelledby="logH"]{order:2}.grid>[aria-labelledby="sonarH"]{order:3}
+  #sonar{max-width:340px}
+  #log{max-height:40vh}
+  #ptt{font-size:1rem;padding:1rem}
+  #foot{position:static;margin-top:1rem}#foot .keys{display:none}
+  #hero{padding:2rem .5rem}
+  #casefileFrame{height:60vh}
+}
+@media(min-width:900px){#truth{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1rem;align-items:start}#map{max-width:none;margin:0}}

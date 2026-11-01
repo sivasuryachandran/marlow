@@ -12,7 +12,7 @@
 
 <header id="topbar" aria-label="Run status">
   <div class="cell freq"><span class="dot"></span><b>142.85 MHz</b><small>OWL ⇄ MARLOW · SECURE</small></div>
-  <div class="cell"><small>LINK LATENCY</small><b id="hLatency">—</b></div>
+  <div class="cell"><small>ORDER → REPLY</small><b id="hLatency">—</b></div>
   <div class="cell"><small>TURN · OBJECTIVE</small><b><span id="hTurn">00</span> · <span id="hObj">Secure the ledger</span></b></div>
   <div class="cell alert" role="group" aria-label="Alert level"><small>ALERT</small>
     <span class="chip on" data-a="0">0 CALM</span><span class="chip" data-a="1">1 UNEASY</span><span class="chip" data-a="2">2 SEARCHING</span><span class="chip" data-a="3">3 CAUGHT</span>
@@ -103,14 +103,14 @@
   <div class="panel prose">
     <h2>The job</h2>
     <p>You are <b>Owl</b>, once the best fixer in the city. Three years ago, on the night of the Fenwick job, the lights went out and you lost your sight. All you remember from that night is a sound: <i>a heavy step, a drag, and keys.</i></p>
-    <p><b>Marlow</b> is your eyes: young, brave, the only one who still calls you "boss". Your old partner <b>Ines</b> sends you both into the Hale Gallery for one ledger. "Don't read it. It's only numbers."</p>
+    <p><b>Marlow</b> is your eyes: young, brave, the only one who still calls you “boss”. Your old partner <b>Ines</b> sends you both into the Hale Gallery for one ledger. “Don’t read it. It’s only numbers.”</p>
     <h2>How to play</h2>
     <ol>
       <li>Wear headphones. The whole game is 3D sound: you can hear which direction the guard is in.</li>
       <li>Speak an order (hold Space, or just talk if the mic is hands-free), or type it, or press a tactical chip.</li>
       <li>Marlow tells you what she sees. You only know what she tells you and what you hear.</li>
       <li>Get the <b>ledger</b> from the office and <b>exit through the lobby</b>. Doors are noisy; the guard hears them. If he spots her he runs: you get exactly one turn to hide or leave the room.</li>
-      <li>If you win, Marlow plays you the tape she found. Say <b>"burn it"</b> or <b>"send it"</b>.</li>
+      <li>If you win, Marlow plays you the tape she found. Say <b>“burn it”</b> or <b>“send it”</b>.</li>
     </ol>
     <h2>Things to say</h2>
     <p class="mono">listen · what do you see · go to the hall · peek the left door quietly · hide · take the ledger · go back · exit<br>who is Ines · where can I hide · what's in the ledger</p>
@@ -123,6 +123,8 @@
   <div class="panel">
     <h2>The Case File <small id="caseRun">play a run first</small></h2>
     <div class="stats" id="caseStats"></div>
+    <h3>Story panels from this run</h3>
+    <div id="casePanels" class="panels"><p class="dim">The illustrations appear here as the story unfolds.</p></div>
     <p class="dim">The Case File is a short comic of your run, drawn for sighted friends. It needs the server and takes about a minute.</p>
     <div class="btns"><button id="casefile" class="primary" type="button">Make the Case File</button></div>
     <p id="casefileOut" role="status"></p>

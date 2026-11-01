@@ -44,7 +44,13 @@ const ART: Record<string, [string, string]> = {
   story_office: ["office", "The empty safe. The ledger, open on the desk."], machine_ring: ["machine", "The answering machine."], machine_late: ["machine", "The answering machine."],
   ledger_twist: ["tape", "A tape, taped inside the back cover."], client_checkin: ["ines", "Ines, on the line."],
 };
+let seen: [string, string][] = [];
+function renderPanels() {
+  const box = $("casePanels"); box.replaceChildren(); if (!seen.length) { box.innerHTML = '<p class="dim">The illustrations appear here as the story unfolds.</p>'; return; }
+  seen.forEach(([id, cap], i) => { const f = document.createElement("figure"); f.innerHTML = `<img alt="" loading="lazy"><figcaption><b>PANEL ${String(i + 1).padStart(2, "0")}</b> · </figcaption>`; (f.querySelector("img") as HTMLImageElement).src = `/art/story/${id}.jpg`; (f.querySelector("img") as HTMLImageElement).alt = cap; f.querySelector("figcaption")!.append(cap); box.append(f); });
+}
 function showArt(id: string, caption: string) {
+  if (!seen.some(([x]) => x === id)) { seen.push([id, caption]); renderPanels(); }
   const fig = $("story"), img = $("storyImg") as HTMLImageElement;
   img.src = `/art/story/${id}.jpg`; img.alt = caption; $("storyCap").textContent = caption; fig.hidden = false;
 }
@@ -195,6 +201,6 @@ export function onTurn(out: TurnOutput) {
   renderHeader(); renderTopology(); renderSonarNote(); renderClarify(out); renderLastTx(out); storyArt(out);
   document.querySelectorAll("#chips button").forEach(b => b.classList.remove("on")); $("choices").replaceChildren();
 }
-export function resetRun() { pips = []; peakAlert = 0; $("story").hidden = true; }
+export function resetRun() { pips = []; peakAlert = 0; seen = []; if (document.getElementById("casePanels")) renderPanels(); $("story").hidden = true; }
 export function setMic(text: string, live: boolean) { $("micState").textContent = text; $("ptt").classList.toggle("live", live); }
 export function micLevel(rms: number) { ($("micLevel") as HTMLElement).style.width = `${Math.min(100, Math.round(rms * 900))}%`; }
