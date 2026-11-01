@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import level from "../../../data/level.json";
 import linesJson from "../../../data/lines.json";
+import loreJson from "../../../data/lore.json";
 import beatsJson from "../../../data/beats.json";
 import cuesJson from "../../../data/cues.json";
 import { createInitialState, solve, candidateActions, step, Rng, revealRoom } from "@marlow/engine";
@@ -393,5 +394,38 @@ describe("conversation and guidance", () => {
     const sess = mkSession(); sess.start();
     const out = await sess.submit("where can I hide?");
     expect(out?.kind).toBe("local");
+  });
+});
+
+describe("story facts", () => {
+  const lore = loreJson as unknown as Record<string, [string, string][]>;
+  const ask = async (sess: ReturnType<typeof mkSession>, q: string) => (await sess.submit(q))?.lines.map(l => l.id)[0];
+  it("Marlow answers story questions only from what has been discovered", async () => {
+    const sess = mkSession({ lore }); sess.start();
+    expect(await ask(sess, "who is Ines?")).toBe("marlow.lore.ines.0");
+    expect(await ask(sess, "what's in the ledger")).toBe("marlow.lore.ledger.0");
+    expect(await ask(sess, "tell me about the tape")).toBe("marlow.lore.unknown");
+    expect(await ask(sess, "who is Halloran")).toBe("marlow.lore.halloran.0");
+  });
+  it("answers deepen as facts are found, and a question is free (no turn passes)", async () => {
+    const sess = mkSession({ lore }); sess.start();
+    await sess.submit("go to hall"); await sess.submit("go to office");
+    const turn = sess.state.turn;
+    expect(await ask(sess, "what is the ledger")).toBe("marlow.lore.ledger.1");
+    expect(await ask(sess, "who is Hale")).toBe("marlow.lore.hale.0");
+    expect(sess.state.turn).toBe(turn);
+  });
+  it("lore line ids all exist and every fact names a real beat", () => {
+    const ids = new Set(beats.map(b => b.id));
+    for (const [, levels] of Object.entries(lore)) for (const [fact, line] of levels) {
+      expect(bank[line]).toBeTruthy();
+      expect(fact === "job" || fact === "machine" || ids.has(fact)).toBe(true);
+    }
+  });
+  it("stuck nudges fire once, in story order", async () => {
+    const sess = mkSession({ lore }); sess.start();
+    const seen: string[] = [];
+    for (let i = 0; i < 6; i++) { const o = await sess.submit("wait"); seen.push(...(o?.lines.map(l => l.id) ?? [])); if (sess.state.status !== "playing") break; }
+    expect(seen.filter(id => id === "marlow.nudge.office").length).toBeLessThanOrEqual(1);
   });
 });

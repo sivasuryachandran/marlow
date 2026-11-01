@@ -6,7 +6,30 @@
 
 Built for the Meta Global AI Developer Hackathon (Indie track). **All code, data and tooling in this repo were written during the hackathon.** See [PROGRESS.md](PROGRESS.md) for status and open items, [CREDITS.md](CREDITS.md) for assets and licenses.
 
-## Run it
+## How to play (2 minutes)
+
+You need **Chrome** (or another Chromium browser), **headphones** (the whole game is 3D sound, so stereo headphones matter), and Node 20+.
+
+```bash
+git clone https://github.com/sivasuryachandran/marlow.git
+cd marlow
+npm install
+npm run dev          # then open http://localhost:5173/?seed=7
+```
+
+1. Put your headphones on, click **Start**, and allow the microphone when Chrome asks.
+2. A client phones in, then Marlow, your operative inside the Hale Gallery, tells you where she is. You are **Owl**, who cannot see. You only know what Marlow tells you and what you hear in her earpiece.
+3. **Hold the big button (or hold Space) and speak an order**, then release. Or type in the box. Try:
+   `listen` · `what do you see` · `go to the hall` · `peek the left door` · `quietly go to the office` · `hide` · `take the ledger` · `go back` · `exit`
+4. Ask Marlow questions any time (they are free and use no turn): `who is Ines`, `where can I hide`, `what's in the ledger`.
+5. Get the **ledger** from the office and **exit through the lobby** without being caught. The guard hears noisy doors. If he spots Marlow he runs at her and you have exactly one turn to hide or leave the room.
+6. If you win, Marlow asks what to do with the tape she found: say **"burn it"** or **"send it"**.
+
+Marlow's voice lines are bundled (`assets/audio/lines/*.mp3`), so a fresh clone talks. Sound effects and music are generated in the browser. Tips: short orders work best; Marlow answers "say again" to small talk; in Settings you can turn on rain and room ambience, mono audio, and captions.
+
+**With no API keys** the game still runs: speech uses Chrome's built-in recognition and understanding uses a small offline parser (fewer phrasings). **With keys** (`cp .env.example .env`, fill `MODEL_API_KEY`, then `npm run server` in a second terminal and `npm run dev`) it uses Muse Voice Transcribe and Muse Spark for natural phrasing, and the mic listens hands-free (no button to hold).
+
+## Run it (developer commands)
 
 ```bash
 npm install
@@ -23,7 +46,7 @@ npx tsx tools/simulate.ts   # balance: cautious / reckless / expert over 1000 se
 
 Copy `.env.example` to `.env` for keys. **The game is playable with no keys**: typed input or browser speech recognition, an in-browser deterministic intent mock, placeholder tones where pre-rendered voice lines are missing. With keys and `npm run server` it uses Muse Voice Transcribe and the Spark backend you pick. Headphones recommended.
 
-Controls: hold **Space** or the big button to talk; or type. Try "listen", "go to the hall", "peek the left door quietly", "take the ledger", "go back", "exit". Ambiguous orders get a spoken clarifying question; impossible ones get a refusal and the world does not change. If the guard spots Marlow he runs at her: you get exactly one turn to hide or leave the room.
+Controls: hold **Space** or the big button to talk (with the server and a key the mic is always listening); or type. Try "listen", "go to the hall", "peek the left door quietly", "take the ledger", "go back", "exit". Ambiguous orders get a spoken clarifying question; impossible ones get a refusal and the world does not change. If the guard spots Marlow he runs at her: you get exactly one turn to hide or leave the room.
 
 ## How it works
 

@@ -1,0 +1,88 @@
+{
+  "ines": [
+    [
+      "job",
+      "marlow.lore.ines.0"
+    ],
+    [
+      "story_gallery",
+      "marlow.lore.ines.1"
+    ],
+    [
+      "machine",
+      "marlow.lore.ines.2"
+    ],
+    [
+      "ledger_twist",
+      "marlow.lore.ines.3"
+    ]
+  ],
+  "halloran": [
+    [
+      "job",
+      "marlow.lore.halloran.0"
+    ],
+    [
+      "story_limp",
+      "marlow.lore.halloran.1"
+    ],
+    [
+      "ledger_twist",
+      "marlow.lore.halloran.2"
+    ]
+  ],
+  "hale": [
+    [
+      "job",
+      "marlow.lore.hale.0"
+    ],
+    [
+      "machine",
+      "marlow.lore.hale.1"
+    ],
+    [
+      "ledger_twist",
+      "marlow.lore.hale.2"
+    ]
+  ],
+  "fenwick": [
+    [
+      "job",
+      "marlow.lore.fenwick.0"
+    ],
+    [
+      "story_office",
+      "marlow.lore.fenwick.1"
+    ],
+    [
+      "ledger_twist",
+      "marlow.lore.fenwick.2"
+    ]
+  ],
+  "ledger": [
+    [
+      "job",
+      "marlow.lore.ledger.0"
+    ],
+    [
+      "story_office",
+      "marlow.lore.ledger.1"
+    ],
+    [
+      "ledger_twist",
+      "marlow.lore.ledger.2"
+    ]
+  ],
+  "tape": [
+    [
+      "ledger_twist",
+      "marlow.lore.tape.0"
+    ]
+  ],
+  "marlow": [
+    [
+      "job",
+      "marlow.lore.marlow.0"
+    ]
+  ]
+}

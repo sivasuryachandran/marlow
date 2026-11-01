@@ -4,7 +4,7 @@ import type { LineBank } from "./lines";
 
 export interface Trigger {
   start?: boolean; first_run?: boolean; repeat_run?: boolean; last_trust_loss?: string | null;
-  alert_gte?: number; entered?: string; heard?: string; heard_guard?: boolean; in_room?: string; unless_fired?: string[]; taken?: string; turn_gte?: number; no_objective?: boolean; trust_lt?: number; status?: "won" | "caught";
+  alert_gte?: number; entered?: string; heard?: string; heard_guard?: boolean; in_room?: string; unless_fired?: string[]; after_fired?: string[]; taken?: string; turn_gte?: number; no_objective?: boolean; trust_lt?: number; status?: "won" | "caught";
 }
 export interface Beat { id: string; trigger: Trigger; lineIds: string[]; cueIds: string[]; once: boolean }
 export interface DirectorCtx { runNumber: number; start: boolean }
@@ -14,6 +14,8 @@ const MAX_BEATS = 2;
 /** L3: reads state + events, never writes either. Returns beats to speak (<= 2 per turn). */
 export class Director {
   private fired = new Set<string>();
+  /** Which beats have been spoken this run: the story's discovered facts. */
+  has(id: string) { return this.fired.has(id); }
   constructor(private beats: Beat[]) {}
 
   evaluate(s: WorldState, events: GameEvent[], ctx: DirectorCtx): Beat[] {
@@ -23,6 +25,7 @@ export class Director {
       if (b.once && this.fired.has(b.id)) continue;
       if (!matches(b.trigger, s, events, ctx)) continue;
       if (b.trigger.unless_fired?.some(id => this.fired.has(id))) continue;
+      if (b.trigger.after_fired?.some(id => !this.fired.has(id))) continue;
       this.fired.add(b.id);
       out.push(b);
     }
@@ -59,7 +62,7 @@ export function validateBeats(beats: Beat[], bank: LineBank, cues: string[], lev
     for (const l of b.lineIds) if (!bank[l]) errs.push(`beat ${b.id}: unknown line ${l}`);
     for (const c of b.cueIds) if (!cues.includes(c)) errs.push(`beat ${b.id}: unknown cue ${c}`);
     for (const r of [b.trigger.entered, b.trigger.in_room]) if (r && !entities.has(r)) errs.push(`beat ${b.id}: unknown room ${r}`);
-    for (const u of b.trigger.unless_fired ?? []) if (!beats.some(x => x.id === u)) errs.push(`beat ${b.id}: unless_fired names unknown beat ${u}`);
+    for (const u of [...(b.trigger.unless_fired ?? []), ...(b.trigger.after_fired ?? [])]) if (!beats.some(x => x.id === u)) errs.push(`beat ${b.id}: unless_fired/after_fired names unknown beat ${u}`);
     if (b.trigger.taken && !entities.has(b.trigger.taken)) errs.push(`beat ${b.id}: unknown item ${b.trigger.taken}`);
     if (!Object.keys(b.trigger).length) errs.push(`beat ${b.id}: empty trigger`);
   }

@@ -15,7 +15,7 @@ export interface TurnOutput {
 }
 export interface SessionConfig {
   level: unknown; bank: LineBank; beats: Beat[]; intent: IntentAdapter; seed: number; memory: MemoryStore;
-  timeoutMs?: number; knowledgeScope?: KnowledgeScope; runId?: string; onLog?: (row: Record<string, unknown>) => void; now?: () => number;
+  timeoutMs?: number; lore?: Record<string, [string, string][]>; knowledgeScope?: KnowledgeScope; runId?: string; onLog?: (row: Record<string, unknown>) => void; now?: () => number;
 }
 
 const TIMEOUT = Symbol("timeout");
@@ -108,6 +108,7 @@ export class Session {
         case "yes": case "no":
           if (this.pending) return out("clarify", [this.clarifyRef(this.pending.candidates, s)], {}, { parsed: local.kind });
           return out("local", [{ id: "system.nothing_pending", slots: {} }], {}, { parsed: local.kind });
+        case "lore": return out("local", [{ id: this.loreLine(local.topic), slots: {} }], {}, { parsed: `lore:${local.topic}` });
         case "cover": return out("local", coverRefs(s), {}, { parsed: "cover" });
         case "talk": return out("local", [{ id: "marlow.talk", slots: {} }], {}, { parsed: "talk" });
         case "look": return out("local", this.lookRefs(s), {}, { parsed: "look" });
@@ -170,6 +171,13 @@ export class Session {
     for (const i of s.items) if (i.room === here && s.knowledge.items.includes(i.id)) refs.push({ id: "marlow.arrive.item", slots: { item: i.spokenName } });
     for (const p of s.props) if (p.room === here && p.tags.includes("hide") && s.knowledge.props.includes(p.id)) refs.push({ id: "marlow.arrive.hide", slots: { prop: p.spokenName } });
     return refs;
+  }
+  /** The highest-level answer on a topic whose required story fact has been discovered; otherwise "I don't know yet". */
+  private loreLine(topic: string): string {
+    const known = (f: string) => f === "job" || (f === "machine" ? this.director.has("machine_ring") || this.director.has("machine_late") : this.director.has(f));
+    let best: string | null = null;
+    for (const [fact, lineId] of this.cfg.lore?.[topic] ?? []) if (known(fact)) best = lineId;
+    return best ?? "marlow.lore.unknown";
   }
   private clarifyRef(cands: string[], s: WorldState, ctype?: string): LineRef {
     const name = (id: string) => [...s.rooms, ...s.doors, ...s.props, ...s.items].find(x => x.id === id)!.spokenName;

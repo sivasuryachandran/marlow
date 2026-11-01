@@ -19,7 +19,7 @@ mkdirSync(dir, { recursive: true });
 const manifest: { audioKey: string; text: string; speaker: string }[] = [];
 for (const [id, def] of Object.entries(bank)) manifest.push(...expandLine(id, def, level));
 writeFileSync(`${dir}/manifest.json`, JSON.stringify(manifest, null, 1));
-const todo = manifest.filter(m => !existsSync(`${dir}/${m.audioKey}.wav`));
+const todo = manifest.filter(m => !existsSync(`${dir}/${m.audioKey}.wav`) && !existsSync(`${dir}/${m.audioKey}.mp3`)); // a committed mp3 counts as rendered
 console.log(`${manifest.length} lines in manifest; ${todo.length} not yet rendered.`);
 if (process.argv.includes("--manifest") || !todo.length) process.exit(0);
 
@@ -35,4 +35,4 @@ for (const m of todo) {
   await audio.save(`${dir}/${m.audioKey}.wav`);
   if (++n % 25 === 0) console.log(`rendered ${n}/${todo.length}`);
 }
-console.log(`done: ${n} files in ${dir}`);
+console.log(`done: ${n} files in ${dir}. Now run: sh tools/compress-lines.sh (the game plays the small mp3s)`);

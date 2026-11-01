@@ -2051,7 +2051,7 @@
  },
  {
   "audioKey": "marlow.twist.tape.v0",
-  "text": "Boss. There's a tape in the drawer under the ledger. A pen label: Fenwick, the ninth. That's the night you lost your sight. I'm bringing it out too.",
+  "text": "Boss. There's a tape taped inside the back cover. A pen label: Fenwick, the ninth. That's the night you lost your sight. I'm bringing it out too.",
   "speaker": "marlow"
  },
  {
@@ -2231,22 +2231,22 @@
  },
  {
   "audioKey": "marlow.story.office.v0",
-  "text": "The ledger's open on the desk. Old payments. One line says Fenwick, the ninth, forty thousand, and a single initial. H.",
+  "text": "The safe is standing open, and it's empty. But the ledger's lying open on the desk, right in front of me, like a menu. Nobody hides what nobody looks at.",
   "speaker": "marlow"
  },
  {
   "audioKey": "marlow.story.office.c0",
-  "text": "The ledger. Fenwick, the ninth. Forty thousand. Initial H.",
+  "text": "Safe's empty. The ledger's open on the desk.",
   "speaker": "marlow"
  },
  {
   "audioKey": "marlow.story.stairwell.v0",
-  "text": "Stairs going up. There's a radio playing low up there, a ball game I think. He has all night. The metal rings under everything.",
+  "text": "Stairs going up. There's a radio playing low up there, and someone humming along, off key. He has all night. The metal rings under everything.",
   "speaker": "marlow"
  },
  {
   "audioKey": "marlow.story.stairwell.c0",
-  "text": "Stairs. A radio up there. The metal rings.",
+  "text": "Stairs. A radio and humming upstairs. The metal rings.",
   "speaker": "marlow"
  },
  {
@@ -2271,12 +2271,12 @@
  },
  {
   "audioKey": "marlow.epilogue.ask.v0",
-  "text": "I played the tape in the cab. It's Ines, telling Halloran to keep you inside until the lights go. You'd have known her voice, boss. Burn it, or send it?",
+  "text": "That was Ines on the tape, boss, and I could hear keys behind her. Halloran's. Burn it, or send it?",
   "speaker": "marlow"
  },
  {
   "audioKey": "marlow.epilogue.ask.c0",
-  "text": "It's Ines, on the tape, with Halloran. Burn it, or send it?",
+  "text": "That's Ines, with Halloran's keys behind her. Burn it, or send it?",
   "speaker": "marlow"
  },
  {
@@ -2492,6 +2492,146 @@
  {
   "audioKey": "marlow.refuse.no_hide_spot.chase.c0",
   "text": "No cover! Move me!",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "client.tape.v0",
+  "text": "Keep him inside, Halloran. Not a word to him. When the lights go out, Owl does not leave this building.",
+  "speaker": "client"
+ },
+ {
+  "audioKey": "marlow.nudge.office.v0",
+  "text": "The ledger's in the office off the main hall, boss. Want me to head there?",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.nudge.office.c0",
+  "text": "The ledger's in the office, boss.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.nudge.take.v0",
+  "text": "It's right there on the desk, boss. Want me to take it?",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.nudge.take.c0",
+  "text": "Ledger's on the desk. Take it?",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.nudge.exit.v0",
+  "text": "We have it. Back through the hall and out the lobby, boss.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.nudge.exit.c0",
+  "text": "Back to the lobby, boss. Out.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.lore.unknown.v0",
+  "text": "I don't know yet, boss.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.lore.unknown.v1",
+  "text": "Nothing on that so far, boss.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.lore.unknown.c0",
+  "text": "Don't know yet.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.lore.ines.0.v0",
+  "text": "Ines is the client, boss. Your old partner. She hired us for the ledger.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.lore.ines.1.v0",
+  "text": "Ines is the client. She also signed the guest book here, on the night of Fenwick.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.lore.ines.2.v0",
+  "text": "Ines is the client, and Hale's machine calls her by name. She signed the guest book on the night of Fenwick. They're tied together.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.lore.ines.3.v0",
+  "text": "Ines is the client, boss. And she's the voice on the tape, telling Halloran to keep you inside.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.lore.halloran.0.v0",
+  "text": "Halloran is the night man, boss. I haven't heard him yet.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.lore.halloran.1.v0",
+  "text": "Halloran is the night man. A heavy step, a drag, and keys. It's the sound you remember from Fenwick.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.lore.halloran.2.v0",
+  "text": "Halloran was in the building at Fenwick. Ines told him to keep you inside until the lights went out.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.lore.hale.0.v0",
+  "text": "Hale owns the gallery, boss. That's all I know.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.lore.hale.1.v0",
+  "text": "Hale owns the gallery. He left Ines a message, telling her to burn the ledger before you read it.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.lore.hale.2.v0",
+  "text": "Hale owned the building at Fenwick, and he kept the tape as insurance. It was taped inside his ledger.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.lore.fenwick.0.v0",
+  "text": "Fenwick is the job where you lost your sight, boss. All you remember is a step, a drag, and keys.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.lore.fenwick.1.v0",
+  "text": "Fenwick is the job where you lost your sight. The ledger has a line for it: the ninth, forty thousand, initial H.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.lore.fenwick.2.v0",
+  "text": "Fenwick was a setup, boss. Ines sold you out to Hale, and Halloran kept you inside.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.lore.ledger.0.v0",
+  "text": "The ledger is in the office off the main hall, boss. Ines says it's only numbers.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.lore.ledger.1.v0",
+  "text": "The ledger is a payment book. One old line says Fenwick, the ninth, forty thousand, initial H.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.lore.ledger.2.v0",
+  "text": "The ledger names the payment for Fenwick, and it had the tape taped inside the back cover.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.lore.tape.0.v0",
+  "text": "The tape is Ines giving Halloran his orders for the night of Fenwick.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.lore.marlow.0.v0",
+  "text": "I'm Marlow, boss. Your eyes.",
   "speaker": "marlow"
  }
 ]

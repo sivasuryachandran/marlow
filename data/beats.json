@@ -198,13 +198,46 @@
   "once": true
  },
  {
-  "id": "turn_8_nudge",
+  "id": "nudge_office",
   "trigger": {
-   "turn_gte": 8,
-   "no_objective": true
+   "turn_gte": 5,
+   "unless_fired": [
+    "story_office"
+   ]
   },
   "lineIds": [
-   "marlow.nudge"
+   "marlow.nudge.office"
+  ],
+  "cueIds": [],
+  "once": true
+ },
+ {
+  "id": "nudge_take",
+  "trigger": {
+   "turn_gte": 8,
+   "after_fired": [
+    "story_office"
+   ],
+   "unless_fired": [
+    "ledger_twist"
+   ]
+  },
+  "lineIds": [
+   "marlow.nudge.take"
+  ],
+  "cueIds": [],
+  "once": true
+ },
+ {
+  "id": "nudge_exit",
+  "trigger": {
+   "turn_gte": 12,
+   "after_fired": [
+    "ledger_twist"
+   ]
+  },
+  "lineIds": [
+   "marlow.nudge.exit"
   ],
   "cueIds": [],
   "once": true
@@ -227,6 +260,7 @@
   },
   "lineIds": [
    "marlow.outro.win",
+   "client.tape",
    "marlow.epilogue.ask"
   ],
   "cueIds": [

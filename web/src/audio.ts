@@ -141,7 +141,11 @@ export class AudioEngine {
     const mat = id.startsWith("sfx.footsteps.") ? id.split(".")[2] : "";
     if (mat) {
       if (limp) { // Halloran: a heavy step, then the other foot dragging, over and over
-        [0, 1.0].forEach((g, k) => { this.footstep(dest, t + g, mat, k, 1.1); this.footstep(dest, t + g + 0.46, "carpet", k + 3, 0.5); });
+        [0, 1.0].forEach((g, k) => {
+          this.footstep(dest, t + g, mat, k, 1.1); this.footstep(dest, t + g + 0.46, "carpet", k + 3, 0.5);
+          // keys on his belt: a quick scatter of bright metallic ticks just after the heavy step
+          [0.06, 0.1, 0.17, 0.23].forEach((d, j) => this.tone(dest, t + g + d, 3200 + j * 610, 0.07, 0.02, "triangle"));
+        });
         return 1.9;
       }
       const gaps = [0, 0.46, 0.9, 1.38]; // slightly uneven, like a person walking
@@ -336,7 +340,7 @@ export class AudioEngine {
   }
 
   private async playVoice(line: SpokenLine): Promise<void> {
-    const c = this.ctx, buf = await this.asset(`/audio/lines/${line.audioKey}.wav`);
+    const c = this.ctx, buf = await this.asset(`/audio/lines/${line.audioKey}.mp3`);
     this.duckOn();
     const t = c.currentTime + 0.02;
     let dur: number;

@@ -8,6 +8,7 @@ export type LocalParse =
   | { kind: "look" }
   | { kind: "talk" }
   | { kind: "cover" }
+  | { kind: "lore"; topic: string }
   | null;
 
 /** Speech recognizers sometimes stutter ("the the", "Listen,Listen,", "sneak to the sneak to the hall"): collapse adjacent repeats. */
@@ -39,6 +40,13 @@ export function localParse(text: string, s: WorldState): LocalParse {
   if (/\b(where (can|could|do|should) (i|you|we) hide|any (cover|hiding)|hiding (spot|place)|where is (the )?cover|where'?s (the )?cover|is there (any )?(cover|a place to hide))\b/.test(t)) return { kind: "cover" };
   // Checking in on her ("can you hear me", "are you there", "hello"): she answers; no turn passes, nothing moves.
   if (/^(hey|hi|hello|testing|test|hello marlow|hey marlow|are you there|you there|is anyone there|can you hear me|do you hear me|can you hear me now|are you (ok|okay|alright|all right)|how are you|you ok|you okay|are you with me|are you listening|marlow)( there| now)?$/.test(t)) return { kind: "talk" };
+  // Story questions ("who is Ines", "tell me about the tape"): answered from the facts discovered so far.
+  if (/^(who|what|tell me|explain|remind me|whats|who s|what s)\b/.test(t) || /^who are you/.test(t)) {
+    const TOPICS: [string, RegExp][] = [["ines", /\b(ines|client|partner)\b/], ["halloran", /\b(halloran|guard|night ?man|watchman|limp)\b/], ["hale", /\b(hale|owner)\b/],
+      ["fenwick", /\b(fenwick|that night|the night)\b/], ["ledger", /\b(ledger|numbers|payments?)\b/], ["tape", /\b(tape|recording|cassette)\b/], ["marlow", /\b(who are you|about yourself|about you)\b/]];
+    const hit = TOPICS.find(([, re]) => re.test(t));
+    if (hit && !/\b(see|hear|do you|can you|should|where)\b/.test(t.replace(/who are you/, ""))) return { kind: "lore", topic: hit[0] };
+  }
   // "What do you see / look around": Marlow describes the room from what she already knows. Free, local, no turn passes.
   if (/\b(what (do|can) you see|what do you see|look around|what is around|what's around|describe|where are you|what(?:'s| is) (in )?(the )?(room|here))\b/.test(t) && !/\b(door|arch|through|behind|left|right|stairs?|gallery|office|hall|lobby|stairwell)\b/.test(t)) return { kind: "look" };
   // "I'm ready, we can start, go ahead": acknowledgement only, not an order. Marlow answers; the world does not change.

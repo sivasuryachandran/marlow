@@ -1,4 +1,5 @@
 import linesJson from "../../data/lines.json";
+import loreJson from "../../data/lore.json";
 import beatsJson from "../../data/beats.json";
 import level from "../../data/level.json";
 import { Session, loadBank, renderLine, type Beat, type SpokenLine, type TurnOutput } from "@marlow/game";
@@ -68,7 +69,7 @@ function postLog(runId: string, row: Record<string, unknown>) {
 function newSession() {
   const runId = `${seed}-${Date.now().toString(36)}`;
   session = new Session({
-    level, bank, beats: beatsJson as Beat[], intent, seed, memory: store, runId,
+    level, bank, beats: beatsJson as Beat[], lore: loreJson as unknown as Record<string, [string, string][]>, intent, seed, memory: store, runId,
     timeoutMs: Number((q.get("timeout") ?? 7000)), onLog: row => postLog(runId, row),
   });
   $("log").replaceChildren(); $("end").hidden = true; $("casefileOut").textContent = "";
