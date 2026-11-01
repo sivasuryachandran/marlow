@@ -180,8 +180,8 @@ input[type=text]{width:100%;background:#0c0907;border:1px solid var(--line);bord
 
 /* ---------- spectator & seer maps: blueprints ---------- */
 #debug{font:12px/1.35 var(--mono);background:#0c0907;border:1px solid var(--line);padding:.7rem;white-space:pre-wrap;overflow:auto;max-height:55vh;color:var(--dim)}
-#map,.seer-map svg{background:url(/art/ui/blueprint.jpg) center/cover,#163a6b;border:6px solid #1c2a3e;box-shadow:0 0 0 1px var(--brass2);width:100%;display:block}
-#map{max-width:none;margin:.6rem 0}
+.plan{display:block;width:100%;height:auto;background:#0b0907;border:8px solid #2b2218;box-shadow:0 0 0 1px var(--brass2),0 12px 30px rgba(0,0,0,.6)}
+#map{margin:.6rem 0}
 @media(min-width:900px){#truth{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1rem;align-items:start}#map{margin:0}}
 
 /* ---------- settings ---------- */
@@ -203,7 +203,6 @@ input[type=range]{width:100%;accent-color:var(--brass)}
 .seer .truth{font:1.25rem var(--serif);color:#fff6e4;background:rgba(0,0,0,.6);border-left:4px solid var(--red);padding:.75rem 1rem;margin:0 0 1rem}
 .seer-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:1rem}
 @media(min-width:1000px){.seer-grid{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)}}
-.seer-map svg{height:auto}
 .seer .legend{font:.82rem var(--type);margin:.5rem 0 0}
 .seer-log{max-height:65vh;overflow:auto;background:url(/art/ui/paper.jpg) center/cover,var(--paper);color:var(--paper-ink);padding:.9rem 1rem;font:.92rem/1.5 var(--mono)}
 .seer-log p{margin:.15rem 0 .6rem}.seer-log .cue{font-style:italic;text-align:center;color:#523f29}.seer-log .you{color:#4e3f2b}.seer-log .client{color:#6b1d1e}

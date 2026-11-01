@@ -1,6 +1,9 @@
 import type { Session } from "@marlow/game";
 import { guardRoom, locate, nextGuardRoom } from "@marlow/engine";
 import type { GameEvent, WorldState } from "@marlow/shared";
+import { FloorPlan } from "./floorplan";
+
+let spectatorPlan: FloorPlan | null = null;
 
 const esc = (t: string) => t.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
 
@@ -46,10 +49,11 @@ export function truthLine(s: WorldState): string {
 
 /** Debug/demo mode (?debug=1, or the Spectator tab after "Show ground truth"): map plus raw state and the last events. */
 export function renderDebug(session: Session, lastEvents: GameEvent[], extra: Record<string, unknown>) {
-  const s = session.state, map = document.getElementById("map")!, pre = document.getElementById("debug")!;
+  const s = session.state, map = document.getElementById("map") as HTMLCanvasElement, pre = document.getElementById("debug")!;
   map.removeAttribute("hidden"); pre.removeAttribute("hidden");
-  map.innerHTML = mapSvg(s).replace(/^<svg[^>]*>|<\/svg>$/g, "");
-  map.setAttribute("viewBox", mapSvg(s).match(/viewBox="([^"]+)"/)![1]);
+  spectatorPlan ??= new FloorPlan(map);
+  spectatorPlan.update(s, lastEvents);
+  map.setAttribute("aria-label", `Ground-truth floor plan. ${truthLine(s)}`);
   const g = guardRoom(s);
   pre.textContent = truthLine(s) + "\n\n" + JSON.stringify({
     run: session.runId, runNumber: session.runNumber, turn: s.turn, alert: s.alert, trust: s.trust, status: s.status,

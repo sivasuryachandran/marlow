@@ -42,6 +42,12 @@ export const UI_ART: Record<string, string> = {
   hale: POSTER + "Head-and-shoulders portrait of a heavy-set bald art dealer in his sixties with a thick grey walrus moustache and round wire spectacles, plump cheeks, wearing a velvet smoking jacket and a cravat, holding a magnifying loupe, gilded oil paintings blurred behind him, an ordinary unfamiliar face, 1960s film still.",
   paper: TEXTURE + "Aged cream manila paper with soft fibers, faint coffee rings and gentle creases, warm and even.",
   blueprint: TEXTURE + "Old architectural blueprint paper, deep prussian blue, faint fine square grid, slightly worn, a few soft folds, no drawings.",
+  // floors for the seer's top-down map, matched to each room's footstep sound in level.json
+  floor_lobby: TEXTURE + "Top-down view of a polished black and white checkerboard marble floor, art-deco hotel lobby, slight reflections, square tiles.",
+  floor_marble: TEXTURE + "Top-down view of a polished cream and grey veined marble floor with large square slabs and thin brass inlay lines, museum hall.",
+  floor_carpet: TEXTURE + "Top-down view of a deep oxblood red wool carpet with a small repeating gold art-deco pattern, private office.",
+  floor_metal: TEXTURE + "Top-down view of worn dark steel diamond-plate flooring, industrial stairwell, scuffed.",
+  floor_street: TEXTURE + "Top-down view of wet black asphalt at night with puddles reflecting warm amber street light.",
 };
 
 const args = process.argv.slice(2);

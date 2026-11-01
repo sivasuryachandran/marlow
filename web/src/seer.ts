@@ -1,8 +1,11 @@
 /** Seer page: a friend who can see watches the ground truth and talks to the player who can only listen. Read-only. */
 import type { WorldState } from "@marlow/shared";
-import { mapSvg, truthLine } from "./debug";
+import { truthLine } from "./debug";
+import { FloorPlan } from "./floorplan";
+import type { GameEvent } from "@marlow/shared";
 
-interface Snapshot { type: "state"; turn: number; runNumber: number; state: WorldState; history: string[] }
+interface Snapshot { type: "state"; turn: number; runNumber: number; state: WorldState; history: string[]; events?: GameEvent[] }
+let plan: FloorPlan | null = null;
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
 const q = new URLSearchParams(location.search);
@@ -31,7 +34,9 @@ function render(m: Snapshot) {
   $("sTurn").textContent = String(s.turn).padStart(2, "0");
   $("sObj").textContent = s.status !== "playing" ? (s.status === "won" ? "Job done" : "Caught") : s.marlow.carrying ? "Exit through the lobby" : "Secure the ledger";
   document.querySelectorAll<HTMLElement>("#topbar .chip").forEach(c => c.classList.toggle("on", Number(c.dataset.a) === Math.min(3, s.alert)));
-  $("seerMap").innerHTML = mapSvg(s);
+  plan ??= new FloorPlan($("seerMap") as HTMLCanvasElement);
+  plan.update(s, m.events ?? []);
+  $("seerMap").setAttribute("aria-label", `Ground-truth floor plan. ${truthLine(s)}`);
   $("truth").textContent = s.status === "playing" ? truthLine(s) : s.status === "won" ? "They made it out." : "Marlow was caught.";
   const box = $("heard"); box.replaceChildren();
   for (const t of m.history) { const p = document.createElement("p"); p.className = t.startsWith("[") ? "cue" : t.startsWith("Client") ? "client" : t.startsWith("Owl") ? "you" : "marlow"; p.textContent = t.replace(/^\[(.*)\]$/, "($1)"); box.append(p); }

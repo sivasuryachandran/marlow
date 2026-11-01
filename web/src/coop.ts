@@ -62,6 +62,6 @@ export function publishTurn(session: Session, out: TurnOutput) {
   if (out.transcript) history.push(`Owl: ${out.transcript}`);
   history.push(...out.cues.filter(c => c.caption).map(c => `[${c.caption}]`), ...out.lines.map(l => `${l.speaker === "client" ? "Client" : "Marlow"}: ${l.text}`));
   history = history.slice(-40);
-  last = JSON.stringify({ type: "state", turn: out.state.turn, runNumber: session.runNumber, state: out.state, history });
+  last = JSON.stringify({ type: "state", turn: out.state.turn, runNumber: session.runNumber, state: out.state, history, events: out.events });
   if (ws?.readyState === WebSocket.OPEN) ws.send(last);
 }
