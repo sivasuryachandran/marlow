@@ -18,3 +18,9 @@ Every asset and third-party component, with source and license. No third-party a
 Intended future sources (log here when used): OpenAIR impulse responses (per-file CC license), Freesound CC0 filter, Sonniss GDC bundles, CC0 music stems.
 
 Real places, if mentioned, are settings only. All characters and targets are fictional.
+
+## Story inspiration (public domain in the US; ideas adapted, no text copied)
+- Edgar Allan Poe, "The Purloined Letter" (1844) and "The Tell-Tale Heart" (1843), via Project Gutenberg eBook 2148.
+- Maurice Leblanc, *The Extraordinary Adventures of Arsène Lupin, Gentleman-Burglar* (1907), "The Black Pearl", via Project Gutenberg eBook 6133. Leblanc died in 1941, so check local law outside the US.
+- E. W. Hornung, *The Amateur Cracksman* (1899), via Project Gutenberg eBook 706.
+All names, dialogue and plot specifics in MARLOW are original. See STORY.md.
