@@ -30,3 +30,6 @@ All names, dialogue and plot specifics in MARLOW are original. See STORY.md.
 
 ## Seer link (co-op)
 `ws` 8.x (MIT) for the WebSocket relay. Design informed by Keep Talking and Nobody Explodes (information split between players), Operation: Tango (each player sees a different part of the world) and the CHI 2021 paper "Exploring Asymmetric Roles in Mixed-Ability Gaming" (Gonçalves et al.). No code or assets from those works.
+
+## Interface theme (1960s caper picture)
+Fonts from Google Fonts: Limelight (SIL OFL), Libre Baskerville (SIL OFL), Special Elite (Apache 2.0), Courier Prime (SIL OFL). Interface art in `assets/art/ui/` (title poster, five cast portraits, paper and blueprint textures) generated with **Muse Image** by `npm run story-art -- --set=ui`, recompressed with ffmpeg. The portraits are invented characters; the Hale portrait was regenerated once because the first version resembled a classic screen star too closely.

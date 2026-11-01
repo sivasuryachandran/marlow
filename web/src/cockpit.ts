@@ -86,28 +86,28 @@ const still = () => window.matchMedia?.("(prefers-reduced-motion: reduce)").matc
 function drawSonar() {
   const c = $("sonar") as HTMLCanvasElement, g = c.getContext("2d")!, W = c.width, cx = W / 2, rad = W / 2 - 14;
   g.clearRect(0, 0, W, W);
-  g.strokeStyle = "#232b3b"; g.lineWidth = 1; g.setLineDash([4, 5]);
+  g.strokeStyle = "rgba(155,227,166,.28)"; g.lineWidth = 1; g.setLineDash([4, 5]);
   for (const f of [R.near, R.mid, R.far]) { g.beginPath(); g.arc(cx, cx, rad * f, 0, Math.PI * 2); g.stroke(); }
   g.setLineDash([]); g.beginPath(); g.moveTo(cx, cx - rad); g.lineTo(cx, cx + rad); g.moveTo(cx - rad, cx); g.lineTo(cx + rad, cx); g.stroke();
-  g.fillStyle = "#8b93a7"; g.font = "13px JetBrains Mono, monospace"; g.textAlign = "center";
+  g.fillStyle = "rgba(155,227,166,.75)"; g.font = "14px Courier Prime, monospace"; g.textAlign = "center";
   g.fillText("AHEAD", cx, 20); g.fillText("BEHIND", cx, W - 10); g.textAlign = "left"; g.fillText("L", 12, cx - 6); g.textAlign = "right"; g.fillText("R", W - 12, cx - 6);
   if (!still()) sweep = (sweep + 0.018) % (Math.PI * 2);
-  const grad = g.createConicGradient(sweep - Math.PI / 2, cx, cx); grad.addColorStop(0, "rgba(47,217,238,0.18)"); grad.addColorStop(0.12, "rgba(47,217,238,0)"); grad.addColorStop(1, "rgba(47,217,238,0)");
+  const grad = g.createConicGradient(sweep - Math.PI / 2, cx, cx); grad.addColorStop(0, "rgba(155,227,166,0.22)"); grad.addColorStop(0.12, "rgba(155,227,166,0)"); grad.addColorStop(1, "rgba(155,227,166,0)");
   g.fillStyle = grad; g.beginPath(); g.arc(cx, cx, rad, 0, Math.PI * 2); g.fill();
   const now = deps.session().state.turn;
   for (const p of pips) {
     const age = now - p.turn; if (age > 3) continue;
     const a = (AZ[p.dir] * Math.PI) / 180, r = rad * R[p.dist], x = cx + Math.sin(a) * r, y = cx - Math.cos(a) * r, alpha = 1 - age * 0.28;
-    const col = p.kind === "guard" ? `rgba(255,159,67,${alpha})` : `rgba(47,217,238,${alpha})`;
+    const col = p.kind === "guard" ? `rgba(240,180,90,${alpha})` : `rgba(242,231,208,${alpha})`;
     g.fillStyle = col; g.beginPath(); g.arc(x, y, 9, 0, Math.PI * 2); g.fill();
     g.strokeStyle = col; g.lineWidth = 2; g.beginPath(); g.arc(x, y, 9 + (still() ? 5 : (performance.now() / 60) % 14), 0, Math.PI * 2); g.stroke();
-    g.fillStyle = `rgba(232,235,242,${alpha})`; g.font = "13px Space Grotesk, sans-serif"; g.textAlign = x > cx ? "right" : "left"; g.fillText(p.label, x + (x > cx ? -14 : 14), y + 4);
+    g.fillStyle = `rgba(242,231,208,${alpha})`; g.font = "14px Courier Prime, monospace"; g.textAlign = x > cx ? "right" : "left"; g.fillText(p.label, x + (x > cx ? -14 : 14), y + 4);
   }
-  g.fillStyle = "#fff"; g.beginPath(); g.arc(cx, cx, 7, 0, Math.PI * 2); g.fill(); g.textAlign = "center"; g.font = "700 12px JetBrains Mono, monospace"; g.fillText("MARLOW", cx, cx + 24);
+  g.fillStyle = "#f2e7d0"; g.beginPath(); g.arc(cx, cx, 7, 0, Math.PI * 2); g.fill(); g.textAlign = "center"; g.font = "700 13px Courier Prime, monospace"; g.fillText("MARLOW", cx, cx + 24);
 }
 function drawWave() {
   const c = $("wave") as HTMLCanvasElement, g = c.getContext("2d")!, W = c.width, H = c.height;
-  g.clearRect(0, 0, W, H); g.strokeStyle = "#ff9f43"; g.lineWidth = 2; g.beginPath();
+  g.clearRect(0, 0, W, H); g.strokeStyle = "#9be3a6"; g.shadowColor = "#9be3a6"; g.shadowBlur = 6; g.lineWidth = 2; g.beginPath();
   const an = deps.audio.analyser;
   if (an) {
     const buf = new Uint8Array(an.fftSize); an.getByteTimeDomainData(buf);
@@ -116,8 +116,9 @@ function drawWave() {
   g.stroke();
 }
 function loop() {
-  if (!$("game").hidden && !document.body.classList.contains("audio-only") && !$("tab-play").hidden) { drawSonar(); drawWave(); }
-  requestAnimationFrame(loop);
+  requestAnimationFrame(loop); // schedule first: one bad frame must never stop the scope for the rest of the run
+  if (!deps.session?.() || $("game").hidden || document.body.classList.contains("audio-only") || $("tab-play").hidden) return;
+  try { drawSonar(); drawWave(); } catch (e) { console.warn("scope frame skipped", e); }
 }
 
 // ---------------- panels ----------------

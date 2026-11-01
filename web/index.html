@@ -4,7 +4,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>MARLOW — a heist you play by ear</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Limelight&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Special+Elite&family=Courier+Prime:wght@400;700&display=swap">
 <link rel="stylesheet" href="/src/style.css">
 </head>
 <body>
@@ -12,7 +12,7 @@
 
 <header id="topbar" aria-label="Run status">
   <h1 class="sr-only">MARLOW, a heist you play by ear</h1>
-  <div class="cell freq"><span class="dot"></span><b>142.85 MHz</b><small>OWL ⇄ MARLOW · SECURE</small></div>
+  <div class="cell freq"><span class="dot"></span><b>142.85</b><small>MC · OWL ⇄ MARLOW</small></div>
   <div class="cell"><small>ORDER → REPLY</small><b id="hLatency">—</b></div>
   <div class="cell"><small>TURN · OBJECTIVE</small><b><span id="hTurn">00</span> · <span id="hObj">Secure the ledger</span></b></div>
   <div class="cell alert" role="group" aria-label="Alert level"><small>ALERT</small>
@@ -47,25 +47,32 @@
 <!-- ============ PLAY ============ -->
 <section id="tab-play" role="tabpanel" aria-labelledby="t-play">
   <div id="hero">
-    <div class="h1" aria-hidden="true">MARLOW</div>
-    <p class="tag">A heist you play by ear. You are Owl, the voice in her earpiece. She is the only one who can see.</p>
-    <p class="hint">Headphones on. Chrome recommended. You'll be asked for the microphone.</p>
-    <button id="start" class="primary" type="button">Start the job</button>
+    <div class="poster">
+      <img src="/art/ui/poster.jpg" alt="" width="1400" height="800">
+      <div class="titlecard">
+        <p class="presents">Owl &amp; Marlow in</p>
+        <div class="h1 marquee" aria-hidden="true">MARLOW</div>
+        <p class="subtitle">The Purloined Ledger</p>
+        <p class="tag">A heist you play by ear. You are Owl, the voice in her earpiece. She is the only one who can see.</p>
+        <p class="hint">Headphones on · Chrome recommended · you'll be asked for the microphone</p>
+        <button id="start" class="primary ticket" type="button"><small>ADMIT ONE</small>Start the job</button>
+      </div>
+    </div>
   </div>
 
   <div id="game" hidden>
     <p id="status" role="status" aria-live="polite"></p>
     <div class="grid">
       <section class="panel visual" aria-labelledby="sonarH">
-        <h2 id="sonarH">Acoustic sonar <small>only what Owl has heard</small></h2>
-        <canvas id="sonar" width="520" height="520" role="img" aria-label="Sonar: sounds Marlow's earpiece has picked up, around her"></canvas>
+        <h2 id="sonarH">The scope <small>only what Owl has heard</small></h2>
+        <canvas id="sonar" width="520" height="520" role="img" aria-label="Listening scope: sounds Marlow's earpiece has picked up, around her"></canvas>
         <p id="sonarNote" class="dim">Nothing heard yet.</p>
-        <h3>Building <small>what Marlow has told you</small></h3>
+        <h3>The building <small>what Marlow has told you</small></h3>
         <ul id="topology" class="topo"></ul>
       </section>
 
       <section class="panel mid" aria-label="Earpiece and orders">
-        <h2>Earpiece monitor <small id="micState">mic off</small></h2>
+        <h2>On the wire <small id="micState">mic off</small></h2>
         <canvas id="wave" class="visual" width="800" height="150" aria-hidden="true"></canvas>
         <button id="ptt" type="button" aria-pressed="false" aria-keyshortcuts="Space">HOLD SPACE TO TRANSMIT</button>
         <span class="meter mic" aria-hidden="true"><i id="micLevel"></i></span>
@@ -91,13 +98,13 @@
 
       <section class="panel" aria-labelledby="logH">
         <figure id="story" class="story visual" hidden><img id="storyImg" alt="" width="1400" height="800"><figcaption id="storyCap"></figcaption></figure>
-        <h2 id="logH">Acoustic log <small>everything you hear, as text</small></h2>
+        <h2 id="logH">The script <small>everything you hear, as text</small></h2>
         <div id="log" tabindex="0" role="log" aria-live="polite" aria-label="Transcript of everything you hear"></div>
       </section>
     </div>
 
     <section class="panel actions" aria-labelledby="actH">
-      <h2 id="actH">Tactical action matrix <small>keys 1–7 · or just speak</small></h2>
+      <h2 id="actH">The playbook <small>keys 1–7 · or just speak</small></h2>
       <div id="chips" class="chips">
         <button type="button" data-act="move"   data-k="1" aria-keyshortcuts="1"><kbd>1</kbd><b>MOVE</b><span>go somewhere</span></button>
         <button type="button" aria-keyshortcuts="2" data-act="peek"   data-k="2"><kbd>2</kbd><b>PEEK</b><span>look through a door</span></button>
@@ -114,30 +121,46 @@
 
 <!-- ============ BRIEFING ============ -->
 <section id="tab-brief" role="tabpanel" aria-labelledby="t-brief" hidden>
-  <div class="panel prose">
-    <h2>The job</h2>
-    <p>You are <b>Owl</b>, once the best fixer in the city. Three years ago, on the night of the Fenwick job, the lights went out and you lost your sight. All you remember from that night is a sound: <i>a heavy step, a drag, and keys.</i></p>
-    <p><b>Marlow</b> is your eyes: young, brave, the only one who still calls you “boss”. Your old partner <b>Ines</b> sends you both into the Hale Gallery for one ledger. “Don’t read it. It’s only numbers.”</p>
-    <h2>How to play</h2>
-    <ol>
-      <li>Wear headphones. The whole game is 3D sound: you can hear which direction the guard is in.</li>
-      <li>Speak an order (hold Space, or just talk if the mic is hands-free), or type it, or press a tactical chip.</li>
-      <li>Marlow tells you what she sees. You only know what she tells you and what you hear.</li>
-      <li>Get the <b>ledger</b> from the office and <b>exit through the lobby</b>. Doors are noisy; the guard hears them. If he spots her he runs: you get exactly one turn to hide or leave the room.</li>
-      <li>If you win, Marlow plays you the tape she found. Say <b>“burn it”</b> or <b>“send it”</b>.</li>
-    </ol>
-    <h2>Things to say</h2>
-    <p class="mono">listen · what do you see · go to the hall · peek the left door quietly · hide · take the ledger · go back · exit<br>who is Ines · where can I hide · what's in the ledger</p>
-    <p class="dim">Questions to Marlow are free: no turn passes. Small talk gets "say again". The engine, not the AI, decides what happens; the AI only understands what you said.</p>
+  <div class="brief-grid">
+    <article class="paper" aria-labelledby="memoH">
+      <span class="stamp" aria-hidden="true">CONFIDENTIAL</span>
+      <p class="memohead">TO: Owl<br>FROM: I.V.<br>RE: The Hale Gallery, one ledger</p>
+      <h2 id="memoH">The job</h2>
+      <p>You are <b>Owl</b>, once the best fixer in the city. Three years ago, on the night of the Fenwick job, the lights went out and you lost your sight. All you remember from that night is a sound: <i>a heavy step, a drag, and keys.</i></p>
+      <p><b>Marlow</b> is your eyes: young, brave, the only one who still calls you “boss”. Your old partner <b>Ines</b> sends you both into the Hale Gallery for one ledger. “Don’t read it. It’s only numbers.”</p>
+      <h2>How to play</h2>
+      <ol>
+        <li>Wear headphones. The whole picture is 3D sound: you can hear which direction the guard is in.</li>
+        <li>Speak an order (hold Space, or just talk if the mic is hands-free), type it, or press a key in the playbook.</li>
+        <li>Marlow tells you what she sees. You only know what she tells you and what you hear.</li>
+        <li>Get the <b>ledger</b> from the office and <b>exit through the lobby</b>. Doors are noisy; the guard hears them. If he spots her he runs: you get exactly one turn to hide or leave the room.</li>
+        <li>If you win, Marlow plays you the tape she found. Say <b>“burn it”</b> or <b>“send it”</b>.</li>
+      </ol>
+      <h2>Things to say</h2>
+      <p>listen · what do you see · go to the hall · peek the left door quietly · hide · take the ledger · go back · exit<br>who is Ines · where can I hide · what’s in the ledger</p>
+      <p class="dim">Questions to Marlow are free: no turn passes. The engine, not the AI, decides what happens; the AI only understands what you said.</p>
+    </article>
+    <section class="panel cast-wrap" aria-labelledby="castH">
+      <h2 id="castH">The players <small>in order of appearance</small></h2>
+      <div class="cast">
+        <figure class="castcard"><img src="/art/ui/owl.jpg" alt="Owl: an older blind man in dark round glasses, headphones around his neck, lit by a radio dial" loading="lazy"><figcaption><span class="name">Owl</span><span class="role">the voice in her ear. You.</span></figcaption></figure>
+        <figure class="castcard"><img src="/art/ui/marlow.jpg" alt="Marlow: a young woman in a black turtleneck with an earpiece" loading="lazy"><figcaption><span class="name">Marlow</span><span class="role">the eyes. The only one who still calls you boss.</span></figcaption></figure>
+        <figure class="castcard"><img src="/art/ui/ines.jpg" alt="Ines: an elegant older woman in a trench coat holding a telephone" loading="lazy"><figcaption><span class="name">Ines</span><span class="role">the client. An old partner.</span></figcaption></figure>
+        <figure class="castcard"><img src="/art/ui/halloran.jpg" alt="Halloran: a heavy night watchman with a cane, keys and a flashlight" loading="lazy"><figcaption><span class="name">Halloran</span><span class="role">the night man.</span></figcaption></figure>
+        <figure class="castcard"><img src="/art/ui/hale.jpg" alt="Hale: an art dealer in a tuxedo with a cigar" loading="lazy"><figcaption><span class="name">Hale</span><span class="role">owns the gallery, and the ledger.</span></figcaption></figure>
+      </div>
+      <p class="credits">Portraits and stills painted with Muse Image</p>
+    </section>
   </div>
 </section>
 
 <!-- ============ CASE FILE ============ -->
 <section id="tab-case" role="tabpanel" aria-labelledby="t-case" hidden>
-  <div class="panel">
+  <div class="dossier" data-tab="CASE FILE · HALE GALLERY">
+    <span class="stamp" aria-hidden="true">EYES ONLY</span>
     <h2>The Case File <small id="caseRun">play a run first</small></h2>
     <div class="stats" id="caseStats"></div>
-    <h3>Story panels from this run</h3>
+    <h3>Frames from this run</h3>
     <div id="casePanels" class="panels"><p class="dim">The illustrations appear here as the story unfolds.</p></div>
     <p class="dim">The Case File is a short comic of your run, drawn for sighted friends. It needs the server and takes about a minute.</p>
     <div class="btns"><button id="casefile" class="primary" type="button">Make the Case File</button></div>
@@ -154,7 +177,7 @@
     <button id="reveal" type="button">Show ground truth</button>
     <div id="truth" hidden>
       <svg id="map" viewBox="0 0 420 300" role="img" aria-label="Engine map (debug)" hidden></svg>
-      <pre id="debug" hidden></pre>
+      <pre id="debug" tabindex="0" aria-label="Ground truth data" hidden></pre>
     </div>
   </div>
 </section>
@@ -174,7 +197,7 @@
 </section>
 </main>
 
-<footer id="foot"><span class="dot rec"></span> REEL A: REC · <span class="keys"><kbd>Space</kbd> push-to-talk <kbd>1–7</kbd> tactical chips <kbd>O</kbd> audio only</span></footer>
+<footer id="foot"><span class="dot rec"></span> REEL 1 · ROLLING · <span class="keys"><kbd>Space</kbd> push-to-talk <kbd>1–7</kbd> the playbook <kbd>O</kbd> audio only</span></footer>
 <script type="module" src="./src/main.ts"></script>
 </body>
 </html>

@@ -34,7 +34,7 @@ function render(m: Snapshot) {
   $("seerMap").innerHTML = mapSvg(s);
   $("truth").textContent = s.status === "playing" ? truthLine(s) : s.status === "won" ? "They made it out." : "Marlow was caught.";
   const box = $("heard"); box.replaceChildren();
-  for (const t of m.history) { const p = document.createElement("p"); p.className = t.startsWith("[") ? "cue" : t.startsWith("Client") ? "client" : t.startsWith("Owl") ? "you" : "marlow"; p.textContent = t; box.append(p); }
+  for (const t of m.history) { const p = document.createElement("p"); p.className = t.startsWith("[") ? "cue" : t.startsWith("Client") ? "client" : t.startsWith("Owl") ? "you" : "marlow"; p.textContent = t.replace(/^\[(.*)\]$/, "($1)"); box.append(p); }
   box.scrollTop = box.scrollHeight;
 }
 

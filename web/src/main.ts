@@ -34,7 +34,14 @@ const latencies: number[] = [];
 
 // ---------- log (everything audible is also text) ----------
 function log(cls: string, text: string) {
-  const p = document.createElement("p"); p.className = cls; p.textContent = text;
+  const p = document.createElement("p"); p.className = cls;
+  // Screenplay style: the speaker's name above the line; sound cues as stage directions in parentheses.
+  const m = /^(You|Marlow|Client): ([\s\S]*)$/.exec(text);
+  if (m) {
+    const who = document.createElement("span"), say = document.createElement("span");
+    who.className = "who"; who.textContent = m[1] === "You" ? "Owl" : m[1]; say.className = "say"; say.textContent = m[2];
+    p.append(who, say);
+  } else p.textContent = text.replace(/^\[(.*)\]$/, "($1)");
   const box = $("log"); box.append(p); box.scrollTop = box.scrollHeight;
 }
 const status = (t: string) => { $("status").textContent = t; };

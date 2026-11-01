@@ -6,6 +6,7 @@
  *   npm run story-art                 # generate missing images only
  *   npm run story-art -- --only=tape  # one image
  *   npm run story-art -- --force      # regenerate everything
+ *   npm run story-art -- --set=ui     # the interface art (poster, cast portraits, paper and blueprint textures) into assets/art/ui/
  *
  * The art is illustration only. It never carries game facts: the engine decides what happens, these only set the mood.
  */
@@ -29,19 +30,35 @@ export const ART: Record<string, string> = {
   send: "A city skyline at dawn with radio towers and satellite dishes, a hand holding a cassette tape in the foreground, light breaking through clouds.",
 };
 
+/** Interface art for the 1960s caper-film theme. Portraits and poster share one look; textures are flat and plain. */
+const POSTER = "1960s Hollywood heist film poster painting, gouache and screen-print look, limited palette of near-black, warm cream, oxblood red and brass gold, visible film grain, dramatic chiaroscuro, no text, no letters, no numbers, no logos, no signatures. ";
+const TEXTURE = "Seamless flat texture photographed top-down with even soft lighting, fills the whole frame, no objects, no text, no letters, no numbers. ";
+export const UI_ART: Record<string, string> = {
+  poster: POSTER + "A rain-slicked city street at night outside a grand art-deco gallery with a glowing blank marquee canopy, a parked panel van with a thin radio antenna in the foreground, two small silhouettes, searchlight beams crossing the sky, wide cinematic composition with a large dark empty sky at the top.",
+  owl: POSTER + "Head-and-shoulders portrait of a distinguished blind man in his fifties wearing dark round glasses and a tweed overcoat, old radio headphones around his neck, lit from below by the warm glow of a radio dial inside a dark van, 1960s film still.",
+  marlow: POSTER + "Head-and-shoulders portrait of a young woman cat burglar with short dark hair in a black turtleneck, alert eyes, half her face in shadow, a small earpiece in one ear, 1960s film still.",
+  ines: POSTER + "Head-and-shoulders portrait of an elegant woman in her fifties in a camel trench coat and pearls, holding a black telephone receiver, a cool knowing smile, rain-streaked window behind her, 1960s film still.",
+  halloran: POSTER + "Portrait of a heavy-set night watchman in a peaked cap with a large ring of keys on his belt, leaning on a cane, flashlight beam cutting through a dark marble corridor, 1960s film still.",
+  hale: POSTER + "Head-and-shoulders portrait of a heavy-set bald art dealer in his sixties with a thick grey walrus moustache and round wire spectacles, plump cheeks, wearing a velvet smoking jacket and a cravat, holding a magnifying loupe, gilded oil paintings blurred behind him, an ordinary unfamiliar face, 1960s film still.",
+  paper: TEXTURE + "Aged cream manila paper with soft fibers, faint coffee rings and gentle creases, warm and even.",
+  blueprint: TEXTURE + "Old architectural blueprint paper, deep prussian blue, faint fine square grid, slightly worn, a few soft folds, no drawings.",
+};
+
 const args = process.argv.slice(2);
 const dry = args.includes("--dry"), force = args.includes("--force"), only = args.find(a => a.startsWith("--only="))?.split("=")[1];
-const dir = "assets/art/story";
+const set = args.find(a => a.startsWith("--set="))?.split("=")[1] ?? "story";
+const SET: Record<string, string> = set === "ui" ? UI_ART : Object.fromEntries(Object.entries(ART).map(([k, v]) => [k, STYLE + v]));
+const dir = set === "ui" ? "assets/art/ui" : "assets/art/story";
 mkdirSync(dir, { recursive: true });
-const todo = Object.keys(ART).filter(id => (!only || id === only) && (force || !existsSync(`${dir}/${id}.jpg`)));
-console.log(`${todo.length} of ${Object.keys(ART).length} images to generate${dry ? " (DRY RUN: nothing sent)" : ""}: ${todo.join(", ") || "none"}`);
+const todo = Object.keys(SET).filter(id => (!only || id === only) && (force || !existsSync(`${dir}/${id}.jpg`)));
+console.log(`${todo.length} of ${Object.keys(SET).length} ${set} images to generate${dry ? " (DRY RUN: nothing sent)" : ""}: ${todo.join(", ") || "none"}`);
 if (dry || !todo.length) process.exit(0);
 
 const cfg = loadConfig(); const img = new MuseImage(cfg);
 for (const id of todo) {
   const t0 = performance.now();
   try {
-    const r = await img.render(STYLE + ART[id]);
+    const r = await img.render(SET[id]);
     writeFileSync(`${dir}/${id}.jpg`, r.data as Uint8Array);
     console.log(`  ${id}: ${(((r.data as Uint8Array).length) / 1024).toFixed(0)} KB in ${((performance.now() - t0) / 1000).toFixed(1)} s`);
   } catch (e) { console.log(`  ${id}: FAILED ${(e as Error).message}`); }
