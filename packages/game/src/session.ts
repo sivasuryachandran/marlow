@@ -15,7 +15,7 @@ export interface TurnOutput {
 }
 export interface SessionConfig {
   level: unknown; bank: LineBank; beats: Beat[]; intent: IntentAdapter; seed: number; memory: MemoryStore;
-  timeoutMs?: number; lore?: Record<string, [string, string][]>; knowledgeScope?: KnowledgeScope; runId?: string; onLog?: (row: Record<string, unknown>) => void; now?: () => number;
+  timeoutMs?: number; lore?: Record<string, [string, string][]>; loreTopics?: [string, string][]; knowledgeScope?: KnowledgeScope; runId?: string; onLog?: (row: Record<string, unknown>) => void; now?: () => number;
 }
 
 const TIMEOUT = Symbol("timeout");
@@ -105,7 +105,7 @@ export class Session {
     }
     if (s.status !== "playing") return out("refused", [{ id: "marlow.refuse.game_over", slots: {} }]);
 
-    const local = localParse(transcript, s);
+    const local = localParse(transcript, s, this.cfg.loreTopics?.map(([t, re]) => [t, new RegExp(re)] as [string, RegExp]));
     if (local) {
       switch (local.kind) {
         case "repeat":

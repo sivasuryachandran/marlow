@@ -26,7 +26,11 @@ export function cleanTranscript(text: string): string {
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9' ]+/g, " ").replace(/\s+/g, " ").trim();
 
 /** Local parser (L1): plain code, no model call. Null => needs the intent adapter. */
-export function localParse(text: string, s: WorldState): LocalParse {
+/** Lore topics of the built-in story. A generated mission passes its own (its characters have other names). */
+export const DEFAULT_TOPICS: [string, RegExp][] = [["ines", /\b(ines|client|partner)\b/], ["halloran", /\b(halloran|guard|night ?man|watchman|limp)\b/], ["hale", /\b(hale|owner)\b/],
+  ["fenwick", /\b(fenwick|that night|the night)\b/], ["ledger", /\b(ledger|numbers|payments?)\b/], ["tape", /\b(tape|recording|cassette)\b/], ["marlow", /\b(who are you|about yourself|about you)\b/]];
+
+export function localParse(text: string, s: WorldState, topics: [string, RegExp][] = DEFAULT_TOPICS): LocalParse {
   const quiet = /\b(quietly|softly|carefully|slowly|silently|gently|sneak|creep)\b/.test(norm(text));
   const t = norm(text).replace(/\b(quietly|softly|carefully|slowly|silently|gently|sneak|creep)\b/g, " ").replace(/\s+/g, " ").trim().replace(/^(ok(ay)?|alright|marlow|boss)\s+/, "").replace(/\s+(please|marlow)$/, "");
   if (["wait", "stop", "hold", "hold on", "hold up", "freeze", "stay", "stay put", "hold position"].includes(t)) return { kind: "action", action: { action: "wait" } };
@@ -42,9 +46,7 @@ export function localParse(text: string, s: WorldState): LocalParse {
   if (/^(hey|hi|hello|testing|test|hello marlow|hey marlow|are you there|you there|is anyone there|can you hear me|do you hear me|can you hear me now|are you (ok|okay|alright|all right)|how are you|you ok|you okay|are you with me|are you listening|marlow)( there| now)?$/.test(t)) return { kind: "talk" };
   // Story questions ("who is Ines", "tell me about the tape"): answered from the facts discovered so far.
   if (/^(who|what|tell me|explain|remind me|whats|who s|what s)\b/.test(t) || /^who are you/.test(t)) {
-    const TOPICS: [string, RegExp][] = [["ines", /\b(ines|client|partner)\b/], ["halloran", /\b(halloran|guard|night ?man|watchman|limp)\b/], ["hale", /\b(hale|owner)\b/],
-      ["fenwick", /\b(fenwick|that night|the night)\b/], ["ledger", /\b(ledger|numbers|payments?)\b/], ["tape", /\b(tape|recording|cassette)\b/], ["marlow", /\b(who are you|about yourself|about you)\b/]];
-    const hit = TOPICS.find(([, re]) => re.test(t));
+    const hit = topics.find(([, re]) => re.test(t));
     if (hit && !/\b(see|hear|do you|can you|should|where)\b/.test(t.replace(/who are you/, ""))) return { kind: "lore", topic: hit[0] };
   }
   // "What do you see / look around": Marlow describes the room from what she already knows. Free, local, no turn passes.

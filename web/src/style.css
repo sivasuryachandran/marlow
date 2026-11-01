@@ -156,6 +156,19 @@ input[type=text]{width:100%;background:#0c0907;border:1px solid var(--line);bord
 .castcard .role{display:block;font:italic .85rem var(--serif);color:var(--dim)}
 .credits{font:.8rem var(--type);color:var(--dim);text-align:center;letter-spacing:.06em;margin-top:.8rem}
 
+/* ---------- case picker ---------- */
+.cases{margin-bottom:1.4rem}
+.cases .now{font:1.02rem var(--serif)}.cases a{color:var(--brass)}
+.case-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.7rem;margin:.8rem 0 1rem}
+.case-card{display:block;text-decoration:none;color:var(--cream);background:#0c0907;border:1px dashed var(--brass2);padding:.8rem 1rem}
+.case-card b{display:block;font:400 1.15rem var(--display);letter-spacing:.08em;color:var(--brass)}.case-card span{font:italic .88rem var(--serif);color:var(--dim)}
+.case-card.current{border-style:solid;border-color:var(--brass);background:linear-gradient(rgba(158,42,43,.25),#0c0907)}
+.case-card:hover{border-color:var(--brass)}
+.gen label{display:block;font:.8rem var(--type);color:var(--dim);margin:.6rem 0 .25rem}
+.gen select{width:100%;background:#0c0907;border:1px solid var(--line);border-bottom:2px solid var(--brass2);padding:.6rem .7rem;font-family:var(--mono)}
+.gen .btns{margin-top:.8rem}
+.genlog{font:12px/1.5 var(--mono);background:#0c0907;border:1px solid var(--line);padding:.7rem;white-space:pre-wrap;max-height:40vh;overflow:auto;color:var(--dim)}
+
 /* ---------- case file: a manila dossier ---------- */
 .dossier{position:relative;background:linear-gradient(#dcbe7f,#cfac66);color:var(--paper-ink);padding:2.2rem 1.6rem 1.6rem;border-radius:2px 8px 4px 4px;box-shadow:0 14px 34px rgba(0,0,0,.6);margin-top:1.8rem}
 .dossier::before{content:attr(data-tab);position:absolute;top:-1.7rem;left:1.4rem;background:#dcbe7f;padding:.35rem 1.4rem .3rem;border-radius:8px 8px 0 0;font:.8rem var(--type);letter-spacing:.2em;color:#2e2012}

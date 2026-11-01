@@ -15,7 +15,9 @@ export class AudioEngine {
   settings: AudioSettings = { voice: 1, music: 0.35, sfx: 1, mono: false, ambience: false };
   /** Assets that fell back to synthesized placeholders (listed as TODO in PROGRESS.md). */
   missing = new Set<string>();
-  analyser!: AnalyserNode; private master!: GainNode; private monoNode!: GainNode; private duck!: GainNode;
+  analyser!: AnalyserNode; private master!: GainNode;
+  /** A generated mission's voice lines: its own lines only from its folder; shared lines from there first, then the default. */
+  mission: { base: string; own: Set<string> } | null = null; private monoNode!: GainNode; private duck!: GainNode;
   private voiceGain!: GainNode; private musicGain!: GainNode; private sfxGain!: GainNode;
   private earpiece!: GainNode; private noiseBuf!: AudioBuffer; private pinkBuf!: AudioBuffer; private brownBuf!: AudioBuffer;
   private timers: ReturnType<typeof setTimeout>[] = []; private ambTimers: ReturnType<typeof setTimeout>[] = []; private tensionTimer?: ReturnType<typeof setInterval>;
@@ -342,7 +344,8 @@ export class AudioEngine {
   }
 
   private async playVoice(line: SpokenLine): Promise<void> {
-    const c = this.ctx, buf = await this.asset(`/audio/lines/${line.audioKey}.mp3`);
+    const c = this.ctx, m = this.mission;
+    const buf = m ? (await this.asset(`${m.base}/${line.audioKey}.mp3`)) ?? (m.own.has(line.id) ? null : await this.asset(`/audio/lines/${line.audioKey}.mp3`)) : await this.asset(`/audio/lines/${line.audioKey}.mp3`);
     this.duckOn();
     const t = c.currentTime + 0.02;
     let dur: number;

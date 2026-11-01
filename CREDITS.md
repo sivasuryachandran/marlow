@@ -33,3 +33,6 @@ All names, dialogue and plot specifics in MARLOW are original. See STORY.md.
 
 ## Interface theme (1960s caper picture)
 Fonts from Google Fonts: Limelight (SIL OFL), Libre Baskerville (SIL OFL), Special Elite (Apache 2.0), Courier Prime (SIL OFL). Interface art in `assets/art/ui/` (title poster, five cast portraits, paper and blueprint textures) generated with **Muse Image** by `npm run story-art -- --set=ui`, recompressed with ffmpeg. The portraits are invented characters; the Hale portrait was regenerated once because the first version resembled a classic screen star too closely.
+
+## Mission generator
+Case research from Wikipedia summaries (CC BY-SA) is used only as model input; generated missions are original and fictionalized, and each lists its sources in `report.md`. Generated stills use Muse Image; generated voices use Kokoro (local, Apache-2.0).

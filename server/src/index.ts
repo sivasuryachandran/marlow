@@ -11,6 +11,8 @@ import { buildCaseFile } from "./casefile";
 import { loadConfig } from "./config";
 import { replayRows } from "./replay";
 import { SeerRooms } from "./seer";
+import { CASES } from "./mission-author";
+import { spawn } from "node:child_process";
 import { WebSocketServer } from "ws";
 import { networkInterfaces } from "node:os";
 import level from "../../data/level.json" with { type: "json" };
@@ -74,6 +76,29 @@ app.post("/api/eval-audio/:id", async c => {
 
 app.use("/casefiles/*", serveStatic({ root: "./" }));
 void knowledgeList;
+// Mission generator: list the case library; start a generation job (one at a time) and report its progress.
+app.get("/api/cases", c => c.json(CASES.map(k => ({ id: k.id, title: k.title, inspiredBy: k.inspiredBy }))));
+let running: string | null = null;
+app.post("/api/missions/generate", async c => {
+  if (!cfg.modelApiKey) return c.text("MODEL_API_KEY is not set on the server", 400);
+  const job = Date.now().toString(36);
+  if (running && existsSync(`assets/missions/_jobs/${running}.json`) && !JSON.parse(readFileSync(`assets/missions/_jobs/${running}.json`, "utf8")).done) return c.text("A case is already being written; wait for it to finish", 409);
+  const b = (await c.req.json().catch(() => ({}))) as { caseId?: string; theme?: string };
+  const args = ["--env-file=.env", "--import", "tsx", "tools/generate-mission.ts", `--job=${job}`, "--voices", "--art"];
+  if (b.caseId && CASES.some(k => k.id === b.caseId)) args.push(`--case=${b.caseId}`);
+  else if (b.theme && b.theme.length <= 120) args.push(`--theme=${b.theme.replace(/[^\w .,'-]/g, "")}`);
+  else return c.text("Choose a case or describe one (120 characters at most)", 400);
+  mkdirSync("assets/missions/_jobs", { recursive: true });
+  writeFileSync(`assets/missions/_jobs/${job}.json`, JSON.stringify({ log: ["Queued."] }));
+  spawn(process.execPath, args, { stdio: "ignore", detached: true }).unref();
+  running = job;
+  return c.json({ job });
+});
+app.get("/api/missions/job/:id", c => {
+  const f = `assets/missions/_jobs/${c.req.param("id").replace(/[^a-z0-9]/g, "")}.json`;
+  return existsSync(f) ? c.json(JSON.parse(readFileSync(f, "utf8"))) : c.json({ log: ["Unknown job"], done: true, ok: false }, 404);
+});
+
 // Seer link: addresses a friend on the same network could use (only works if the web app is started with --host).
 app.get("/api/lan", c => c.json(Object.values(networkInterfaces()).flat().filter(n => n && n.family === "IPv4" && !n.internal).map(n => n!.address)));
 

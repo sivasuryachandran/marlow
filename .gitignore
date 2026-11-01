@@ -9,3 +9,7 @@ data/eval/heldout-audio/*.wav
 
 # rendered voice lines (86 MB; regenerate with npm run render-lines)
 assets/audio/lines/*.wav
+
+# mission generator scratch
+assets/missions/_failed/
+assets/missions/_jobs/

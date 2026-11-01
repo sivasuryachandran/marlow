@@ -11,16 +11,24 @@ import { loadPrefs, LocalStore, savePrefs } from "./storage";
 import { BrowserStt, ServerStt, type Stt } from "./stt";
 import { HandsFree } from "./vad";
 import { initCoop, publishTurn } from "./coop";
-import { initCockpit, micLevel, onTurn, resetRun, setMic, showTab, truthRevealed } from "./cockpit";
+import { initCockpit, micLevel, onTurn, resetRun, setMic, setMissionArt, showTab, truthRevealed } from "./cockpit";
+import { artCaptions, initMissions, type LoadedMission } from "./missions";
 
 const q = new URLSearchParams(location.search);
 const debug = q.get("debug") === "1";
 const fixedSeed = q.has("seed") ? Number(q.get("seed")) : null;
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
-const bank = loadBank(linesJson);
+// A generated mission (?mission=<id>) replaces the building, the story lines, the beats and the lore; everything else is shared.
+const missionId = q.get("mission");
+const mission: LoadedMission | null = missionId && /^[a-z0-9_-]{1,60}$/.test(missionId)
+  ? await fetch(`/missions/${missionId}/mission.json`).then(r => (r.ok ? r.json() : null)).catch(() => null) : null;
+const bank = loadBank(mission ? { ...linesJson, ...mission.lines } : linesJson);
+const gameLevel = mission?.level ?? level, gameBeats = (mission?.beats ?? beatsJson) as Beat[];
+const gameLore = (mission?.lore ?? loreJson) as unknown as Record<string, [string, string][]>;
 const audio = new AudioEngine();
-const store = new LocalStore();
+if (mission) audio.mission = { base: `/missions/${mission.id}/audio`, own: new Set(Object.keys(mission.lines)) };
+const store = new LocalStore(mission ? `marlow.memory.${mission.id}` : undefined);
 const intent = new HttpIntent();
 let session: Session;
 let seed = fixedSeed ?? Math.floor(Math.random() * 1e6);
@@ -80,7 +88,7 @@ function postLog(runId: string, row: Record<string, unknown>) {
 function newSession() {
   const runId = `${seed}-${Date.now().toString(36)}`;
   session = new Session({
-    level, bank, beats: beatsJson as Beat[], lore: loreJson as unknown as Record<string, [string, string][]>, intent, seed, memory: store, runId,
+    level: gameLevel, bank, beats: gameBeats, lore: gameLore, loreTopics: mission?.loreTopics, intent, seed, memory: store, runId,
     timeoutMs: Number((q.get("timeout") ?? 7000)), onLog: row => postLog(runId, row),
   });
   $("log").replaceChildren(); $("end").hidden = true; $("casefileOut").textContent = ""; $<HTMLIFrameElement>("casefileFrame").hidden = true; resetRun();
@@ -223,7 +231,8 @@ function wirePtt() {
 }
 
 // ---------- wiring ----------
-bindSettings(); wirePtt(); initCoop();
+bindSettings(); wirePtt(); initCoop(); initMissions(mission);
+if (mission?.art?.length) setMissionArt(`/missions/${mission.id}/art`, artCaptions(mission));
 initCockpit({
   send: text => { if (busy || !session) return; void audio.playAck(); void handleTranscript(text); },
   session: () => session, audio, latencyP50: () => (latencies.length ? [...latencies].sort((a, b) => a - b)[Math.floor(latencies.length / 2)] : null),

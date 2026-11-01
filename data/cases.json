@@ -1,0 +1,50 @@
+[
+  {
+    "id": "gallery1990",
+    "title": "The Empty Frames",
+    "inspiredBy": "the 1990 theft from the Isabella Stewart Gardner Museum in Boston",
+    "year": 1990,
+    "wiki": "Isabella Stewart Gardner Museum theft",
+    "facts": [
+      "In the early hours of 18 March 1990, two men dressed as police officers came to a museum's side door and said they were answering a disturbance.",
+      "The night guard on duty let them in. The thieves handcuffed the two guards and left them in the basement.",
+      "They spent about 81 minutes inside and took 13 works, cutting two paintings from their frames.",
+      "The stolen works have never been recovered; the museum still hangs the empty frames where the paintings were.",
+      "No one has ever been charged. A large reward is still offered for information."
+    ],
+    "realNames": ["Isabella", "Stewart", "Gardner", "Boston", "Vermeer", "Rembrandt", "Manet", "Degas", "Flinck", "Abath", "Hestand", "Fenway"],
+    "sources": ["https://en.wikipedia.org/wiki/Isabella_Stewart_Gardner_Museum_theft"]
+  },
+  {
+    "id": "louvre1911",
+    "title": "The Missing Smile",
+    "inspiredBy": "the 1911 theft of the Mona Lisa from the Louvre",
+    "year": 1911,
+    "wiki": "Mona Lisa",
+    "facts": [
+      "In August 1911 a painting was taken from one of the world's most famous museums on a day it was closed to the public.",
+      "The thief was a former employee who knew the building; he left with the painting hidden under his work smock.",
+      "For more than a day nobody noticed it was gone; staff assumed it had been taken down to be photographed.",
+      "Suspicion fell on many people, including well-known artists and writers, before the trail went cold.",
+      "Two years later the thief tried to sell it to a dealer in another country and was caught; the painting went back on the wall more famous than before."
+    ],
+    "realNames": ["Mona", "Lisa", "Gioconda", "Louvre", "Peruggia", "Vincenzo", "Leonardo", "Vinci", "Picasso", "Apollinaire", "Geri", "Uffizi", "Florence", "Paris"],
+    "sources": ["https://en.wikipedia.org/wiki/Mona_Lisa"]
+  },
+  {
+    "id": "diamond2003",
+    "title": "Ten Layers Down",
+    "inspiredBy": "the 2003 Antwerp Diamond Centre heist",
+    "year": 2003,
+    "wiki": "Antwerp diamond heist",
+    "facts": [
+      "Over a weekend in February 2003, thieves emptied most of the safe-deposit boxes in a vault two floors below a diamond trading centre.",
+      "The vault was said to be protected by many layers of security, including a combination lock, a heat and motion detector, a magnetic field on the door, and guards.",
+      "The ring leader had rented office space in the building for about two years and was known there as a trader.",
+      "Most of the haul was never found.",
+      "The gang was caught partly because of rubbish dumped in a forest by the roadside, which held documents and a half-eaten sandwich."
+    ],
+    "realNames": ["Antwerp", "Notarbartolo", "Leonardo", "Turin", "Diamond Centre", "Belgium", "Speedy", "Genius", "Monster", "Tonino"],
+    "sources": ["https://en.wikipedia.org/wiki/Antwerp_diamond_heist"]
+  }
+]

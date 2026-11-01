@@ -47,14 +47,20 @@ const ART: Record<string, [string, string]> = {
 let seen: [string, string][] = [];
 function renderPanels() {
   const box = $("casePanels"); box.replaceChildren(); if (!seen.length) { box.innerHTML = '<p class="dim">The illustrations appear here as the story unfolds.</p>'; return; }
-  seen.forEach(([id, cap], i) => { const f = document.createElement("figure"); f.innerHTML = `<img alt="" loading="lazy"><figcaption><b>PANEL ${String(i + 1).padStart(2, "0")}</b> · </figcaption>`; (f.querySelector("img") as HTMLImageElement).src = `/art/story/${id}.jpg`; (f.querySelector("img") as HTMLImageElement).alt = cap; f.querySelector("figcaption")!.append(cap); box.append(f); });
+  seen.forEach(([id, cap], i) => { const f = document.createElement("figure"); f.innerHTML = `<img alt="" loading="lazy"><figcaption><b>PANEL ${String(i + 1).padStart(2, "0")}</b> · </figcaption>`; (f.querySelector("img") as HTMLImageElement).src = artUrl(id); (f.querySelector("img") as HTMLImageElement).alt = cap; f.querySelector("figcaption")!.append(cap); box.append(f); });
 }
-function showArt(id: string, caption: string) {
+/** Built-in stills are ids under /art/story; a mission's are full paths. */
+const artUrl = (id: string) => (id.startsWith("/") ? `${id}.jpg` : `/art/story/${id}.jpg`);
+function showArt(id: string, caption: string, _full = false) {
   if (!seen.some(([x]) => x === id)) { seen.push([id, caption]); renderPanels(); }
   const fig = $("story"), img = $("storyImg") as HTMLImageElement;
-  img.src = `/art/story/${id}.jpg`; img.alt = caption; $("storyCap").textContent = caption; fig.hidden = false;
+  img.src = artUrl(id); img.alt = caption; $("storyCap").textContent = caption; fig.hidden = false;
 }
+/** A generated mission brings its own stills (beat id -> image), and none of the built-in story's. */
+let missionArt: { base: string; caps: Record<string, string> } | null = null;
+export function setMissionArt(base: string, caps: Record<string, string>) { missionArt = { base, caps }; }
 function storyArt(out: TurnOutput) {
+  if (missionArt) { for (const b of [...(out.beatIds ?? [])].reverse()) if (missionArt.caps[b]) return showArt(`${missionArt.base}/${b}`, missionArt.caps[b], true); return; }
   const ids = out.lines.map(l => l.id);
   if (ids.includes("marlow.epilogue.burn")) return showArt("burn", "Burned. Ashes in the rain.");
   if (ids.includes("marlow.epilogue.send")) return showArt("send", "Sent. By morning the city hears her voice.");
