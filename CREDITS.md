@@ -24,3 +24,6 @@ Real places, if mentioned, are settings only. All characters and targets are fic
 - Maurice Leblanc, *The Extraordinary Adventures of Arsène Lupin, Gentleman-Burglar* (1907), "The Black Pearl", via Project Gutenberg eBook 6133. Leblanc died in 1941, so check local law outside the US.
 - E. W. Hornung, *The Amateur Cracksman* (1899), via Project Gutenberg eBook 706.
 All names, dialogue and plot specifics in MARLOW are original. See STORY.md.
+
+## Story illustrations
+`assets/art/story/*.jpg` (12 images) were generated once with **Muse Image** (`muse-image-1.0`, Meta Model API) by `npm run story-art`, then recompressed with ffmpeg. They are mood illustrations only and never carry game facts. The UI layout follows designs made in Google Stitch for this project.

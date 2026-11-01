@@ -11,7 +11,7 @@ import { verify, type Verified } from "./verify";
 export type TurnKind = "ok" | "clarify" | "refused" | "timeout" | "sayagain" | "local";
 export interface TurnOutput {
   turnId: number; kind: TurnKind; transcript: string; action?: Action; events: GameEvent[];
-  lines: SpokenLine[]; cues: Cue[]; beatCueIds: string[]; latencyMs: number; state: WorldState;
+  lines: SpokenLine[]; cues: Cue[]; beatCueIds: string[]; /** Story beats that fired this turn (ids from beats.json). */ beatIds?: string[]; latencyMs: number; state: WorldState;
 }
 export interface SessionConfig {
   level: unknown; bank: LineBank; beats: Beat[]; intent: IntentAdapter; seed: number; memory: MemoryStore;
@@ -73,7 +73,7 @@ export class Session {
     const b = this.beatOutput([], true, 0, this.state.trust);
     this.lastLines = b.lines;
     this.write({ turnId: 0, beats: b.ids, lineIds: b.lines.map(l => l.id), lines: b.lines.map(l => ({ id: l.id, text: l.text })) });
-    return { turnId: 0, kind: "ok", transcript: "", events: [], lines: b.lines, cues: [], beatCueIds: b.cueIds, latencyMs: 0, state: this.state };
+    return { turnId: 0, kind: "ok", transcript: "", events: [], lines: b.lines, cues: [], beatCueIds: b.cueIds, beatIds: b.ids, latencyMs: 0, state: this.state };
   }
 
   /** Returns null when the turn was superseded or timed out (reply discarded, state untouched). */
@@ -221,7 +221,7 @@ export class Session {
     const refused = r.events[0]?.type === "refused";
     const o: TurnOutput = {
       turnId, kind: refused ? "refused" : "ok", transcript, action: refused ? undefined : action, events: r.events, lines,
-      cues: cuesFor(prev, r.state, r.events), beatCueIds: b.cueIds, latencyMs: this.now() - t0, state: r.state,
+      cues: cuesFor(prev, r.state, r.events), beatCueIds: b.cueIds, beatIds: b.ids, latencyMs: this.now() - t0, state: r.state,
     };
     this.write({
       turnId, transcript, kind: o.kind, ...(typeof how === "string" ? { parsed: how, validation: "local" } : how), action: o.action, roll: r.roll,

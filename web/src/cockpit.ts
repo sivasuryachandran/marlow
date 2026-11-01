@@ -36,6 +36,26 @@ function wireTabs() {
   });
 }
 
+// ---------------- story illustrations ----------------
+/** Beat id (or event) -> pre-generated Muse Image illustration. Mood only; the engine still owns every fact. */
+const ART: Record<string, [string, string]> = {
+  intro_first: ["title", "Owl, in the van. The Hale Gallery across the street."], intro_repeat: ["lobby", "The lobby again."],
+  story_hall: ["hall", "The hall of portraits."], story_limp: ["limp", "A heavy step, a drag, and keys."], story_gallery: ["guestbook", "The guest book, open to the ninth."],
+  story_office: ["office", "The empty safe. The ledger, open on the desk."], machine_ring: ["machine", "The answering machine."], machine_late: ["machine", "The answering machine."],
+  ledger_twist: ["tape", "A tape, taped inside the back cover."], client_checkin: ["ines", "Ines, on the line."],
+};
+function showArt(id: string, caption: string) {
+  const fig = $("story"), img = $("storyImg") as HTMLImageElement;
+  img.src = `/art/story/${id}.jpg`; img.alt = caption; $("storyCap").textContent = caption; fig.hidden = false;
+}
+function storyArt(out: TurnOutput) {
+  const ids = out.lines.map(l => l.id);
+  if (ids.includes("marlow.epilogue.burn")) return showArt("burn", "Burned. Ashes in the rain.");
+  if (ids.includes("marlow.epilogue.send")) return showArt("send", "Sent. By morning the city hears her voice.");
+  if (out.events.some(e => e.type === "chase_started")) return showArt("chase", "He's running at her.");
+  for (const b of [...(out.beatIds ?? [])].reverse()) if (ART[b]) return showArt(ART[b][0], ART[b][1]);
+}
+
 // ---------------- helpers ----------------
 const dirOf = (e: GameEvent): { dir: Dir; dist: Dist } | null => ("dir" in e && "dist" in e ? { dir: e.dir as Dir, dist: e.dist as Dist } : null);
 const SOUND_LABEL: Record<string, string> = { phone_ring: "Phone ringing" };
@@ -172,9 +192,9 @@ export function initCockpit(d: CockpitDeps) {
 /** Call after every turn (and at the start). */
 export function onTurn(out: TurnOutput) {
   collect(out.events, out.state.turn);
-  renderHeader(); renderTopology(); renderSonarNote(); renderClarify(out); renderLastTx(out);
+  renderHeader(); renderTopology(); renderSonarNote(); renderClarify(out); renderLastTx(out); storyArt(out);
   document.querySelectorAll("#chips button").forEach(b => b.classList.remove("on")); $("choices").replaceChildren();
 }
-export function resetRun() { pips = []; peakAlert = 0; }
+export function resetRun() { pips = []; peakAlert = 0; $("story").hidden = true; }
 export function setMic(text: string, live: boolean) { $("micState").textContent = text; $("ptt").classList.toggle("live", live); }
 export function micLevel(rms: number) { ($("micLevel") as HTMLElement).style.width = `${Math.min(100, Math.round(rms * 900))}%`; }

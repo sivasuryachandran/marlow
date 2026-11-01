@@ -113,3 +113,9 @@ input[type=range]{width:100%;accent-color:var(--amber)}
 body.audio-only .visual,body.audio-only .chips,body.audio-only #choices{display:none!important}
 body.audio-only .grid{grid-template-columns:minmax(0,720px);justify-content:center}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* story illustrations (Muse Image, pre-generated; mood only, never facts) */
+.story{margin:0 0 1rem;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:#05070b}
+.story img{display:block;width:100%;height:auto;aspect-ratio:7/4;object-fit:cover;animation:fadein .9s ease}
+.story figcaption{padding:.45rem .7rem;font:500 .72rem var(--mono);color:var(--dim)}
+@keyframes fadein{from{opacity:0}to{opacity:1}}

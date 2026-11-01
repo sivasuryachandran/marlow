@@ -25,6 +25,8 @@ npm run dev          # then open http://localhost:5173/?seed=7
 5. Get the **ledger** from the office and **exit through the lobby** without being caught. The guard hears noisy doors. If he spots Marlow he runs at her and you have exactly one turn to hide or leave the room.
 6. If you win, Marlow asks what to do with the tape she found: say **"burn it"** or **"send it"**.
 
+The screen is the **Van Cockpit**: a sonar showing only sounds Owl has actually heard (never the guard's true position), the earpiece waveform, Marlow's last words, clickable choices when she asks "which door?", tactical chips (keys 1-7), and an "Audio only" mode (key O) that hides every visual panel. Story moments appear as illustrations made with Muse Image. The Spectator/Debug tab shows the ground truth, behind a spoiler button.
+
 Marlow's voice lines are bundled (`assets/audio/lines/*.mp3`), so a fresh clone talks. Sound effects and music are generated in the browser. Tips: short orders work best; Marlow answers "say again" to small talk; in Settings you can turn on rain and room ambience, mono audio, and captions.
 
 **With no API keys** the game still runs: speech uses Chrome's built-in recognition and understanding uses a small offline parser (fewer phrasings). **With keys** (`cp .env.example .env`, fill `MODEL_API_KEY`, then `npm run server` in a second terminal and `npm run dev`) it uses Muse Voice Transcribe and Muse Spark for natural phrasing, and the mic listens hands-free (no button to hold).

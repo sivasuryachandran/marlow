@@ -16,6 +16,7 @@
     "server": "node --env-file=.env --import tsx server/src/index.ts",
     "eval": "node --env-file=.env --import tsx tools/eval.ts",
     "eval:dry": "EVAL_DRYRUN=1 node --env-file=.env --import tsx tools/eval.ts",
+    "story-art": "node --env-file=.env --import tsx tools/story-art.ts",
     "render-lines": "tsx tools/render-lines.ts",
     "author-mission": "tsx tools/author-mission.ts --validate",
     "casefile": "tsx tools/casefile.ts",
