@@ -629,5 +629,35 @@
     "curt": [
       "Step, drag, keys. Fenwick, boss. That's Halloran."
     ]
+  },
+  "marlow.talk": {
+    "speaker": "marlow",
+    "text": [
+      "Loud and clear, boss. I'm here.",
+      "I'm here, boss. Say the word."
+    ],
+    "curt": [
+      "Here."
+    ]
+  },
+  "marlow.refuse.no_hide_spot.known": {
+    "speaker": "marlow",
+    "text": [
+      "Nothing to hide behind here. {prop} in {room} would work.",
+      "No cover in here, boss. Try {prop} in {room}."
+    ],
+    "curt": [
+      "No cover. {prop}, {room}."
+    ]
+  },
+  "marlow.refuse.no_hide_spot.chase": {
+    "speaker": "marlow",
+    "text": [
+      "No cover in here. Move me, boss! Now!",
+      "Nowhere to hide! Get me out of this room!"
+    ],
+    "curt": [
+      "No cover! Move me!"
+    ]
   }
 }

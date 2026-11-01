@@ -11,6 +11,12 @@ export type Verified =
 
 export interface VerifyOpts { scope?: string[] }
 
+const INTENT_WORDS: Record<string, RegExp> = {
+  wait: /\b(wait|hold|stop|freeze|stay|still|pause|hang|halt|idle|sit|stand|standby|patience|pass|don'?t move|do not move|not move)\b/,
+  hide: /\b(hide|hiding|hid|hided|cover|duck|conceal|crouch|behind|tuck|vanish|low|sight|get down)\b/,
+  listen: /\b(listen|hear|hearing|sound|sounds|noise|ears?|anyone|anybody|somebody|someone|footsteps?|guard)\b/,
+  exit: /\b(exit|leave|out|extract|escape|bail|run|abort|done|finish|finished|outside|home|van|go)\b/,
+};
 const entityIds = (s: WorldState) => new Set([
   ...s.knowledge.rooms, ...s.knowledge.doors, ...s.knowledge.props, ...s.knowledge.items,
 ]);
@@ -50,6 +56,9 @@ export function verify(s: WorldState, reply: unknown, transcript: string, opts: 
       return { kind: "refuse", reason: "unknown_target", target: r.target };
     }
   }
+  // V2c: wait / hide / listen / exit need a word of that kind in the order. A question or small talk never becomes an action.
+  const lex = INTENT_WORDS[(r as { action: string }).action];
+  if (lex && !lex.test(transcript.toLowerCase())) return { kind: "sayagain", why: "unknown" };
   const v = validate(s, r);
   const { matched: _m, ...engineAction } = r as Action & { matched?: string };
   return v.ok ? { kind: "action", action: engineAction as Action } : { kind: "refuse", reason: v.reason, target: v.target };

@@ -5,7 +5,7 @@ import { knowledgeList, type IntentAdapter, type KnowledgeScope, type KnownEntit
 import { cleanTranscript, localParse, plausibleOrder } from "./parser";
 import { hash, renderLine, type LineBank, type LineRef, type SpokenLine } from "./lines";
 import type { MemoryStore } from "./memory";
-import { cuesFor, narrate, type Cue } from "./narrate";
+import { coverRefs, cuesFor, narrate, type Cue } from "./narrate";
 import { verify, type Verified } from "./verify";
 
 export type TurnKind = "ok" | "clarify" | "refused" | "timeout" | "sayagain" | "local";
@@ -108,6 +108,8 @@ export class Session {
         case "yes": case "no":
           if (this.pending) return out("clarify", [this.clarifyRef(this.pending.candidates, s)], {}, { parsed: local.kind });
           return out("local", [{ id: "system.nothing_pending", slots: {} }], {}, { parsed: local.kind });
+        case "cover": return out("local", coverRefs(s), {}, { parsed: "cover" });
+        case "talk": return out("local", [{ id: "marlow.talk", slots: {} }], {}, { parsed: "talk" });
         case "look": return out("local", this.lookRefs(s), {}, { parsed: "look" });
         case "ready": return out("local", [{ id: "system.ready", slots: {} }], {}, { parsed: "ready" });
         case "no_back": return out("refused", [{ id: "marlow.refuse.not_adjacent", slots: {} }], {}, { parsed: "go back" });

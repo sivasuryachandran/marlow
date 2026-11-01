@@ -7,7 +7,7 @@ import { createInitialState, solve, candidateActions, step, Rng, revealRoom } fr
 import type { Action, Level, WorldState } from "@marlow/shared";
 import {
   loadBank, localParse, mockInfer, knowledgeList, verify, v1, MockIntent, Session, InMemoryStore, validateBeats,
-  expandLine, checkMatch, plausibleOrder, type IntentAdapter, type Beat,
+  expandLine, checkMatch, plausibleOrder, coverRefs, type IntentAdapter, type Beat,
 } from "./index";
 
 const bank = loadBank(linesJson);
@@ -366,5 +366,32 @@ describe("story", () => {
     expect(sent?.lines.map(l => l.id)).toEqual(["marlow.epilogue.send", "client.after.send"]);
     expect(sess.ending).toBe("send");
     expect((await sess.submit("burn it"))?.lines.map(l => l.id)).toEqual(["marlow.refuse.game_over"]);
+  });
+});
+
+describe("conversation and guidance", () => {
+  it("checking in is answered, and a question never becomes an action", async () => {
+    const intent = { name: "never", init: async () => {}, infer: async () => { throw new Error("model must not be called"); } } as unknown as IntentAdapter;
+    const sess = mkSession({ intent }); sess.start();
+    const before = JSON.stringify(sess.state);
+    for (const q of ["Marlow can you hear me?", "are you there", "hello"]) expect((await sess.submit(q))?.lines.map(l => l.id)).toEqual(["marlow.talk"]);
+    expect(JSON.stringify(sess.state)).toBe(before);
+  });
+  it("a model reply of 'wait' to an order with no waiting in it is rejected, not executed", () => {
+    expect(verify(mk(), { action: "wait" }, "can you see the guard from there").kind).toBe("sayagain");
+    expect(verify(mk(), { action: "wait" }, "hold on a second").kind).toBe("action");
+    expect(verify(mk(), { action: "hide" }, "tell me about the weather").kind).not.toBe("action");
+  });
+  it("refused hide points at known cover, or says to move when chased", () => {
+    const s = mk(); inHall(s); revealRoom(s, "gallery", true);
+    const known = coverRefs(s);
+    expect(known[0].id).toBe("marlow.refuse.no_hide_spot.known");
+    expect(known[0].slots).toMatchObject({ prop: "the display case", room: "the gallery" });
+    expect(coverRefs(mk())[0].id).toBe("marlow.refuse.no_hide_spot");
+  });
+  it("'where can I hide' is a free local answer", async () => {
+    const sess = mkSession(); sess.start();
+    const out = await sess.submit("where can I hide?");
+    expect(out?.kind).toBe("local");
   });
 });

@@ -2313,5 +2313,185 @@
   "audioKey": "marlow.story.limp.c0",
   "text": "Step, drag, keys. Fenwick, boss. That's Halloran.",
   "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.talk.v0",
+  "text": "Loud and clear, boss. I'm here.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.talk.v1",
+  "text": "I'm here, boss. Say the word.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.talk.c0",
+  "text": "Here.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.refuse.no_hide_spot.known.v0.prop=the_display_case.room=the_lobby",
+  "text": "Nothing to hide behind here. The display case in the lobby would work.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.refuse.no_hide_spot.known.v0.prop=the_display_case.room=the_hall",
+  "text": "Nothing to hide behind here. The display case in the hall would work.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.refuse.no_hide_spot.known.v0.prop=the_display_case.room=the_gallery",
+  "text": "Nothing to hide behind here. The display case in the gallery would work.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.refuse.no_hide_spot.known.v0.prop=the_display_case.room=the_office",
+  "text": "Nothing to hide behind here. The display case in the office would work.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.refuse.no_hide_spot.known.v0.prop=the_display_case.room=the_stairwell",
+  "text": "Nothing to hide behind here. The display case in the stairwell would work.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.refuse.no_hide_spot.known.v0.prop=the_desk.room=the_lobby",
+  "text": "Nothing to hide behind here. The desk in the lobby would work.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.refuse.no_hide_spot.known.v0.prop=the_desk.room=the_hall",
+  "text": "Nothing to hide behind here. The desk in the hall would work.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.refuse.no_hide_spot.known.v0.prop=the_desk.room=the_gallery",
+  "text": "Nothing to hide behind here. The desk in the gallery would work.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.refuse.no_hide_spot.known.v0.prop=the_desk.room=the_office",
+  "text": "Nothing to hide behind here. The desk in the office would work.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.refuse.no_hide_spot.known.v0.prop=the_desk.room=the_stairwell",
+  "text": "Nothing to hide behind here. The desk in the stairwell would work.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.refuse.no_hide_spot.known.v1.prop=the_display_case.room=the_lobby",
+  "text": "No cover in here, boss. Try the display case in the lobby.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.refuse.no_hide_spot.known.v1.prop=the_display_case.room=the_hall",
+  "text": "No cover in here, boss. Try the display case in the hall.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.refuse.no_hide_spot.known.v1.prop=the_display_case.room=the_gallery",
+  "text": "No cover in here, boss. Try the display case in the gallery.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.refuse.no_hide_spot.known.v1.prop=the_display_case.room=the_office",
+  "text": "No cover in here, boss. Try the display case in the office.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.refuse.no_hide_spot.known.v1.prop=the_display_case.room=the_stairwell",
+  "text": "No cover in here, boss. Try the display case in the stairwell.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.refuse.no_hide_spot.known.v1.prop=the_desk.room=the_lobby",
+  "text": "No cover in here, boss. Try the desk in the lobby.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.refuse.no_hide_spot.known.v1.prop=the_desk.room=the_hall",
+  "text": "No cover in here, boss. Try the desk in the hall.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.refuse.no_hide_spot.known.v1.prop=the_desk.room=the_gallery",
+  "text": "No cover in here, boss. Try the desk in the gallery.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.refuse.no_hide_spot.known.v1.prop=the_desk.room=the_office",
+  "text": "No cover in here, boss. Try the desk in the office.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.refuse.no_hide_spot.known.v1.prop=the_desk.room=the_stairwell",
+  "text": "No cover in here, boss. Try the desk in the stairwell.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.refuse.no_hide_spot.known.c0.prop=the_display_case.room=the_lobby",
+  "text": "No cover. The display case, the lobby.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.refuse.no_hide_spot.known.c0.prop=the_display_case.room=the_hall",
+  "text": "No cover. The display case, the hall.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.refuse.no_hide_spot.known.c0.prop=the_display_case.room=the_gallery",
+  "text": "No cover. The display case, the gallery.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.refuse.no_hide_spot.known.c0.prop=the_display_case.room=the_office",
+  "text": "No cover. The display case, the office.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.refuse.no_hide_spot.known.c0.prop=the_display_case.room=the_stairwell",
+  "text": "No cover. The display case, the stairwell.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.refuse.no_hide_spot.known.c0.prop=the_desk.room=the_lobby",
+  "text": "No cover. The desk, the lobby.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.refuse.no_hide_spot.known.c0.prop=the_desk.room=the_hall",
+  "text": "No cover. The desk, the hall.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.refuse.no_hide_spot.known.c0.prop=the_desk.room=the_gallery",
+  "text": "No cover. The desk, the gallery.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.refuse.no_hide_spot.known.c0.prop=the_desk.room=the_office",
+  "text": "No cover. The desk, the office.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.refuse.no_hide_spot.known.c0.prop=the_desk.room=the_stairwell",
+  "text": "No cover. The desk, the stairwell.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.refuse.no_hide_spot.chase.v0",
+  "text": "No cover in here. Move me, boss! Now!",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.refuse.no_hide_spot.chase.v1",
+  "text": "Nowhere to hide! Get me out of this room!",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.refuse.no_hide_spot.chase.c0",
+  "text": "No cover! Move me!",
+  "speaker": "marlow"
  }
 ]

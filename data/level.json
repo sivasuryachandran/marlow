@@ -228,7 +228,8 @@
       "office",
       "hall",
       "stairwell"
-    ]
+    ],
+    "startWindow": 1
   },
   "start": {
     "room": "lobby",

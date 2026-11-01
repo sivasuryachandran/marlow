@@ -26,8 +26,11 @@ describe("level", () => {
   });
   it("seeded RNG picks the guard start", () => {
     expect(mk(7).guard.step).toBe(mk(7).guard.step);
-    const starts = new Set(Array.from({ length: 40 }, (_, i) => mk(i).guard.step));
+    // a level without a start window starts the guard anywhere on his route; this one gives a fixed quiet opening
+    const open = { ...(level as object), guard: { ...(level as { guard: object }).guard, startWindow: undefined } };
+    const starts = new Set(Array.from({ length: 40 }, (_, i) => createInitialState(open, i).guard.step));
     expect(starts.size).toBeGreaterThan(1);
+    expect(new Set(Array.from({ length: 40 }, (_, i) => mk(i).guard.step))).toEqual(new Set([0])); // the real level: upstairs for three turns
   });
 });
 

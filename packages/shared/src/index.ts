@@ -25,6 +25,8 @@ export const Prop = z.object({
 export const Item = z.object({ id: z.string(), aliases: z.array(z.string()).default([]), room: z.string().nullable(), spokenName: z.string() });
 export const Guard = z.object({
   id: z.string(), route: z.array(z.string()).min(2), step: z.number().int().min(0),
+  /** A run starts with the guard at a random route index below this (default: anywhere), so a level can give the player a quiet opening. */
+  startWindow: z.number().int().min(1).optional(),
   /** Sound reaction: while detouring he leaves his route toward a noise for up to `left` steps, then walks back to route[step]. */
   at: z.string().nullable().default(null),
   detour: z.object({ target: z.string(), left: z.number().int() }).nullable().default(null),

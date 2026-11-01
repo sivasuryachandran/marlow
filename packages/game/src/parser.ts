@@ -6,6 +6,8 @@ export type LocalParse =
   | { kind: "no_back" }
   | { kind: "ready" }
   | { kind: "look" }
+  | { kind: "talk" }
+  | { kind: "cover" }
   | null;
 
 /** Speech recognizers sometimes stutter ("the the", "Listen,Listen,", "sneak to the sneak to the hall"): collapse adjacent repeats. */
@@ -33,6 +35,10 @@ export function localParse(text: string, s: WorldState): LocalParse {
   if (["go back", "back", "back up", "retreat", "go back the way you came"].includes(t)) {
     return s.marlow.prevRoom ? { kind: "action", action: { action: "move", target: s.marlow.prevRoom } } : { kind: "no_back" };
   }
+  // "Where can I hide": from what she already knows. Free and local.
+  if (/\b(where (can|could|do|should) (i|you|we) hide|any (cover|hiding)|hiding (spot|place)|where is (the )?cover|where'?s (the )?cover|is there (any )?(cover|a place to hide))\b/.test(t)) return { kind: "cover" };
+  // Checking in on her ("can you hear me", "are you there", "hello"): she answers; no turn passes, nothing moves.
+  if (/^(hey|hi|hello|testing|test|hello marlow|hey marlow|are you there|you there|is anyone there|can you hear me|do you hear me|can you hear me now|are you (ok|okay|alright|all right)|how are you|you ok|you okay|are you with me|are you listening|marlow)( there| now)?$/.test(t)) return { kind: "talk" };
   // "What do you see / look around": Marlow describes the room from what she already knows. Free, local, no turn passes.
   if (/\b(what (do|can) you see|what do you see|look around|what is around|what's around|describe|where are you|what(?:'s| is) (in )?(the )?(room|here))\b/.test(t) && !/\b(door|arch|through|behind|left|right|stairs?|gallery|office|hall|lobby|stairwell)\b/.test(t)) return { kind: "look" };
   // "I'm ready, we can start, go ahead": acknowledgement only, not an order. Marlow answers; the world does not change.

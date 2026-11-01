@@ -5,6 +5,17 @@ import type { LineRef } from "./lines";
 const nameOf = (s: WorldState, id: string) =>
   [...s.rooms, ...s.doors, ...s.props, ...s.items].find(x => x.id === id)?.spokenName ?? id;
 
+/** Where cover is, from what Marlow already knows: here, else the nearest known hiding place, else nothing known. */
+export function coverRefs(s: WorldState): LineRef[] {
+  const here = s.marlow.room;
+  const spots = s.props.filter(p => p.tags.includes("hide") && s.knowledge.props.includes(p.id));
+  const inRoom = spots.find(p => p.room === here);
+  if (inRoom) return [{ id: "marlow.arrive.hide", slots: { prop: inRoom.spokenName } }];
+  let best: { p: (typeof spots)[number]; d: number } | null = null;
+  for (const p of spots) { const d = path(s, here, p.room)?.length ?? Infinity; if (!best || d < best.d) best = { p, d }; }
+  return best ? [{ id: "marlow.refuse.no_hide_spot.known", slots: { prop: best.p.spokenName, room: nameOf(s, best.p.room) } }] : [{ id: "marlow.refuse.no_hide_spot", slots: {} }];
+}
+
 /** Events -> template line refs. Facts come only from perceived events and Marlow's knowledge delta. */
 export function narrate(prev: WorldState, next: WorldState, events: GameEvent[]): LineRef[] {
   const out: LineRef[] = [];
@@ -52,7 +63,10 @@ export function narrate(prev: WorldState, next: WorldState, events: GameEvent[])
       case "chase_started": out.push({ id: "marlow.chase", slots: {} }); break;
       case "chase_escaped": out.push({ id: "marlow.chase.escaped", slots: {} }); break;
       case "won": out.push({ id: e.alert <= 1 ? "marlow.win.clean" : "marlow.win.messy", slots: {} }); break;
-      case "refused": out.push({ id: `marlow.refuse.${e.reason}`, slots: {} }); break;
+      case "refused":
+        if (e.reason === "no_hide_spot") out.push(...(next.chase ? [{ id: "marlow.refuse.no_hide_spot.chase", slots: {} }] : coverRefs(next)));
+        else out.push({ id: `marlow.refuse.${e.reason}`, slots: {} });
+        break;
     }
   }
   return out;
