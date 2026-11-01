@@ -19,6 +19,7 @@
     <span class="chip on" data-a="0">0 CALM</span><span class="chip" data-a="1">1 UNEASY</span><span class="chip" data-a="2">2 SEARCHING</span><span class="chip" data-a="3">3 CAUGHT</span>
   </div>
   <div class="cell"><small>MARLOW'S TRUST</small><span class="meter"><i id="hTrust" style="width:50%"></i></span><b id="hTrustN">50%</b></div>
+  <button id="coopBtn" class="cell toggle" type="button" aria-pressed="false" aria-controls="coop" title="A friend sees the building while you listen">CO-OP: SEER LINK</button>
   <button id="audioOnly" class="cell toggle" type="button" aria-pressed="false" aria-keyshortcuts="O" title="Hide the visual panels and play by ear only">AUDIO ONLY [O]</button>
 </header>
 
@@ -31,6 +32,18 @@
 </div></nav>
 
 <main>
+<section id="coop" class="panel coop" aria-labelledby="coopH" hidden>
+  <h2 id="coopH">Play with a friend <small>one sees, one listens</small></h2>
+  <p>Your friend opens this link and sees the whole building, including where the guard really is. You keep playing by ear. Talk to each other on a phone or voice call. Only you can give Marlow orders.</p>
+  <div class="coop-row">
+    <div class="coop-code"><small>ROOM CODE</small><b id="coopCode" tabindex="-1">----</b></div>
+    <label class="sr-only" for="coopLink">Seer link</label><input id="coopLink" type="text" readonly>
+    <button id="coopCopy" type="button">Copy link</button>
+  </div>
+  <p id="coopLan" class="dim"></p>
+  <p id="coopStatus" role="status"></p>
+  <button id="coopStop" type="button">Stop sharing</button>
+</section>
 <!-- ============ PLAY ============ -->
 <section id="tab-play" role="tabpanel" aria-labelledby="t-play">
   <div id="hero">

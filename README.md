@@ -29,6 +29,8 @@ The screen is the **Van Cockpit**: a sonar showing only sounds Owl has actually 
 
 Marlow's voice lines are bundled (`assets/audio/lines/*.mp3`), so a fresh clone talks. Sound effects and music are generated in the browser. Tips: short orders work best; Marlow answers "say again" to small talk; in Settings you can turn on rain and room ambience, mono audio, and captions.
 
+**Play with a friend: one sees, one listens.** Run `npm run server` too, start the game, and press **CO-OP: SEER LINK** in the top bar. You get a four-letter room code and a link. Your friend opens the link and sees the whole building, including where the guard really is, plus everything you hear as text. You keep playing by ear; they can't give orders. Talk to each other on a phone or voice call. On the same Wi-Fi, start the game with `npm run dev:lan` and the panel shows the address your friend should open. (A friend elsewhere needs the game hosted somewhere you can both reach, for example a tunnel.)
+
 **With no API keys** the game still runs: speech uses Chrome's built-in recognition and understanding uses a small offline parser (fewer phrasings). **With keys** (`cp .env.example .env`, fill `MODEL_API_KEY`, then `npm run server` in a second terminal and `npm run dev`) it uses Muse Voice Transcribe and Muse Spark for natural phrasing, and the mic listens hands-free (no button to hold).
 
 ## Run it (developer commands)

@@ -10,6 +10,7 @@
   "scripts": {
     "test": "vitest run",
     "dev": "vite web",
+    "dev:lan": "vite web --host",
     "build": "vite build web",
     "check-access": "node --env-file=.env --import tsx tools/check-access.ts",
     "replay": "tsx tools/replay.ts",

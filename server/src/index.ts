@@ -10,6 +10,9 @@ import { NotConfigured } from "./adapters/errors";
 import { buildCaseFile } from "./casefile";
 import { loadConfig } from "./config";
 import { replayRows } from "./replay";
+import { SeerRooms } from "./seer";
+import { WebSocketServer } from "ws";
+import { networkInterfaces } from "node:os";
 import level from "../../data/level.json" with { type: "json" };
 
 const cfg = loadConfig();
@@ -71,4 +74,22 @@ app.post("/api/eval-audio/:id", async c => {
 
 app.use("/casefiles/*", serveStatic({ root: "./" }));
 void knowledgeList;
-serve({ fetch: app.fetch, port: cfg.port }, i => console.log(`MARLOW server on :${i.port} (intent=${cfg.intentBackend})`));
+// Seer link: addresses a friend on the same network could use (only works if the web app is started with --host).
+app.get("/api/lan", c => c.json(Object.values(networkInterfaces()).flat().filter(n => n && n.family === "IPv4" && !n.internal).map(n => n!.address)));
+
+const server = serve({ fetch: app.fetch, port: cfg.port }, i => console.log(`MARLOW server on :${i.port} (intent=${cfg.intentBackend})`));
+
+// Seer link relay: ws://host/ws/seer?room=ABCD&role=host|seer
+const rooms = new SeerRooms();
+const wss = new WebSocketServer({ noServer: true, maxPayload: 1024 * 1024 });
+server.on("upgrade", (req, socket, head) => {
+  const u = new URL(req.url ?? "/", "http://localhost");
+  if (u.pathname !== "/ws/seer") { socket.destroy(); return; }
+  wss.handleUpgrade(req, socket, head, ws => {
+    const code = u.searchParams.get("room") ?? "", role = u.searchParams.get("role") ?? "";
+    if (!rooms.join(code, role, ws)) { ws.close(4001, "bad room, role, or room full"); return; }
+    ws.on("message", d => rooms.message(code, ws, d.toString()));
+    ws.on("close", () => rooms.leave(code, ws));
+  });
+});
+setInterval(() => rooms.sweep(), 10 * 60 * 1000).unref();

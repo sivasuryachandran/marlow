@@ -124,6 +124,21 @@ body.audio-only .grid{grid-template-columns:minmax(0,720px);justify-content:cent
 .panels figure{margin:0;background:#0d111a;border:1px solid var(--line);border-radius:12px;overflow:hidden}
 .panels img{display:block;width:100%;aspect-ratio:7/4;object-fit:cover}
 .panels figcaption{padding:.5rem .7rem;font:500 .75rem var(--mono);color:var(--dim)}.panels figcaption b{color:var(--amber)}
+/* co-op: Seer link */
+.coop{margin-bottom:1rem;border-color:var(--amber)}
+.coop-row{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center}
+.coop-code{background:#0d111a;border-radius:10px;padding:.4rem .9rem}.coop-code small{display:block;font:500 .65rem var(--mono)}
+#coopCode{font:700 2rem var(--mono);letter-spacing:.3em;color:var(--amber)}
+#coopLink{flex:1 1 260px;width:auto}
+.seer .brief{font:1.05rem var(--serif);margin:.2rem 0 .6rem}
+.seer .truth{font:700 1.25rem var(--ui);color:var(--fg);background:var(--panel);border-left:4px solid var(--red);padding:.7rem 1rem;border-radius:8px;margin:0 0 1rem}
+.seer-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:1rem}
+@media(min-width:1000px){.seer-grid{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)}}
+.seer-map svg{width:100%;height:auto;display:block;background:#05070b;border-radius:10px}
+.seer .legend{font-size:.8rem;margin:.5rem 0 0}
+.seer-log{max-height:65vh;overflow:auto}
+.seer-log p{margin:.3rem 0;padding:.35rem .6rem;border-radius:8px;background:#0d111a}
+.seer-log .marlow{border-left:3px solid var(--cyan)}.seer-log .client{color:#d3c3ff;border-left:3px solid #8e6bff}.seer-log .you{color:var(--dim)}.seer-log .cue{color:var(--amber);font-style:italic}
 /* ---------- phones ---------- */
 @media(max-width:700px){
   body{padding-bottom:1rem}

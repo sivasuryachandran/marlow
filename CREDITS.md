@@ -27,3 +27,6 @@ All names, dialogue and plot specifics in MARLOW are original. See STORY.md.
 
 ## Story illustrations
 `assets/art/story/*.jpg` (12 images) were generated once with **Muse Image** (`muse-image-1.0`, Meta Model API) by `npm run story-art`, then recompressed with ffmpeg. They are mood illustrations only and never carry game facts. The UI layout follows designs made in Google Stitch for this project.
+
+## Seer link (co-op)
+`ws` 8.x (MIT) for the WebSocket relay. Design informed by Keep Talking and Nobody Explodes (information split between players), Operation: Tango (each player sees a different part of the world) and the CHI 2021 paper "Exploring Asymmetric Roles in Mixed-Ability Gaming" (Gonçalves et al.). No code or assets from those works.

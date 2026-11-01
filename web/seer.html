@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MARLOW — Seer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap">
+<link rel="stylesheet" href="/src/style.css">
+</head>
+<body class="seer">
+<header id="topbar" aria-label="Seer status">
+  <h1 class="sr-only">MARLOW Seer link</h1>
+  <div class="cell freq"><span class="dot"></span><b>SEER</b><small>YOU SEE · YOUR PARTNER LISTENS</small></div>
+  <div class="cell"><small>ROOM</small><b id="sRoom">—</b></div>
+  <div class="cell"><small>LINK</small><b id="sConn">not connected</b></div>
+  <div class="cell"><small>TURN · OBJECTIVE</small><b><span id="sTurn">00</span> · <span id="sObj">—</span></b></div>
+  <div class="cell alert" role="group" aria-label="Alert level"><small>ALERT</small>
+    <span class="chip on" data-a="0">0 CALM</span><span class="chip" data-a="1">1 UNEASY</span><span class="chip" data-a="2">2 SEARCHING</span><span class="chip" data-a="3">3 CAUGHT</span>
+  </div>
+</header>
+
+<main>
+  <section id="join" class="panel prose" aria-labelledby="joinH" hidden>
+    <h2 id="joinH">Join as the Seer</h2>
+    <p>Your partner is playing MARLOW with headphones and no screen. They gave you a four-letter room code.</p>
+    <form id="joinForm" class="btns"><label class="sr-only" for="code">Room code</label><input id="code" type="text" maxlength="4" autocomplete="off" placeholder="ABCD" style="text-transform:uppercase;max-width:10rem"><button class="primary" type="submit">Join</button></form>
+  </section>
+
+  <section id="seerView" hidden>
+    <p class="brief">You can <b>see</b> the whole building, including the guard. Your partner can only <b>hear</b> it. Talk to them on a phone or voice call. You can't give Marlow orders; only they can.</p>
+    <p id="truth" class="truth" role="status" aria-live="polite">Waiting for the listener's first turn…</p>
+    <div class="grid seer-grid">
+      <section class="panel" aria-labelledby="mapH">
+        <h2 id="mapH">The building <small>ground truth</small></h2>
+        <div id="seerMap" class="seer-map"></div>
+        <p class="dim legend"><b style="color:var(--cyan)">M</b> Marlow · <b style="color:var(--red)">G</b> guard, dashed arrow = his next step · <span style="color:var(--ok)">cover</span> · <span style="color:var(--amber)">orange</span> doors and rooms Marlow knows about</p>
+      </section>
+      <section class="panel" aria-labelledby="heardH">
+        <h2 id="heardH">What your partner hears</h2>
+        <div id="heard" class="log seer-log" tabindex="0" role="log" aria-label="What your partner hears"></div>
+      </section>
+    </div>
+  </section>
+</main>
+<script type="module" src="./src/seer.ts"></script>
+</body>
+</html>

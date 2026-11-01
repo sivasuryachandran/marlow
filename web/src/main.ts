@@ -10,6 +10,7 @@ import { HttpIntent } from "./intent-client";
 import { loadPrefs, LocalStore, savePrefs } from "./storage";
 import { BrowserStt, ServerStt, type Stt } from "./stt";
 import { HandsFree } from "./vad";
+import { initCoop, publishTurn } from "./coop";
 import { initCockpit, micLevel, onTurn, resetRun, setMic, showTab, truthRevealed } from "./cockpit";
 
 const q = new URLSearchParams(location.search);
@@ -42,6 +43,7 @@ function showTurn(out: TurnOutput) {
   for (const l of out.lines) log(l.speaker === "client" ? "client" : "marlow", `${l.speaker === "client" ? "Client" : "Marlow"}: ${l.text}`);
   if (out.kind === "timeout") log("sys", "[Static burst: signal's bad]");
   onTurn(out);
+  publishTurn(session, out);
 }
 
 // ---------- settings ----------
@@ -214,7 +216,7 @@ function wirePtt() {
 }
 
 // ---------- wiring ----------
-bindSettings(); wirePtt();
+bindSettings(); wirePtt(); initCoop();
 initCockpit({
   send: text => { if (busy || !session) return; void audio.playAck(); void handleTranscript(text); },
   session: () => session, audio, latencyP50: () => (latencies.length ? [...latencies].sort((a, b) => a - b)[Math.floor(latencies.length / 2)] : null),
