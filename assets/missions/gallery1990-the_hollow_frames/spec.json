@@ -1,0 +1,174 @@
+{
+ "clientName": "Silas",
+ "guardName": "Harlan",
+ "guardPost": {
+  "attachTo": "blue_room",
+  "name": "watch closet"
+ },
+ "guardSound": "keys clinking against a tin cup",
+ "item": {
+  "aliases": [
+   "canvas",
+   "painting",
+   "tube"
+  ],
+  "id": "harbor_moon",
+  "name": "Harbor Moon Canvas",
+  "room": "gallery"
+ },
+ "lines": {
+  "burn": "I am holding the tape over the ashtray, boss, and I watch it curl and die.",
+  "clientAfterBurn": "I knew I could trust you, Owl, and I will pay double by morning.",
+  "clientAfterSend": "You fool, Owl, you burned us both and I will deny every word.",
+  "clientAfterTake": "You have it, good, now get out fast and do not stop for anyone.",
+  "clientCheckin": "I am waiting by the phone, Owl, tell me you have my canvas yet.",
+  "clientIntro": [
+   "I am Silas, boss, and I still owe you for Naples in sixty four.",
+   "I need that Harbor Moon canvas from the Vane House tonight, no questions.",
+   "I am begging you, do not unroll it or look inside the tube, ever."
+  ],
+  "evidence": "I am Silas and I order you to blind Owl and leave him for the police.",
+  "evidenceAsk": "Boss, this tape proves Silas sold you out, what should I do now. Burn it, or send it?",
+  "guardFirstHeard": "Boss, I hear keys on a tin cup and I am back to the night you lost your sight.",
+  "marlowIntro": "Boss, I am in the lobby and I see wide stairs and I hear a fountain dripping.",
+  "outro": "Boss, I am out on the street and I can hear the traffic and I am running.",
+  "send": "I am at the post box, boss, and I drop the tape to the papers.",
+  "take": "Boss, I feel tape inside the tube and I hear Silas say your name."
+ },
+ "links": [
+  {
+   "a": "lobby",
+   "b": "grand_hall",
+   "kind": "door"
+  },
+  {
+   "a": "grand_hall",
+   "b": "blue_room",
+   "kind": "arch"
+  },
+  {
+   "a": "grand_hall",
+   "b": "gallery",
+   "kind": "door"
+  },
+  {
+   "a": "grand_hall",
+   "b": "study",
+   "kind": "door"
+  }
+ ],
+ "lore": [
+  {
+   "text": "Silas is the client, boss. He was your partner before he betrayed you.",
+   "topic": "client",
+   "when": "start"
+  },
+  {
+   "text": "Harlan is the guard, boss. He walks all night with keys and a tin cup.",
+   "topic": "guard",
+   "when": "guard"
+  },
+  {
+   "text": "Cornelia Vane is the owner, boss. She built this house for music in sixty one.",
+   "topic": "owner",
+   "when": "start"
+  },
+  {
+   "text": "Harbor Moon is the item, boss. It hides a tape inside its wooden tube.",
+   "topic": "item",
+   "when": "item"
+  },
+  {
+   "text": "Silas is the voice on the tape, boss. He ordered the men who blinded you.",
+   "topic": "client",
+   "when": "end"
+  },
+  {
+   "text": "Harlan is kind to cats, boss. He leaves milk by the blue room door.",
+   "topic": "guard",
+   "when": "start"
+  },
+  {
+   "text": "This job is inspired by the 1990 museum theft where fake police stole thirteen works that were never found, boss.",
+   "topic": "history",
+   "when": "start"
+  }
+ ],
+ "ownerName": "Cornelia Vane",
+ "patrol": [
+  "grand_hall",
+  "gallery",
+  "grand_hall",
+  "blue_room",
+  "grand_hall"
+ ],
+ "rooms": [
+  {
+   "aliases": [
+    "foyer",
+    "entry"
+   ],
+   "cover": "",
+   "describe": "Boss, I am past the doors now and I hear the street fade behind me.",
+   "floor": "marble",
+   "id": "lobby",
+   "name": "Lobby",
+   "x": 0,
+   "y": 0
+  },
+  {
+   "aliases": [
+    "hall",
+    "hub"
+   ],
+   "cover": "a velvet sofa",
+   "describe": "Boss, I see a wide hall and I hear my shoes echo and I see police coats hung by Silas men.",
+   "floor": "marble",
+   "id": "grand_hall",
+   "name": "Grand Hall",
+   "x": 0,
+   "y": 1
+  },
+  {
+   "aliases": [
+    "blue",
+    "sitting"
+   ],
+   "cover": "a heavy curtain",
+   "describe": "Boss, I see blue walls and I hear the radiator hiss and I smell old smoke.",
+   "floor": "carpet",
+   "id": "blue_room",
+   "name": "Blue Room",
+   "x": -1,
+   "y": 1
+  },
+  {
+   "aliases": [
+    "art",
+    "frames"
+   ],
+   "cover": "a marble bench",
+   "describe": "Boss, I see empty frames on the wall and I hear the wire hum and I see your old fixers tag.",
+   "floor": "metal",
+   "id": "gallery",
+   "name": "Gallery",
+   "x": 1,
+   "y": 1
+  },
+  {
+   "aliases": [
+    "library",
+    "office"
+   ],
+   "cover": "",
+   "describe": "Boss, I see ledgers and I hear the clock tick and I smell ink and dust.",
+   "floor": "carpet",
+   "id": "study",
+   "name": "Study",
+   "x": 0,
+   "y": 2
+  }
+ ],
+ "tagline": "Take the canvas, find the truth, choose who pays",
+ "title": "The Hollow Frames"
+}

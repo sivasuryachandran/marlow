@@ -82,6 +82,8 @@ export function checkSpec(spec: MissionSpec): string[] {
   for (const p of spec.patrol) if (!ids.has(p)) e.push(`patrol names unknown room ${p}`);
   if (spec.patrol.length < 2) e.push(`the patrol needs at least 2 rooms`);
   if (!spec.rooms.some(r => r.cover.trim())) e.push(`at least one room needs cover to hide behind`);
+  const deg = (id: string) => spec.links.filter(l => l.a === id || l.b === id).length;
+  if (!spec.rooms.some(r => deg(r.id) >= 3)) e.push(`the building is a single corridor, so Marlow can never step aside while the guard passes: give one room three or more doorways (a hub, like a hall with side rooms off it)`);
   if (spec.lines.clientIntro.length < 2) e.push(`clientIntro needs 2 or 3 lines`);
   return e;
 }
@@ -106,7 +108,7 @@ export function buildMission(spec: MissionSpec, kase: Pick<MissionCase, "id" | "
     return {
       id: `${l.kind}_${a.id}_${b.id}`, kind: l.kind, between: [a.id, b.id], side: { [a.id]: sideOf(a, b), [b.id]: sideOf(b, a) },
       state: l.kind === "door" ? "closed" : "open",
-      spokenName: l.kind === "stairs" ? `the ${bare(named.name)} stairs` : `the ${bare(named.name)} ${l.kind}`,
+      spokenName: (l.kind === "stairs" ? `the ${bare(named.name)} stairs` : `the ${bare(named.name)} ${l.kind}`).toLowerCase(),
       aliases: named.aliases.map(x => `${bare(x)} ${l.kind}`),
     };
   });
@@ -115,7 +117,7 @@ export function buildMission(spec: MissionSpec, kase: Pick<MissionCase, "id" | "
   const props = rooms.filter(r => r.cover.trim()).map(r => {
     const used = new Set(doors.filter(d => d.between.includes(r.id)).map(d => d.side[r.id]));
     const side = (["left", "right", "ahead", "behind"] as const).find(s => !used.has(s)) ?? "left";
-    return { id: `${r.id}_cover`, room: r.id, side, tags: ["hide"], spokenName: the(r.cover), aliases: [bare(r.cover).split(" ").pop()!] };
+    return { id: `${r.id}_cover`, room: r.id, side, tags: ["hide"], spokenName: `the ${bare(r.cover)}`.toLowerCase(), aliases: [bare(r.cover).split(" ").pop()!.toLowerCase()] };
   });
   const levelRooms = [
     ...rooms.map(r => ({ id: r.id, pos: [r.x, r.y], spokenName: the(r.name), aliases: r.aliases.map(a => bare(a).toLowerCase()), reverb: r.floor === "carpet" ? "dry" : r.floor, footsteps: r.floor })),
@@ -225,6 +227,13 @@ export function checkText(mission: Mission, realNames: string[]): string[] {
     const sentences = t.split(/(?<=[.!?])\s+/);
     if (self && sentences.some(x => new RegExp(`^${self}\\s+(\\w+s|is|was|has|had)\\b`, "i").test(x.trim()))) e.push(`${id}: reads as narration about the speaker ("${t.slice(0, 50)}…"); write it in the speaker's own words, first person`);
     if (/\b(a|the) voice (says|said|whispers|whispered)\b/i.test(t)) e.push(`${id}: reads as narration ("a voice says"); write the words themselves`);
+  }  // a lore answer is Marlow talking ABOUT its topic, so it must name it (the client's name, the guard's name, the object...)
+  for (const [topic, re] of mission.loreTopics) {
+    if (topic === "history" || topic === "marlow") continue;
+    const rx = new RegExp(re, "i");
+    for (const [id, def] of Object.entries(mission.lines)) if (id.startsWith(`marlow.lore.${topic}.`)) for (const t of def.text)
+      if (!rx.test(t.toLowerCase())) e.push(`${id}: a ${topic} fact must name its subject so Owl knows who or what Marlow means ("${t.slice(0, 50)}…")`);
   }
+
   return e;
 }

@@ -55,6 +55,10 @@ describe("mission generator: spec -> playable mission", () => {
     const ok = spec(); ok.rooms[2].describe = "I see a desk with old reels, boss. A note says Vera was here."; ok.lines.evidence = "This is Vera. Keep the night man busy.";
     expect(checkText(buildMission(ok, kase, base).mission!, [])).toEqual([]);
   });
+  it("a lore answer must name its subject (Marlow talking about it, not someone else talking)", () => {
+    const sp = spec(); sp.lore[0].text = "I hired you because I trust you, Owl.";
+    expect(checkText(buildMission(sp, kase, base).mission!, []).join(" ")).toMatch(/marlow.lore.client.0: a client fact must name its subject/);
+  });
   it("story questions use the mission's own names, unlocked by what has been discovered", async () => {
     const { mission } = buildMission(spec(), kase, base);
     const sess = new Session({ level: mission!.level, bank: { ...base.lines, ...mission!.lines }, beats: mission!.beats, lore: mission!.lore, loreTopics: mission!.loreTopics, intent: new MockIntent(), seed: 3, memory: new InMemoryStore() });
