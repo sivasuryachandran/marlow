@@ -15,7 +15,7 @@ export class AudioEngine {
   settings: AudioSettings = { voice: 1, music: 0.35, sfx: 1, mono: false, ambience: false };
   /** Assets that fell back to synthesized placeholders (listed as TODO in PROGRESS.md). */
   missing = new Set<string>();
-  private master!: GainNode; private monoNode!: GainNode; private duck!: GainNode;
+  analyser!: AnalyserNode; private master!: GainNode; private monoNode!: GainNode; private duck!: GainNode;
   private voiceGain!: GainNode; private musicGain!: GainNode; private sfxGain!: GainNode;
   private earpiece!: GainNode; private noiseBuf!: AudioBuffer; private pinkBuf!: AudioBuffer; private brownBuf!: AudioBuffer;
   private timers: ReturnType<typeof setTimeout>[] = []; private ambTimers: ReturnType<typeof setTimeout>[] = []; private tensionTimer?: ReturnType<typeof setInterval>;
@@ -42,6 +42,7 @@ export class AudioEngine {
     const lp = c.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 3400;
     const mid = c.createBiquadFilter(); mid.type = "peaking"; mid.frequency.value = 1500; mid.gain.value = 4;
     this.earpiece.connect(hp); hp.connect(mid); mid.connect(lp); lp.connect(this.voiceGain);
+    this.analyser = c.createAnalyser(); this.analyser.fftSize = 1024; this.master.connect(this.analyser); // what you hear, for the waveform display
     this.applySettings(); this.routeMaster();
     for (const kind of ["marble", "dry", "metal"]) {
       const cv = c.createConvolver(); cv.buffer = this.makeIR(kind); cv.connect(this.sfxGain); this.reverbs[kind] = cv;
@@ -64,6 +65,7 @@ export class AudioEngine {
     this.master.disconnect(); this.monoNode.disconnect();
     if (this.settings.mono) { this.master.connect(this.monoNode); this.monoNode.connect(this.ctx.destination); }
     else this.master.connect(this.ctx.destination);
+    if (this.analyser) this.master.connect(this.analyser); // routeMaster disconnects everything first
   }
 
   // ---------- synthesis helpers ----------

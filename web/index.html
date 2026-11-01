@@ -3,62 +3,161 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>MARLOW — a heist you play by ear</title>
-<style>
-:root{--bg:#0b0b10;--fg:#eceef2;--dim:#9aa0ae;--amber:#e8a33d;--line:#3a3d4a}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:18px/1.55 Georgia,serif}
-main{max-width:46rem;margin:0 auto;padding:1.25rem}
-h1{letter-spacing:.35em;color:var(--amber);margin:.2em 0}.tag{color:var(--dim);margin:0 0 1rem}
-button,input,select,summary{font:inherit;color:var(--fg)}
-button{background:#1a1c26;border:2px solid var(--line);border-radius:8px;padding:.7rem 1.1rem;cursor:pointer}
-button:hover{border-color:var(--amber)}:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
-#ptt{width:100%;font-size:1.3rem;padding:1.4rem;margin:.8rem 0}#ptt[aria-pressed="true"]{background:#5a1f1f;border-color:#f66}
-#start{font-size:1.2rem;padding:1rem 1.6rem}
-input[type=text]{width:100%;background:#14161e;border:2px solid var(--line);border-radius:8px;padding:.7rem}
-#status{color:var(--dim);min-height:1.5em}
-#log{border-top:1px solid var(--line);margin-top:1rem;padding-top:.5rem;max-height:46vh;overflow:auto}
-#log p{margin:.35rem 0}.you{color:var(--dim)}.marlow{color:#fff}.client{color:#c9b6ff}.cue{color:var(--amber);font-style:italic}.sys{color:var(--dim)}
-.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-details{margin:1rem 0;border:1px solid var(--line);border-radius:8px;padding:.5rem .9rem}summary{cursor:pointer}
-label{display:block;margin:.5rem 0}input[type=range]{width:100%}
-#end{border:2px solid var(--amber);border-radius:8px;padding:1rem;margin-top:1rem}
-#debug{font:12px/1.3 ui-monospace,monospace;background:#000;border:1px solid var(--line);padding:.6rem;margin-top:1rem;white-space:pre-wrap}
-#map{background:#05050a;border:1px solid var(--line);width:100%;max-width:420px;display:block}
-[hidden]{display:none!important}
-</style>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap">
+<link rel="stylesheet" href="/src/style.css">
 </head>
 <body>
-<main>
-<h1>MARLOW</h1>
-<p class="tag">You're the voice in her earpiece. She's the only one who can see. Headphones recommended.</p>
-<button id="start" type="button">Start the job</button>
-<div id="game" hidden>
-  <p id="status" role="status"></p>
-  <button id="ptt" type="button" aria-pressed="false" aria-keyshortcuts="Space">Hold to talk (or hold Space)</button>
-  <form id="f">
-    <label for="cmd">Or type an order, for example "peek the left door quietly", "go to the hall", "listen", "wait"</label>
-    <input id="cmd" type="text" autocomplete="off" enterkeyhint="send">
-  </form>
-  <div id="partial" class="sys" aria-hidden="true"></div>
-  <div id="log" role="log" aria-live="polite" aria-label="Transcript of everything you hear"></div>
-  <div id="end" hidden>
-    <p id="endText"></p>
-    <button id="again" type="button">Run it again (Marlow remembers)</button>
-    <button id="casefile" type="button">Make the Case File</button>
-    <p id="casefileOut" role="status"></p>
+<a class="skip" href="#tab-play">Skip to the game</a>
+
+<header id="topbar" aria-label="Run status">
+  <div class="cell freq"><span class="dot"></span><b>142.85 MHz</b><small>OWL ⇄ MARLOW · SECURE</small></div>
+  <div class="cell"><small>LINK LATENCY</small><b id="hLatency">—</b></div>
+  <div class="cell"><small>TURN · OBJECTIVE</small><b><span id="hTurn">00</span> · <span id="hObj">Secure the ledger</span></b></div>
+  <div class="cell alert" role="group" aria-label="Alert level"><small>ALERT</small>
+    <span class="chip on" data-a="0">0 CALM</span><span class="chip" data-a="1">1 UNEASY</span><span class="chip" data-a="2">2 SEARCHING</span><span class="chip" data-a="3">3 CAUGHT</span>
   </div>
-</div>
-<details><summary>Sound and display settings</summary>
-  <label>Voice <input id="vVoice" type="range" min="0" max="1" step="0.05" value="1"></label>
-  <label>Music <input id="vMusic" type="range" min="0" max="1" step="0.05" value="0.5"></label>
-  <label>Effects <input id="vSfx" type="range" min="0" max="1" step="0.05" value="0.9"></label>
-  <label><input id="ambience" type="checkbox"> Rain and room ambience (off by default, so footsteps and doors stay clear)</label>
-  <label><input id="mono" type="checkbox"> Mono audio</label>
-  <label><input id="captions" type="checkbox" checked> Show captions on screen (the transcript stays available to screen readers)</label>
-  <button id="forget" type="button">Forget Marlow's memory of past runs</button>
-</details>
-<pre id="debug" hidden></pre>
-<svg id="map" viewBox="0 0 420 300" role="img" aria-label="Engine map (debug)" hidden></svg>
+  <div class="cell"><small>MARLOW'S TRUST</small><span class="meter"><i id="hTrust" style="width:50%"></i></span><b id="hTrustN">50%</b></div>
+  <button id="audioOnly" class="cell toggle" type="button" aria-pressed="false" aria-keyshortcuts="O" title="Hide the visual panels and play by ear only">AUDIO ONLY [O]</button>
+</header>
+
+<nav id="tabs" role="tablist" aria-label="Sections">
+  <button role="tab" id="t-play" aria-controls="tab-play" aria-selected="true" data-tab="play">Van Cockpit (play)</button>
+  <button role="tab" id="t-brief" aria-controls="tab-brief" aria-selected="false" data-tab="brief" tabindex="-1">Briefing</button>
+  <button role="tab" id="t-case" aria-controls="tab-case" aria-selected="false" data-tab="case" tabindex="-1">Case File</button>
+  <button role="tab" id="t-spec" aria-controls="tab-spec" aria-selected="false" data-tab="spec" tabindex="-1">Spectator / Debug</button>
+  <button role="tab" id="t-set" aria-controls="tab-set" aria-selected="false" data-tab="set" tabindex="-1">Settings</button>
+</nav>
+
+<main>
+<!-- ============ PLAY ============ -->
+<section id="tab-play" role="tabpanel" aria-labelledby="t-play">
+  <div id="hero">
+    <h1>MARLOW</h1>
+    <p class="tag">A heist you play by ear. You are Owl, the voice in her earpiece. She is the only one who can see.</p>
+    <p class="hint">Headphones on. Chrome recommended. You'll be asked for the microphone.</p>
+    <button id="start" class="primary" type="button">Start the job</button>
+  </div>
+
+  <div id="game" hidden>
+    <p id="status" role="status" aria-live="polite"></p>
+    <div class="grid">
+      <section class="panel visual" aria-labelledby="sonarH">
+        <h2 id="sonarH">Acoustic sonar <small>only what Owl has heard</small></h2>
+        <canvas id="sonar" width="520" height="520" role="img" aria-label="Sonar: sounds Marlow's earpiece has picked up, around her"></canvas>
+        <p id="sonarNote" class="dim">Nothing heard yet.</p>
+        <h3>Building <small>what Marlow has told you</small></h3>
+        <ul id="topology" class="topo"></ul>
+      </section>
+
+      <section class="panel mid" aria-label="Earpiece and orders">
+        <h2>Earpiece monitor <small id="micState">mic off</small></h2>
+        <canvas id="wave" class="visual" width="800" height="150" aria-hidden="true"></canvas>
+        <button id="ptt" type="button" aria-pressed="false" aria-keyshortcuts="Space">HOLD SPACE TO TRANSMIT</button>
+        <span class="meter mic" aria-hidden="true"><i id="micLevel"></i></span>
+        <blockquote id="lastTx" class="tx"><small>LAST TRANSMISSION</small><p>Waiting for the client's call.</p></blockquote>
+
+        <div id="clarify" class="clarify" hidden>
+          <h3>Clarify <small>Marlow needs a decision</small></h3>
+          <p id="clarifyQ"></p>
+          <div id="clarifyBtns" class="btns"></div>
+        </div>
+
+        <form id="f">
+          <label for="cmd">Or type an order</label>
+          <input id="cmd" type="text" autocomplete="off" enterkeyhint="send" placeholder='e.g. "peek the left door quietly", "go to the hall", "listen"'>
+        </form>
+        <div id="partial" class="sys" aria-hidden="true"></div>
+
+        <div id="end" hidden>
+          <p id="endText"></p>
+          <div class="btns"><button id="again" class="primary" type="button">Run it again (Marlow remembers)</button><button id="openCase" type="button">Open the Case File</button></div>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="logH">
+        <h2 id="logH">Acoustic log <small>everything you hear, as text</small></h2>
+        <div id="log" role="log" aria-live="polite" aria-label="Transcript of everything you hear"></div>
+      </section>
+    </div>
+
+    <section class="panel actions" aria-labelledby="actH">
+      <h2 id="actH">Tactical action matrix <small>keys 1–7 · or just speak</small></h2>
+      <div id="chips" class="chips">
+        <button type="button" data-act="move"   data-k="1"><kbd>1</kbd><b>MOVE</b><span>go somewhere</span></button>
+        <button type="button" data-act="peek"   data-k="2"><kbd>2</kbd><b>PEEK</b><span>look through a door</span></button>
+        <button type="button" data-act="listen" data-k="3"><kbd>3</kbd><b>LISTEN</b><span>for the guard</span></button>
+        <button type="button" data-act="wait"   data-k="4"><kbd>4</kbd><b>WAIT</b><span>hold still</span></button>
+        <button type="button" data-act="hide"   data-k="5"><kbd>5</kbd><b>HIDE</b><span>behind cover</span></button>
+        <button type="button" data-act="take"   data-k="6"><kbd>6</kbd><b>TAKE</b><span>pick something up</span></button>
+        <button type="button" data-act="exit"   data-k="7"><kbd>7</kbd><b>EXIT</b><span>leave the building</span></button>
+      </div>
+      <div id="choices" class="btns" aria-live="polite"></div>
+    </section>
+  </div>
+</section>
+
+<!-- ============ BRIEFING ============ -->
+<section id="tab-brief" role="tabpanel" aria-labelledby="t-brief" hidden>
+  <div class="panel prose">
+    <h2>The job</h2>
+    <p>You are <b>Owl</b>, once the best fixer in the city. Three years ago, on the night of the Fenwick job, the lights went out and you lost your sight. All you remember from that night is a sound: <i>a heavy step, a drag, and keys.</i></p>
+    <p><b>Marlow</b> is your eyes: young, brave, the only one who still calls you "boss". Your old partner <b>Ines</b> sends you both into the Hale Gallery for one ledger. "Don't read it. It's only numbers."</p>
+    <h2>How to play</h2>
+    <ol>
+      <li>Wear headphones. The whole game is 3D sound: you can hear which direction the guard is in.</li>
+      <li>Speak an order (hold Space, or just talk if the mic is hands-free), or type it, or press a tactical chip.</li>
+      <li>Marlow tells you what she sees. You only know what she tells you and what you hear.</li>
+      <li>Get the <b>ledger</b> from the office and <b>exit through the lobby</b>. Doors are noisy; the guard hears them. If he spots her he runs: you get exactly one turn to hide or leave the room.</li>
+      <li>If you win, Marlow plays you the tape she found. Say <b>"burn it"</b> or <b>"send it"</b>.</li>
+    </ol>
+    <h2>Things to say</h2>
+    <p class="mono">listen · what do you see · go to the hall · peek the left door quietly · hide · take the ledger · go back · exit<br>who is Ines · where can I hide · what's in the ledger</p>
+    <p class="dim">Questions to Marlow are free: no turn passes. Small talk gets "say again". The engine, not the AI, decides what happens; the AI only understands what you said.</p>
+  </div>
+</section>
+
+<!-- ============ CASE FILE ============ -->
+<section id="tab-case" role="tabpanel" aria-labelledby="t-case" hidden>
+  <div class="panel">
+    <h2>The Case File <small id="caseRun">play a run first</small></h2>
+    <div class="stats" id="caseStats"></div>
+    <p class="dim">The Case File is a short comic of your run, drawn for sighted friends. It needs the server and takes about a minute.</p>
+    <div class="btns"><button id="casefile" class="primary" type="button">Make the Case File</button></div>
+    <p id="casefileOut" role="status"></p>
+    <iframe id="casefileFrame" title="Case File comic" hidden></iframe>
+  </div>
+</section>
+
+<!-- ============ SPECTATOR / DEBUG ============ -->
+<section id="tab-spec" role="tabpanel" aria-labelledby="t-spec" hidden>
+  <div class="panel">
+    <h2>Spectator / Debug <small>ground truth</small></h2>
+    <p class="warn">Spoiler: this shows where the guard really is. It is the one thing the player is meant to work out by ear.</p>
+    <button id="reveal" type="button">Show ground truth</button>
+    <div id="truth" hidden>
+      <svg id="map" viewBox="0 0 420 300" role="img" aria-label="Engine map (debug)" hidden></svg>
+      <pre id="debug" hidden></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SETTINGS ============ -->
+<section id="tab-set" role="tabpanel" aria-labelledby="t-set" hidden>
+  <div class="panel settings">
+    <h2>Sound and display</h2>
+    <label>Voice <input id="vVoice" type="range" min="0" max="1" step="0.05" value="1"></label>
+    <label>Music <input id="vMusic" type="range" min="0" max="1" step="0.05" value="0.35"></label>
+    <label>Effects <input id="vSfx" type="range" min="0" max="1" step="0.05" value="1"></label>
+    <label class="check"><input id="ambience" type="checkbox"> Rain and room ambience (off by default so footsteps and doors stay clear)</label>
+    <label class="check"><input id="mono" type="checkbox"> Mono audio</label>
+    <label class="check"><input id="captions" type="checkbox" checked> Show captions on screen (the transcript stays available to screen readers)</label>
+    <button id="forget" type="button">Forget Marlow's memory of past runs</button>
+  </div>
+</section>
 </main>
+
+<footer id="foot"><span class="dot rec"></span> REEL A: REC · <span class="keys"><kbd>Space</kbd> push-to-talk <kbd>1–7</kbd> tactical chips <kbd>O</kbd> audio only</span></footer>
 <script type="module" src="./src/main.ts"></script>
 </body>
 </html>

@@ -59,6 +59,12 @@ export class Session {
     };
   }
 
+  /** The options of a pending clarifying question, named as Marlow said them (for on-screen buttons). Empty when nothing is pending. */
+  get pendingChoices(): { id: string; label: string }[] {
+    const s = this.state;
+    return (this.pending?.candidates ?? []).map(id => ({ id, label: [...s.doors, ...s.rooms, ...s.props, ...s.items].find(x => x.id === id)?.spokenName ?? id }));
+  }
+
   /** How the story ended, once chosen after a win. */
   ending: "burn" | "send" | null = null;
 

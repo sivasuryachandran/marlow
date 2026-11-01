@@ -10,6 +10,7 @@ import { HttpIntent } from "./intent-client";
 import { loadPrefs, LocalStore, savePrefs } from "./storage";
 import { BrowserStt, ServerStt, type Stt } from "./stt";
 import { HandsFree } from "./vad";
+import { initCockpit, micLevel, onTurn, resetRun, setMic, showTab, truthRevealed } from "./cockpit";
 
 const q = new URLSearchParams(location.search);
 const debug = q.get("debug") === "1";
@@ -40,6 +41,7 @@ function showTurn(out: TurnOutput) {
   for (const c of out.cues) if (c.caption) log("cue", `[${c.caption}]`);
   for (const l of out.lines) log(l.speaker === "client" ? "client" : "marlow", `${l.speaker === "client" ? "Client" : "Marlow"}: ${l.text}`);
   if (out.kind === "timeout") log("sys", "[Static burst: signal's bad]");
+  onTurn(out);
 }
 
 // ---------- settings ----------
@@ -72,12 +74,12 @@ function newSession() {
     level, bank, beats: beatsJson as Beat[], lore: loreJson as unknown as Record<string, [string, string][]>, intent, seed, memory: store, runId,
     timeoutMs: Number((q.get("timeout") ?? 7000)), onLog: row => postLog(runId, row),
   });
-  $("log").replaceChildren(); $("end").hidden = true; $("casefileOut").textContent = "";
+  $("log").replaceChildren(); $("end").hidden = true; $("casefileOut").textContent = ""; $<HTMLIFrameElement>("casefileFrame").hidden = true; resetRun();
 }
 
 function refresh() {
-  const dbg = debug ? { intentBackend: intent.usingFallback ? "mock (in-browser)" : intent.name, sttBackend: stt?.name ?? "typed", missingAssets: [...audio.missing], latencyMs: summarize() } : {};
-  if (debug) renderDebug(session, lastEvents, dbg);
+  const dbg = debug || truthRevealed() ? { intentBackend: intent.usingFallback ? "mock (in-browser)" : intent.name, sttBackend: stt?.name ?? "typed", missingAssets: [...audio.missing], latencyMs: summarize() } : {};
+  if (debug || truthRevealed()) renderDebug(session, lastEvents, dbg);
 }
 function summarize() {
   if (!latencies.length) return null;
@@ -86,14 +88,14 @@ function summarize() {
 }
 
 async function begin() {
-  $("start").hidden = true; $("game").hidden = false;
+  $("hero").hidden = true; $("game").hidden = false;
   await audio.unlock();
   audio.applySettings(prefs);
   await intent.init();
   void intent.warmup();
   const h = await fetch("/api/health").then(r => r.json()).catch(() => null);
   stt = h?.stt ? new ServerStt() : BrowserStt.available() ? new BrowserStt() : null;
-  if (!stt) $("ptt").textContent = "Voice input unavailable in this browser. Type your orders below.";
+  if (!stt) $("ptt").textContent = "VOICE INPUT UNAVAILABLE · TYPE BELOW";
   newSession();
   if (stt instanceof ServerStt) await startHandsFree();
   const intro = session.start();
@@ -152,10 +154,10 @@ async function startHandsFree() {
         if (!text) { log("sys", "[No speech picked up.]"); status("Didn't catch that."); hfResume(); return; }
         void handleTranscript(text);
       },
-      onLevel: (_r, speaking) => { if (speaking && !busy) status("Listening…"); },
+      onLevel: (r, speaking) => { micLevel(r); if (speaking && !busy) status("Listening…"); },
     });
     await hf.start();
-    const b = $("ptt"); b.textContent = "Listening. Tap to mute"; b.setAttribute("aria-pressed", "false");
+    const b = $("ptt"); b.textContent = "LISTENING · TAP TO MUTE"; b.setAttribute("aria-pressed", "false"); setMic("mic live", true);
   } catch {
     hf = null; log("sys", "[Microphone unavailable. Hold the button or Space to talk, or type.]");
   }
@@ -163,7 +165,7 @@ async function startHandsFree() {
 function toggleMute() {
   if (!hf) return;
   muted = !muted; const b = $("ptt");
-  b.setAttribute("aria-pressed", String(muted)); b.textContent = muted ? "Muted. Tap to listen" : "Listening. Tap to mute";
+  b.setAttribute("aria-pressed", String(muted)); b.textContent = muted ? "MUTED · TAP TO LISTEN" : "LISTENING · TAP TO MUTE"; setMic(muted ? "mic muted" : "mic live", !muted);
   if (muted) hfPause(); else hf.paused = false;
   status(muted ? "Mic muted." : "Listening.");
 }
@@ -209,6 +211,11 @@ function wirePtt() {
 
 // ---------- wiring ----------
 bindSettings(); wirePtt();
+initCockpit({
+  send: text => { if (busy || !session) return; void audio.playAck(); void handleTranscript(text); },
+  session: () => session, audio, latencyP50: () => (latencies.length ? [...latencies].sort((a, b) => a - b)[Math.floor(latencies.length / 2)] : null),
+  onReveal: () => refresh(),
+});
 $("start").addEventListener("click", () => void begin());
 $("f").addEventListener("submit", e => {
   e.preventDefault();
@@ -228,7 +235,8 @@ $("casefile").addEventListener("click", async () => {
     const r = await fetch(`/api/casefile/${session.runId}`, { method: "POST" });
     if (!r.ok) throw new Error(String(r.status));
     const j = await r.json();
-    out.innerHTML = `Ready: <a href="${j.url}" target="_blank" rel="noopener">open the Case File</a> (${j.panels} panels, ${j.sources.join(", ")}).`;
+    out.innerHTML = `Ready: <a href="${j.url}" target="_blank" rel="noopener">open the Case File in a new tab</a> (${j.panels} panels, ${j.sources.join(", ")}).`;
+    const fr = $<HTMLIFrameElement>("casefileFrame"); fr.src = j.url; fr.hidden = false;
   } catch {
     out.textContent = `The Case File needs the server (npm run server). From a terminal: npx tsx tools/casefile.ts ${session.runId}`;
   }
