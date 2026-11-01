@@ -18,6 +18,19 @@
   "once": true
  },
  {
+  "id": "story_limp",
+  "trigger": {
+   "heard_guard": true
+  },
+  "lineIds": [
+   "marlow.story.limp"
+  ],
+  "cueIds": [
+   "sfx.radio.static"
+  ],
+  "once": true
+ },
+ {
   "id": "intro_repeat",
   "trigger": {
    "start": true,

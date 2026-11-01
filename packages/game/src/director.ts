@@ -4,7 +4,7 @@ import type { LineBank } from "./lines";
 
 export interface Trigger {
   start?: boolean; first_run?: boolean; repeat_run?: boolean; last_trust_loss?: string | null;
-  alert_gte?: number; entered?: string; heard?: string; in_room?: string; unless_fired?: string[]; taken?: string; turn_gte?: number; no_objective?: boolean; trust_lt?: number; status?: "won" | "caught";
+  alert_gte?: number; entered?: string; heard?: string; heard_guard?: boolean; in_room?: string; unless_fired?: string[]; taken?: string; turn_gte?: number; no_objective?: boolean; trust_lt?: number; status?: "won" | "caught";
 }
 export interface Beat { id: string; trigger: Trigger; lineIds: string[]; cueIds: string[]; once: boolean }
 export interface DirectorCtx { runNumber: number; start: boolean }
@@ -38,6 +38,7 @@ function matches(t: Trigger, s: WorldState, events: GameEvent[], ctx: DirectorCt
   if (t.alert_gte !== undefined && s.alert < t.alert_gte) return false;
   if (t.entered && !events.some(e => e.type === "moved" && e.to === t.entered)) return false;
   if (t.heard && !events.some(e => e.type === "sound_heard" && e.sound === t.heard)) return false;
+  if (t.heard_guard && !events.some(e => e.type === "guard_heard")) return false;
   if (t.in_room && s.marlow.room !== t.in_room) return false;
   if (t.taken && !events.some(e => e.type === "item_taken" && e.item === t.taken)) return false;
   if (t.turn_gte !== undefined && s.turn < t.turn_gte) return false;

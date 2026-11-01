@@ -456,7 +456,7 @@
  },
  {
   "audioKey": "client.intro.b.v0",
-  "text": "It's Ines, Owl. The Hale Gallery keeps a ledger in the office off the main hall. Marlow is already in the lobby. Bring it out, quietly, and I will forget the rest.",
+  "text": "It's Ines, Owl. The Hale Gallery keeps a ledger in the office off the main hall. Marlow is already in the lobby. The night man is Halloran. Stay out of his way. Bring the ledger out, quietly, and I will forget the rest.",
   "speaker": "client"
  },
  {
@@ -2211,32 +2211,32 @@
  },
  {
   "audioKey": "marlow.story.hall.v0",
-  "text": "Portraits all down the hall, boss. Hale and his friends, pleased with themselves. Above us, a slow step and then a drag. That'll be Halloran.",
+  "text": "Portraits all down the hall, Hale and his friends, pleased with themselves. It's very quiet, boss.",
   "speaker": "marlow"
  },
  {
   "audioKey": "marlow.story.hall.c0",
-  "text": "Portraits. And a limp above us. Halloran.",
+  "text": "Portraits. Very quiet.",
   "speaker": "marlow"
  },
  {
   "audioKey": "marlow.story.gallery.v0",
-  "text": "There's a music box playing in here, some art piece. A slow lullaby. Boss, that's the tune you hum when you think.",
+  "text": "A guest book on a stand, open to the ninth, three years back. The last name signed is Ines Vane. Boss, that's the client.",
   "speaker": "marlow"
  },
  {
   "audioKey": "marlow.story.gallery.c0",
-  "text": "A music box. Your tune, boss.",
+  "text": "A guest book. The last name is Ines Vane. The client.",
   "speaker": "marlow"
  },
  {
   "audioKey": "marlow.story.office.v0",
-  "text": "A photograph on the desk. A woman laughing, her arm around you, boss. You're younger. You can see. On the back it says: Owl and I, Fenwick, last good night.",
+  "text": "The ledger's open on the desk. Old payments. One line says Fenwick, the ninth, forty thousand, and a single initial. H.",
   "speaker": "marlow"
  },
  {
   "audioKey": "marlow.story.office.c0",
-  "text": "A photo of you and a woman. Fenwick, last good night.",
+  "text": "The ledger. Fenwick, the ninth. Forty thousand. Initial H.",
   "speaker": "marlow"
  },
  {
@@ -2251,7 +2251,7 @@
  },
  {
   "audioKey": "marlow.story.machine.v0",
-  "text": "The answering machine picked up. A man says: Ines, it's Hale. Burn the ledger before Owl reads it. Call me. Boss, isn't Ines the client?",
+  "text": "The machine picked up. A man says: Ines, it's Hale. Halloran says you want the ledger gone. Burn it before Owl reads it. Call me.",
   "speaker": "marlow"
  },
  {
@@ -2261,7 +2261,7 @@
  },
  {
   "audioKey": "marlow.story.machine.late.v0",
-  "text": "The answering machine is blinking. I played it. A man says: Ines, it's Hale. Burn the ledger before Owl reads it. Call me. Boss, isn't Ines the client?",
+  "text": "The machine is blinking. I played it. A man says: Ines, it's Hale. Halloran says you want the ledger gone. Burn it before Owl reads it. Call me.",
   "speaker": "marlow"
  },
  {
@@ -2271,12 +2271,12 @@
  },
  {
   "audioKey": "marlow.epilogue.ask.v0",
-  "text": "I played the tape in the cab. It's her, Ines. She tells Hale to make sure you're inside when the lights go. What do I do with it? Burn it, or send it?",
+  "text": "I played the tape in the cab. It's Ines, telling Halloran to keep you inside until the lights go. You'd have known her voice, boss. Burn it, or send it?",
   "speaker": "marlow"
  },
  {
   "audioKey": "marlow.epilogue.ask.c0",
-  "text": "It's her on the tape. Burn it, or send it?",
+  "text": "It's Ines, on the tape, with Halloran. Burn it, or send it?",
   "speaker": "marlow"
  },
  {
@@ -2303,5 +2303,15 @@
   "audioKey": "client.after.send.v0",
   "text": "Owl, pick up. Please. Owl.",
   "speaker": "client"
+ },
+ {
+  "audioKey": "marlow.story.limp.v0",
+  "text": "Step, then a drag. Keys on a belt. Boss, that's what you told me you remember from Fenwick. A heavy step, a drag, and keys. That's him. That's Halloran.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.story.limp.c0",
+  "text": "Step, drag, keys. Fenwick, boss. That's Halloran.",
+  "speaker": "marlow"
  }
 ]
