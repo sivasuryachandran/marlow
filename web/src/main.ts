@@ -88,7 +88,7 @@ function summarize() {
 }
 
 async function begin() {
-  $("hero").hidden = true; $("game").hidden = false;
+  $("hero").hidden = true; $("game").hidden = false; $("ptt").focus({ preventScroll: true }); // keyboard users land on the talk control
   await audio.unlock();
   audio.applySettings(prefs);
   await intent.init();
@@ -192,19 +192,23 @@ async function pttUp() {
   if (!text) { log("sys", "[No speech picked up. Try again, or type.]"); status("Didn't catch that."); return; }
   void handleTranscript(text);
 }
+let spaceAt = -1e9;
 function wirePtt() {
   const b = $("ptt");
   b.addEventListener("pointerdown", e => { e.preventDefault(); if (hf) toggleMute(); else void pttDown(); });
   for (const ev of ["pointerup", "pointercancel", "pointerleave"]) b.addEventListener(ev, () => { if (!hf) void pttUp(); });
-  b.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); if (hf) toggleMute(); else void (recording ? pttUp() : pttDown()); } });
+  // keyboard activation (Enter or Space on the focused button) arrives as a click with detail 0; a Space already handled as push-to-talk is skipped
+  b.addEventListener("click", e => { if (e.detail !== 0 || performance.now() - spaceAt < 700) return; if (hf) toggleMute(); else void (recording ? pttUp() : pttDown()); });
   document.addEventListener("keydown", e => {
     const t = e.target as HTMLElement;
-    if (e.code !== "Space" || t.tagName === "INPUT" || $("game").hidden || hf) return;
+    if (e.code !== "Space" || t.tagName === "INPUT" || $("game").hidden || hf || (t.closest("button,a,select,textarea,[role=tab]") && t.id !== "ptt")) return;
+    spaceAt = performance.now();
     e.preventDefault(); if (!e.repeat) void pttDown();
   });
   document.addEventListener("keyup", e => {
     const t = e.target as HTMLElement;
-    if (e.code !== "Space" || t.tagName === "INPUT" || $("game").hidden || hf) return;
+    if (e.code !== "Space" || t.tagName === "INPUT" || $("game").hidden || hf || (t.closest("button,a,select,textarea,[role=tab]") && t.id !== "ptt")) return;
+    spaceAt = performance.now();
     e.preventDefault(); void pttUp();
   });
 }

@@ -30,8 +30,8 @@ function wireTabs() {
   tabs.forEach((b, i) => {
     b.addEventListener("click", () => showTab(b.dataset.tab!));
     b.addEventListener("keydown", e => {
-      if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
-      const n = tabs[(i + (e.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.length]; n.focus(); showTab(n.dataset.tab!);
+      if (!["ArrowRight", "ArrowLeft", "Home", "End"].includes(e.key)) return; e.preventDefault();
+      const n = e.key === "Home" ? tabs[0] : e.key === "End" ? tabs[tabs.length - 1] : tabs[(i + (e.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.length]; n.focus(); showTab(n.dataset.tab!);
     });
   });
 }
@@ -82,6 +82,7 @@ function collect(events: GameEvent[], turn: number) {
 
 // ---------------- sonar + waveform ----------------
 let sweep = 0;
+const still = () => window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 function drawSonar() {
   const c = $("sonar") as HTMLCanvasElement, g = c.getContext("2d")!, W = c.width, cx = W / 2, rad = W / 2 - 14;
   g.clearRect(0, 0, W, W);
@@ -90,7 +91,7 @@ function drawSonar() {
   g.setLineDash([]); g.beginPath(); g.moveTo(cx, cx - rad); g.lineTo(cx, cx + rad); g.moveTo(cx - rad, cx); g.lineTo(cx + rad, cx); g.stroke();
   g.fillStyle = "#8b93a7"; g.font = "13px JetBrains Mono, monospace"; g.textAlign = "center";
   g.fillText("AHEAD", cx, 20); g.fillText("BEHIND", cx, W - 10); g.textAlign = "left"; g.fillText("L", 12, cx - 6); g.textAlign = "right"; g.fillText("R", W - 12, cx - 6);
-  sweep = (sweep + 0.018) % (Math.PI * 2);
+  if (!still()) sweep = (sweep + 0.018) % (Math.PI * 2);
   const grad = g.createConicGradient(sweep - Math.PI / 2, cx, cx); grad.addColorStop(0, "rgba(47,217,238,0.18)"); grad.addColorStop(0.12, "rgba(47,217,238,0)"); grad.addColorStop(1, "rgba(47,217,238,0)");
   g.fillStyle = grad; g.beginPath(); g.arc(cx, cx, rad, 0, Math.PI * 2); g.fill();
   const now = deps.session().state.turn;
@@ -99,7 +100,7 @@ function drawSonar() {
     const a = (AZ[p.dir] * Math.PI) / 180, r = rad * R[p.dist], x = cx + Math.sin(a) * r, y = cx - Math.cos(a) * r, alpha = 1 - age * 0.28;
     const col = p.kind === "guard" ? `rgba(255,159,67,${alpha})` : `rgba(47,217,238,${alpha})`;
     g.fillStyle = col; g.beginPath(); g.arc(x, y, 9, 0, Math.PI * 2); g.fill();
-    g.strokeStyle = col; g.lineWidth = 2; g.beginPath(); g.arc(x, y, 9 + ((performance.now() / 60) % 14), 0, Math.PI * 2); g.stroke();
+    g.strokeStyle = col; g.lineWidth = 2; g.beginPath(); g.arc(x, y, 9 + (still() ? 5 : (performance.now() / 60) % 14), 0, Math.PI * 2); g.stroke();
     g.fillStyle = `rgba(232,235,242,${alpha})`; g.font = "13px Space Grotesk, sans-serif"; g.textAlign = x > cx ? "right" : "left"; g.fillText(p.label, x + (x > cx ? -14 : 14), y + 4);
   }
   g.fillStyle = "#fff"; g.beginPath(); g.arc(cx, cx, 7, 0, Math.PI * 2); g.fill(); g.textAlign = "center"; g.font = "700 12px JetBrains Mono, monospace"; g.fillText("MARLOW", cx, cx + 24);

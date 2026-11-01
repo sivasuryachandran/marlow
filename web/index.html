@@ -11,6 +11,7 @@
 <a class="skip" href="#tab-play">Skip to the game</a>
 
 <header id="topbar" aria-label="Run status">
+  <h1 class="sr-only">MARLOW, a heist you play by ear</h1>
   <div class="cell freq"><span class="dot"></span><b>142.85 MHz</b><small>OWL ⇄ MARLOW · SECURE</small></div>
   <div class="cell"><small>ORDER → REPLY</small><b id="hLatency">—</b></div>
   <div class="cell"><small>TURN · OBJECTIVE</small><b><span id="hTurn">00</span> · <span id="hObj">Secure the ledger</span></b></div>
@@ -21,19 +22,19 @@
   <button id="audioOnly" class="cell toggle" type="button" aria-pressed="false" aria-keyshortcuts="O" title="Hide the visual panels and play by ear only">AUDIO ONLY [O]</button>
 </header>
 
-<nav id="tabs" role="tablist" aria-label="Sections">
+<nav aria-label="Sections"><div id="tabs" role="tablist" aria-label="Game sections">
   <button role="tab" id="t-play" aria-controls="tab-play" aria-selected="true" data-tab="play">Van Cockpit (play)</button>
   <button role="tab" id="t-brief" aria-controls="tab-brief" aria-selected="false" data-tab="brief" tabindex="-1">Briefing</button>
   <button role="tab" id="t-case" aria-controls="tab-case" aria-selected="false" data-tab="case" tabindex="-1">Case File</button>
   <button role="tab" id="t-spec" aria-controls="tab-spec" aria-selected="false" data-tab="spec" tabindex="-1">Spectator / Debug</button>
   <button role="tab" id="t-set" aria-controls="tab-set" aria-selected="false" data-tab="set" tabindex="-1">Settings</button>
-</nav>
+</div></nav>
 
 <main>
 <!-- ============ PLAY ============ -->
 <section id="tab-play" role="tabpanel" aria-labelledby="t-play">
   <div id="hero">
-    <h1>MARLOW</h1>
+    <div class="h1" aria-hidden="true">MARLOW</div>
     <p class="tag">A heist you play by ear. You are Owl, the voice in her earpiece. She is the only one who can see.</p>
     <p class="hint">Headphones on. Chrome recommended. You'll be asked for the microphone.</p>
     <button id="start" class="primary" type="button">Start the job</button>
@@ -78,20 +79,20 @@
       <section class="panel" aria-labelledby="logH">
         <figure id="story" class="story visual" hidden><img id="storyImg" alt="" width="1400" height="800"><figcaption id="storyCap"></figcaption></figure>
         <h2 id="logH">Acoustic log <small>everything you hear, as text</small></h2>
-        <div id="log" role="log" aria-live="polite" aria-label="Transcript of everything you hear"></div>
+        <div id="log" tabindex="0" role="log" aria-live="polite" aria-label="Transcript of everything you hear"></div>
       </section>
     </div>
 
     <section class="panel actions" aria-labelledby="actH">
       <h2 id="actH">Tactical action matrix <small>keys 1–7 · or just speak</small></h2>
       <div id="chips" class="chips">
-        <button type="button" data-act="move"   data-k="1"><kbd>1</kbd><b>MOVE</b><span>go somewhere</span></button>
-        <button type="button" data-act="peek"   data-k="2"><kbd>2</kbd><b>PEEK</b><span>look through a door</span></button>
-        <button type="button" data-act="listen" data-k="3"><kbd>3</kbd><b>LISTEN</b><span>for the guard</span></button>
-        <button type="button" data-act="wait"   data-k="4"><kbd>4</kbd><b>WAIT</b><span>hold still</span></button>
-        <button type="button" data-act="hide"   data-k="5"><kbd>5</kbd><b>HIDE</b><span>behind cover</span></button>
-        <button type="button" data-act="take"   data-k="6"><kbd>6</kbd><b>TAKE</b><span>pick something up</span></button>
-        <button type="button" data-act="exit"   data-k="7"><kbd>7</kbd><b>EXIT</b><span>leave the building</span></button>
+        <button type="button" data-act="move"   data-k="1" aria-keyshortcuts="1"><kbd>1</kbd><b>MOVE</b><span>go somewhere</span></button>
+        <button type="button" aria-keyshortcuts="2" data-act="peek"   data-k="2"><kbd>2</kbd><b>PEEK</b><span>look through a door</span></button>
+        <button type="button" aria-keyshortcuts="3" data-act="listen" data-k="3"><kbd>3</kbd><b>LISTEN</b><span>for the guard</span></button>
+        <button type="button" aria-keyshortcuts="4" data-act="wait"   data-k="4"><kbd>4</kbd><b>WAIT</b><span>hold still</span></button>
+        <button type="button" aria-keyshortcuts="5" data-act="hide"   data-k="5"><kbd>5</kbd><b>HIDE</b><span>behind cover</span></button>
+        <button type="button" aria-keyshortcuts="6" data-act="take"   data-k="6"><kbd>6</kbd><b>TAKE</b><span>pick something up</span></button>
+        <button type="button" aria-keyshortcuts="7" data-act="exit"   data-k="7"><kbd>7</kbd><b>EXIT</b><span>leave the building</span></button>
       </div>
       <div id="choices" class="btns" aria-live="polite"></div>
     </section>
