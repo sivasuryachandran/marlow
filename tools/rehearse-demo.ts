@@ -9,21 +9,26 @@ import { InMemoryStore, MockIntent, Session, type IntentAdapter } from "../packa
 import { MetaSparkIntent } from "../server/src/adapters/intent";
 import { loadConfig } from "../server/src/config";
 import { bank, beats, level } from "./lib";
+import lore from "../data/lore.json" with { type: "json" };
 
 export const SEED = 7;
 /** The order is the demo: [what the player says, what it should do]. */
 export const RUN1: [string, string][] = [
+  ["I'm ready.", "local"],
   ["Listen.", "listen"],
   ["Check the vault door.", "refuse"],
   ["Let's head into the hallway.", "move hall"],
   ["Take a look through that door.", "clarify"],
   ["The one on the left.", "peek arch_hall_gallery"],
+  ["Who is Halloran?", "local"],
   ["Quietly slip into the study.", "move office quiet"],
   ["Hide.", "hide"],
+  ["Wait.", "wait"],
   ["Grab the book off the desk.", "take ledger"],
   ["Go to the hall.", "move hall"],
   ["Go to the lobby.", "move lobby"],
   ["Exit.", "exit"],
+  ["Burn it.", "local"],
 ];
 export const RUN2: [string, string][] = [["Listen.", "listen"], ["Wait.", "wait"]];
 
@@ -33,7 +38,7 @@ const runs = Number(process.argv[process.argv.indexOf("--runs") + 1]) || 1;
 async function play(label: string, seed: number, script: [string, string][], memory: InMemoryStore, base: IntentAdapter) {
   let model = 0;
   const counting: IntentAdapter = { name: base.name, infer: req => { model++; return base.infer(req); } };
-  const s = new Session({ level, bank, beats, intent: counting, seed, memory, timeoutMs: 15000 });
+  const s = new Session({ level, bank, beats, lore: lore as unknown as Record<string, [string, string][]>, intent: counting, seed, memory, timeoutMs: 15000 });
   console.log(`--- ${label} (seed ${seed}, run ${s.runNumber}, backend ${base.name})`);
   for (const l of s.start().lines) console.log(`     ${l.speaker}: ${l.text}`);
   let okAll = true;
@@ -41,7 +46,7 @@ async function play(label: string, seed: number, script: [string, string][], mem
     const before = model, t0 = performance.now();
     const o = await s.submit(say);
     const ms = Math.round(performance.now() - t0), path = model > before ? "MODEL" : "LOCAL";
-    const got = !o ? "discarded" : o.kind === "clarify" ? "clarify" : o.kind === "refused" ? "refuse" : o.kind === "ok" ? `${o.action!.action}${(o.action as { target?: string }).target ? " " + (o.action as { target?: string }).target : ""}${(o.action as { stance?: string }).stance === "quiet" ? " quiet" : ""}` : o.kind;
+    const got = !o ? "discarded" : o.kind === "local" && !o.action ? "local" : o.kind === "clarify" ? "clarify" : o.kind === "refused" ? "refuse" : o.kind === "ok" ? `${o.action!.action}${(o.action as { target?: string }).target ? " " + (o.action as { target?: string }).target : ""}${(o.action as { stance?: string }).stance === "quiet" ? " quiet" : ""}` : o.kind;
     const ok = got === want; okAll &&= ok;
     console.log(`${ok ? " ok " : "FAIL"} ${path.padEnd(5)} ${String(ms).padStart(5)} ms  "${say}" -> ${got}${ok ? "" : `   (wanted ${want})`}`);
     for (const c of o?.cues ?? []) console.log(`            cue: ${c.caption}`);
