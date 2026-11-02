@@ -8,7 +8,7 @@ import { createInitialState, solve, candidateActions, step, Rng, revealRoom } fr
 import type { Action, Level, WorldState } from "@marlow/shared";
 import {
   loadBank, localParse, mockInfer, knowledgeList, verify, v1, MockIntent, Session, InMemoryStore, validateBeats,
-  expandLine, checkMatch, plausibleOrder, coverRefs, type IntentAdapter, type Beat,
+  expandLine, cuesFor, checkMatch, plausibleOrder, coverRefs, type IntentAdapter, type Beat,
 } from "./index";
 
 const bank = loadBank(linesJson);
@@ -427,5 +427,28 @@ describe("story facts", () => {
     const seen: string[] = [];
     for (let i = 0; i < 6; i++) { const o = await sess.submit("wait"); seen.push(...(o?.lines.map(l => l.id) ?? [])); if (sess.state.status !== "playing") break; }
     expect(seen.filter(id => id === "marlow.nudge.office").length).toBeLessThanOrEqual(1);
+  });
+});
+
+describe("the guard investigates noise: what Owl hears", () => {
+  it("a noisy move within earshot makes a 'he heard that' cue that points at where the guard is", () => {
+    const prev = mk(1, s => { s.guard.step = 5; }); // route index 5: the gallery, one room from the hall
+    const r = step(prev, { action: "move", target: "hall" });
+    const alerted = r.events.find(e => e.type === "guard_alerted") as { dir: string } | undefined;
+    expect(alerted).toBeTruthy();
+    const cue = cuesFor(prev, r.state, r.events).find(c => c.id === "sfx.guard.alert");
+    expect(cue).toMatchObject({ kind: "world", dir: alerted!.dir });
+    expect(cue!.caption).toMatch(/He heard that/);
+  });
+  it("when the guard's direction relative to Marlow changes, his footsteps sweep from the old direction to the new one", () => {
+    const prev = mk(1, s => { inHall(s); s.guard.at = "gallery"; }); // left of the hall
+    const next = structuredClone(prev); next.guard.at = "stairwell"; // ahead of the hall
+    const cue = cuesFor(prev, next, [{ type: "guard_heard", dir: "ahead", dist: "near", via: "footsteps", perceived: true }]).find(c => c.id.startsWith("sfx.footsteps"));
+    expect(cue).toMatchObject({ dir: "ahead", fromDir: "left" });
+  });
+  it("his footsteps stay put (no sweep) when he is heard in the same direction", () => {
+    const prev = mk(1, s => { inHall(s); s.guard.at = "stairwell"; }), next = structuredClone(prev);
+    const cue = cuesFor(prev, next, [{ type: "guard_heard", dir: "ahead", dist: "near", via: "footsteps", perceived: true }]).find(c => c.id.startsWith("sfx.footsteps"));
+    expect(cue!.fromDir).toBeUndefined();
   });
 });

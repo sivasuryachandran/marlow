@@ -12,7 +12,7 @@
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { expandLine, loadBank, type Mission, type MissionCase } from "../packages/game/src/index";
-import { AUTHOR_PROMPT, authorMission, CASES, research, saveMission } from "../server/src/mission-author";
+import { AUTHOR_PROMPT, authorMission, CASES, recordRun, research, saveMission } from "../server/src/mission-author";
 import { loadConfig } from "../server/src/config";
 import { MuseImage } from "../server/src/adapters/image";
 import { linesJson } from "./lib";
@@ -46,9 +46,13 @@ if (!cfg.modelApiKey) { console.error("MODEL_API_KEY is not set (.env)"); proces
 status(`generating a mission inspired by ${kase.inspiredBy}`);
 const fromSpec = val("from-spec") ? JSON.parse(readFileSync(val("from-spec")!, "utf8")) : undefined;
 const result = await authorMission(cfg, kase, { log: status, fromSpec, attempts: fromSpec && flag("offline") ? 1 : 3 });
-if (!result.mission) { status(`FAILED after ${result.attempts.length} attempts. Last problems: ${result.attempts.at(-1)?.errors.join("; ")}`); finish({ ok: false }); process.exit(1); }
+if (!result.mission) { recordRun(kase, result); status(`FAILED after ${result.attempts.length} attempts. Last problems: ${result.attempts.at(-1)?.errors.join("; ")}`); finish({ ok: false }); process.exit(1); }
 const m = result.mission as Mission & { voices?: boolean; art?: string[] };
+// rebuilding an existing mission from its saved spec (--from-spec): keep the voices and stills it already has
+const prevFile = `assets/missions/${m.id}/mission.json`, prev = existsSync(prevFile) ? JSON.parse(readFileSync(prevFile, "utf8")) : null;
+if (prev) { if (prev.voices) m.voices = prev.voices; if (prev.art) m.art = prev.art; }
 const dir = saveMission(m, result);
+const tRest = Date.now(); let nVoices = 0, nImages = 0;
 status(`saved ${dir}`);
 
 if (flag("voices")) {
@@ -69,7 +73,7 @@ if (flag("voices")) {
       execFileSync("ffmpeg", ["-loglevel", "error", "-y", "-i", wav, "-ac", "1", "-ar", "24000", "-b:a", "40k", `${adir}/${x.audioKey}.mp3`]); rmSync(wav);
       if (++n % 25 === 0) status(`  voices ${n}/${todo.length}`);
     }
-    m.voices = true; status(`voices: done`);
+    m.voices = true; nVoices = n; status(`voices: done`);
   } catch (e) { status(`voices skipped (${(e as Error).message.slice(0, 120)}); install kokoro-js and ffmpeg locally to render them`); }
 }
 
@@ -86,10 +90,11 @@ if (flag("art")) {
       const r = await img.render(STYLE + scene);
       const tmp = `${adir}/${beat}.full.jpg`; writeFileSync(tmp, r.data as Uint8Array);
       execFileSync("ffmpeg", ["-loglevel", "error", "-y", "-i", tmp, "-vf", "scale=1400:-2", "-q:v", "5", `${adir}/${beat}.jpg`]); rmSync(tmp);
-      m.art.push(beat); status(`  art: ${beat}`);
+      m.art.push(beat); nImages++; status(`  art: ${beat}`);
     } catch (e) { status(`  art ${beat} failed: ${(e as Error).message.slice(0, 100)}`); }
   }
 }
+recordRun(kase, result, { images: nImages, voiceLines: nVoices, extraMs: Date.now() - tRest });
 writeFileSync(`${dir}/mission.json`, JSON.stringify(m));
 status(`ready: play it at /?mission=${m.id}`);
 finish({ ok: true, id: m.id });

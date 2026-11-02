@@ -11,7 +11,7 @@ import { loadPrefs, LocalStore, savePrefs } from "./storage";
 import { BrowserStt, ServerStt, type Stt } from "./stt";
 import { HandsFree } from "./vad";
 import { initCoop, publishTurn } from "./coop";
-import { initCockpit, micLevel, onTurn, resetRun, setMic, setMissionArt, showTab, truthRevealed } from "./cockpit";
+import { cueCaptions, initCockpit, micLevel, onTurn, resetRun, setMic, setMissionArt, showCaption, showTab, truthRevealed } from "./cockpit";
 import { artCaptions, initMissions, type LoadedMission } from "./missions";
 
 const q = new URLSearchParams(location.search);
@@ -27,6 +27,7 @@ const bank = loadBank(mission ? { ...linesJson, ...mission.lines } : linesJson);
 const gameLevel = mission?.level ?? level, gameBeats = (mission?.beats ?? beatsJson) as Beat[];
 const gameLore = (mission?.lore ?? loreJson) as unknown as Record<string, [string, string][]>;
 const audio = new AudioEngine();
+audio.onCue = c => showCaption(c, 4500);
 if (mission) audio.mission = { base: `/missions/${mission.id}/audio`, own: new Set(Object.keys(mission.lines)) };
 const store = new LocalStore(mission ? `marlow.memory.${mission.id}` : undefined);
 const intent = new HttpIntent();
@@ -54,7 +55,7 @@ function log(cls: string, text: string) {
 }
 const status = (t: string) => { $("status").textContent = t; };
 function showTurn(out: TurnOutput) {
-  for (const c of out.cues) if (c.caption) log("cue", `[${c.caption}]`);
+  for (const c of cueCaptions(out)) log("cue", `[${c}]`); // stage directions: every cue, including the story-beat sounds
   for (const l of out.lines) log(l.speaker === "client" ? "client" : "marlow", `${l.speaker === "client" ? "Client" : "Marlow"}: ${l.text}`);
   if (out.kind === "timeout") log("sys", "[Static burst: signal's bad]");
   onTurn(out);

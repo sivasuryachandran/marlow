@@ -1,0 +1,174 @@
+{
+ "clientName": "Silas",
+ "guardName": "Harlan",
+ "guardPost": {
+  "attachTo": "foyer",
+  "name": "broom closet"
+ },
+ "guardSound": "soft rubber soles squeaking on stone",
+ "item": {
+  "aliases": [
+   "case",
+   "box",
+   "deposit case"
+  ],
+  "id": "deposit_case",
+  "name": "ivory deposit case",
+  "room": "vault"
+ },
+ "lines": {
+  "burn": "Boss, I am holding the tape to my lighter now, it curls and it is gone.",
+  "clientAfterBurn": "Good, Owl, that tape never existed and we are clean, you hear me.",
+  "clientAfterSend": "You fool, Owl, you have ruined me, they will come for me now.",
+  "clientAfterTake": "You got it, good, do not open anything else, just get out fast.",
+  "clientCheckin": "Owl, talk to me, where is she, is she out of the vault yet.",
+  "clientIntro": [
+   "It is Silas, Owl, I need the ivory case from the vault below.",
+   "The job is simple, grab it and do not look inside it for anyone.",
+   "I am warning you, leave the lining alone if you want to live."
+  ],
+  "evidence": "If Owl keeps talking, leave him blind, make it look like an accident.",
+  "evidenceAsk": "Boss, it is Silas ordering it, what do I do with this tape? Burn it, or send it?",
+  "guardFirstHeard": "Boss, I hear rubber soles squeaking, that is the same sound from the night you lost your sight.",
+  "marlowIntro": "Boss, I am in the foyer, I smell polish and hear a clock ticking ahead.",
+  "outro": "Boss, I am out on the street, I can hear the traffic and I am breathing again.",
+  "send": "Boss, I slipped the tape into the mail slot, it is gone to the papers.",
+  "take": "Boss, I found a tape sewn in the lining, I can hear Silas on it."
+ },
+ "links": [
+  {
+   "a": "foyer",
+   "b": "hall",
+   "kind": "door"
+  },
+  {
+   "a": "hall",
+   "b": "office",
+   "kind": "arch"
+  },
+  {
+   "a": "hall",
+   "b": "vault",
+   "kind": "door"
+  },
+  {
+   "a": "hall",
+   "b": "gallery",
+   "kind": "stairs"
+  }
+ ],
+ "lore": [
+  {
+   "text": "Silas is the client, boss. He was your partner once before he sold you out.",
+   "topic": "client",
+   "when": "start"
+  },
+  {
+   "text": "Harlan is the night guard, boss. He owes Silas money and walks soft to pay it off.",
+   "topic": "guard",
+   "when": "guard"
+  },
+  {
+   "text": "Harlan lost his brother in the docks, boss. He takes night work to stay quiet.",
+   "topic": "guard",
+   "when": "start"
+  },
+  {
+   "text": "Petra is the owner, boss. She runs the Meridian Exchange and trusts her vault downstairs.",
+   "topic": "owner",
+   "when": "start"
+  },
+  {
+   "text": "The deposit case is the job, boss. Silas rented an office here for two years to learn it.",
+   "topic": "item",
+   "when": "item"
+  },
+  {
+   "text": "The deposit case has ten layers of locks, boss. Heat wires and magnets guard the vault door.",
+   "topic": "item",
+   "when": "start"
+  },
+  {
+   "text": "This game is inspired by the 2003 weekend vault robbery where thieves emptied safe boxes below a gem exchange.",
+   "topic": "history",
+   "when": "end"
+  }
+ ],
+ "ownerName": "Petra",
+ "patrol": [
+  "hall",
+  "vault",
+  "hall",
+  "hall",
+  "office",
+  "hall",
+  "foyer"
+ ],
+ "rooms": [
+  {
+   "aliases": [
+    "lobby",
+    "entrance"
+   ],
+   "cover": "",
+   "describe": "",
+   "floor": "marble",
+   "id": "foyer",
+   "name": "fizz foyer",
+   "x": 0,
+   "y": 0
+  },
+  {
+   "aliases": [
+    "hallway",
+    "hub"
+   ],
+   "cover": "a velvet sofa",
+   "describe": "Boss, I see a wide hall with clocks ticking, I hear the guard squeaking far off and smell old rubbish.",
+   "floor": "marble",
+   "id": "hall",
+   "name": "tick hall",
+   "x": 0,
+   "y": 1
+  },
+  {
+   "aliases": [
+    "trader office"
+   ],
+   "cover": "",
+   "describe": "Boss, I see a rented trader desk with cold coffee, I hear papers rustling and smell stale sandwiches.",
+   "floor": "carpet",
+   "id": "office",
+   "name": "rent office",
+   "x": -1,
+   "y": 1
+  },
+  {
+   "aliases": [
+    "strongroom",
+    "deposit vault"
+   ],
+   "cover": "an iron cabinet",
+   "describe": "Boss, I see rows of small boxes two floors down, I hear heat wires humming and smell oil.",
+   "floor": "metal",
+   "id": "vault",
+   "name": "deep vault",
+   "x": 1,
+   "y": 1
+  },
+  {
+   "aliases": [
+    "upstairs"
+   ],
+   "cover": "",
+   "describe": "Boss, I see a gallery with gem posters, I hear rain on glass and smell polish.",
+   "floor": "carpet",
+   "id": "gallery",
+   "name": "glass gallery",
+   "x": 0,
+   "y": 2
+  }
+ ],
+ "tagline": "ten locks, one tape, one old betrayal",
+ "title": "Ten Layers Down"
+}

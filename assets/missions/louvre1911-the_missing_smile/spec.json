@@ -1,0 +1,175 @@
+{
+ "clientName": "Theo",
+ "guardName": "Milo",
+ "guardPost": {
+  "attachTo": "stair_gallery",
+  "name": "Broom Cupboard"
+ },
+ "guardSound": "his dragging left boot squeaking on the floor",
+ "item": {
+  "aliases": [
+   "portrait",
+   "painting",
+   "widow"
+  ],
+  "id": "widow_portrait",
+  "name": "The Laughing Widow",
+  "room": "velvet_room"
+ },
+ "lines": {
+  "burn": "Boss, the tape is ash now. I burned the spool in the sink and pocketed the portrait.",
+  "clientAfterBurn": "Good, Owl. The past stays buried, and you will be paid by morning.",
+  "clientAfterSend": "You fool, Owl. You have ruined me, but the truth had to come out.",
+  "clientAfterTake": "You have it, good. Do not open it, do not linger. Get out of there now.",
+  "clientCheckin": "Owl, talk to me. Where is she, have you got clear of the hall yet?",
+  "clientIntro": [
+   "Owl, it is Theo. I need that Laughing Widow portrait out of the Meridian tonight.",
+   "You get Marlow inside after closing, and I pay double, no questions asked.",
+   "One rule, boss to client. Never look inside the frame, just bring it to me."
+  ],
+  "evidence": "Leave Owl blinded in the alley, Theo says. Make sure he never sees who paid.",
+  "evidenceAsk": "Boss, that is Theo ordering the hit that took your eyes. What do I do with it? Burn it, or send it?",
+  "guardFirstHeard": "Boss, I hear his dragging boot squeak. It is the same sound from that alley night you went blind.",
+  "marlowIntro": "Boss, I am inside the foyer. I hear the radiators ticking and smell old polish ahead.",
+  "outro": "Boss, I am out on the street with the Widow. I can hear the traffic and breathe again.",
+  "send": "Boss, I mailed the spool to the papers. I kept a copy and I have the portrait.",
+  "take": "Boss, I lifted the backing and found a taped spool wired inside the frame."
+ },
+ "links": [
+  {
+   "a": "foyer",
+   "b": "grand_hall",
+   "kind": "door"
+  },
+  {
+   "a": "grand_hall",
+   "b": "cloak_room",
+   "kind": "arch"
+  },
+  {
+   "a": "grand_hall",
+   "b": "velvet_room",
+   "kind": "door"
+  },
+  {
+   "a": "grand_hall",
+   "b": "stair_gallery",
+   "kind": "stairs"
+  }
+ ],
+ "lore": [
+  {
+   "text": "Theo is the client, boss. He was your partner once before he sold you out.",
+   "topic": "client",
+   "when": "start"
+  },
+  {
+   "text": "Milo is the guard, boss. He walks nights with a bad knee and a squeaky boot.",
+   "topic": "guard",
+   "when": "guard"
+  },
+  {
+   "text": "Madame Voss is the owner, boss. She built the Meridian to show her late husband's portraits.",
+   "topic": "owner",
+   "when": "start"
+  },
+  {
+   "text": "The Laughing Widow is the item, boss. It is a small smiling lady everyone comes to see.",
+   "topic": "item",
+   "when": "item"
+  },
+  {
+   "text": "Theo is the voice on the spool, boss. He ordered the alley hit that blinded you.",
+   "topic": "client",
+   "when": "end"
+  },
+  {
+   "text": "Milo was a picture hanger here, boss. He knows every back hall like his own kitchen.",
+   "topic": "guard",
+   "when": "guard"
+  },
+  {
+   "text": "This is inspired by a 1911 case where a worker stole a famous smile portrait from a closed museum, boss.",
+   "topic": "history",
+   "when": "start"
+  }
+ ],
+ "ownerName": "Madame Voss",
+ "patrol": [
+  "foyer",
+  "grand_hall",
+  "velvet_room",
+  "grand_hall",
+  "foyer",
+  "grand_hall"
+ ],
+ "rooms": [
+  {
+   "aliases": [
+    "lobby",
+    "entrance"
+   ],
+   "cover": "",
+   "describe": "Boss, the entrance is quiet marble and humming lights, nothing moving yet.",
+   "floor": "marble",
+   "id": "foyer",
+   "name": "Foyer",
+   "x": 0,
+   "y": 0
+  },
+  {
+   "aliases": [
+    "hall",
+    "hub"
+   ],
+   "cover": "a marble statue",
+   "describe": "Boss, I see a wide hall. I hear pigeons cooing in the vents and Theo's old matchbook by the bench.",
+   "floor": "marble",
+   "id": "grand_hall",
+   "name": "Grand Hall",
+   "x": 0,
+   "y": 1
+  },
+  {
+   "aliases": [
+    "cloak",
+    "wardrobe"
+   ],
+   "cover": "a cedar wardrobe",
+   "describe": "Boss, I see rows of coats. I hear hangers clinking and smell mothballs and rain.",
+   "floor": "carpet",
+   "id": "cloak_room",
+   "name": "Cloak Room",
+   "x": -1,
+   "y": 1
+  },
+  {
+   "aliases": [
+    "velvet",
+    "portrait room"
+   ],
+   "cover": "a velvet sofa",
+   "describe": "Boss, I see the Widow smiling on the wall. I hear the frame buzzing faintly and spot Theo's initials scratched behind.",
+   "floor": "carpet",
+   "id": "velvet_room",
+   "name": "Velvet Room",
+   "x": 1,
+   "y": 1
+  },
+  {
+   "aliases": [
+    "stairs",
+    "gallery"
+   ],
+   "cover": "",
+   "describe": "Boss, I see dusty stairs and photo flashes. I hear my own steps ringing on metal rails.",
+   "floor": "metal",
+   "id": "stair_gallery",
+   "name": "Stair Gallery",
+   "x": 0,
+   "y": 2
+  }
+ ],
+ "tagline": "Steal back the smile that blinded you.",
+ "title": "The Missing Smile"
+}

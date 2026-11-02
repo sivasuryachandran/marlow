@@ -7,7 +7,7 @@ MARLOW is a screenless, binaural heist game played by voice. A deterministic eng
 ```bash
 git clone https://github.com/sivasuryachandran/marlow.git && cd marlow
 npm install
-npm test && npm run typecheck && npm run build   # expect 137 tests passing
+npm test && npm run typecheck && npm run build   # expect 149 tests passing
 npm run dev                                       # http://localhost:5173/?seed=7  (Chrome, headphones)
 ```
 Without keys the game uses Chrome speech recognition and an offline intent parser. Never ask for or paste real API keys; `.env` is gitignored and no key is in any commit.
@@ -19,7 +19,9 @@ Without keys the game uses Chrome speech recognition and an offline intent parse
 | An invalid or hallucinated model action can never reach the engine | `packages/game/src/verify.ts`, `match.ts`; stress test in `tools/eval.ts` (41,040 model replies, 0 wrong-target, 0 illegal) |
 | Wrong-target protection: the model must quote the words naming its target, and the code checks them | `packages/game/src/match.ts`; `EVAL_SKIP_AUDIO=1 EVAL_TAG=x npm run eval -- --backends mock` |
 | Game balance is measured, not guessed | `npx tsx tools/simulate.ts` (careful play wins, reckless play can't win cleanly) |
-| Generated missions are validated and balance-tested before play | `packages/game/src/mission.ts`, `server/src/mission-author.ts`, `npm run mission -- --list`, `assets/missions/*/report.md` |
+| A silent alarm (10 moves after the ledger is taken) makes waiting stop working; deterministic; measured, not target-shaped | `packages/engine/src/rules.ts`, `simulation.md` (includes an alarm-length sweep and the "waiter" player) |
+| Every sound has a caption and a scope animation, so the game is understandable muted | `web/src/captions.ts` (+ test that every cue id has text), caption strip in the UI |
+| Generated missions are validated and balance-tested before play | `packages/game/src/mission.ts`, `server/src/mission-author.ts`, `npm run mission -- --list`, `assets/missions/*/report.md`, [generation-stats.md](generation-stats.md) (every run, failures included) |
 | Truth flows engine to narration only; the model never states facts | `packages/game/src/narrate.ts`, `session.ts` |
 | Accessibility: axe-clean, keyboard-only playable, audio-only mode | `PROGRESS.md` (accessibility audit); open the app, press O |
 | Meta models used for real: Spark (intent, mission authoring), Voice Transcribe, Muse Image | `server/src/adapters/*`, `tools/check-access.ts`, request shapes pinned in `adapters.test.ts` |
@@ -36,8 +38,8 @@ Without keys the game uses Chrome speech recognition and an offline intent parse
 - Audio quality is unjudged by any listener. Sound effects and music are synthesized in the browser; voices are Kokoro. No recorded audio assets.
 - Held-out eval case h30 ("head out") exposed a real bug that was then fixed, so it is no longer a clean held-out case (disclosed in `metrics.heldout.md`).
 - Spark accuracy varies run to run (dev set 94 to 100% across four runs); Spark Open on Baseten was last measured at 76.7% on the held-out set and has not been re-run.
-- Only one mission has been generated end to end so far.
-- The generator tunes balance with a simulated "careful" player; real players may find generated levels easier or harder.
+- Three missions have been generated end to end (gallery, Louvre, diamond vault); 3 of 4 case runs recorded by the instrumented generator... see generation-stats.md for the real counts, including failures and one false rejection caused by my own checker.
+- The generator tunes balance with simulated players (careful, reckless), not people; real players may find generated levels easier or harder. The silent alarm length (10 on the built-in level) was chosen from a simulation sweep so a human has slack, not from human play.
 - Seer link works on the same network only (no hosted relay).
 
 ## A prompt you can paste to another agent

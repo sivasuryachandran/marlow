@@ -1,8 +1,8 @@
 # MARLOW
 
-**A screenless, binaural heist radio-drama you play by voice.** You are Owl, a blind former safecracker running a job from a van by ear. Marlow is the operative inside the building, and she is the only one who can see. You hear the building in 3D through her collar mic, give orders by push-to-talk, and hear what happens. Afterwards the game draws a **Case File**: a short comic of your run for sighted friends.
+**A screenless, binaural heist radio-drama you play by voice.** You are Owl, a blind former fixer running a job from a van by ear. Marlow is the operative inside the building, and she is the only one who can see. You hear the building in 3D through her collar mic, give orders by push-to-talk, and hear what happens. Afterwards the game draws a **Case File**: a short comic of your run for sighted friends.
 
-> Muse understands what you say. A deterministic engine decides what actually happens. Your only map is what your partner can tell you.
+> Muse understands what you say. A deterministic engine decides what actually happens. Your map only shows what Marlow has seen.
 
 Built for the Meta Global AI Developer Hackathon (Indie track). **All code, data and tooling in this repo were written during the hackathon.** See [PROGRESS.md](PROGRESS.md) for status and open items, [CREDITS.md](CREDITS.md) for assets and licenses.
 
@@ -22,7 +22,7 @@ npm run dev          # then open http://localhost:5173/?seed=7
 3. **Hold the big button (or hold Space) and speak an order**, then release. Or type in the box. Try:
    `listen` · `what do you see` · `go to the hall` · `peek the left door` · `quietly go to the office` · `hide` · `take the ledger` · `go back` · `exit`
 4. Ask Marlow questions any time (they are free and use no turn): `who is Ines`, `where can I hide`, `what's in the ledger`.
-5. Get the **ledger** from the office and **exit through the lobby** without being caught. The guard hears noisy doors. If he spots Marlow he runs at her and you have exactly one turn to hide or leave the room.
+5. Get the **ledger** from the office and **exit through the lobby** without being caught. The guard hears noisy doors and walks toward them. If he spots Marlow he runs at her and you have exactly one turn to hide or leave the room. **Taking the ledger sets off a silent alarm**: you have 10 moves to get her out before the building seals. The top bar counts down and the alarm pulses faster; waiting for the guard to leave no longer works.
 6. If you win, Marlow asks what to do with the tape she found: say **"burn it"** or **"send it"**.
 
 The screen is the **Van Cockpit**: a sonar showing only sounds Owl has actually heard (never the guard's true position), the earpiece waveform, Marlow's last words, clickable choices when she asks "which door?", tactical chips (keys 1-7), and an "Audio only" mode (key O) that hides every visual panel. Story moments appear as illustrations made with Muse Image. The Spectator/Debug tab shows the ground truth, behind a spoiler button.
@@ -46,13 +46,13 @@ npm run server          # optional: API proxy, run logs, Case File (port 8787)
 npm run dev             # game on http://localhost:5173  (add ?debug=1&seed=7)
 npm run eval            # V3 regression harness -> metrics.json + metrics.md
 npm run replay          # replay every runs/*.jsonl and assert identical event logs
-npm run check-access    # real calls to Spark, Voice Transcribe, Baseten (--image, --wonder opt-in)
+npm run check-access    # real calls to Spark, Voice Transcribe, Baseten (--image opt-in; --wonder only probes access, Wonder is not used)
 npx tsx tools/path-share.ts # local-parser vs model-call share of a scripted run
 # real-speech eval: npm run server, open http://localhost:5173/record.html, record the 50 commands (kept out of git; your own voice), then npm run eval
 npx tsx tools/simulate.ts   # balance: cautious / reckless / expert over 1000 seeds
 ```
 
-Copy `.env.example` to `.env` for keys. **The game is playable with no keys**: typed input or browser speech recognition, an in-browser deterministic intent mock, placeholder tones where pre-rendered voice lines are missing. With keys and `npm run server` it uses Muse Voice Transcribe and the Spark backend you pick. Headphones recommended.
+Copy `.env.example` to `.env` for keys. **The game is playable with no keys**: typed input or browser speech recognition, an in-browser deterministic intent mock, the voice lines are bundled (rendered offline with Kokoro, see below). With keys and `npm run server` it uses Muse Voice Transcribe and the Spark backend you pick. Headphones recommended.
 
 Controls: hold **Space** or the big button to talk (with the server and a key the mic is always listening); or type. Try "listen", "go to the hall", "peek the left door quietly", "take the ledger", "go back", "exit". Ambiguous orders get a spoken clarifying question; impossible ones get a refusal and the world does not change. If the guard spots Marlow he runs at her: you get exactly one turn to hide or leave the room.
 
@@ -107,17 +107,19 @@ Rules the code enforces (each has a test): the engine owns truth; truth flows en
 
 ## Model usage
 
-| Model | Job | Status (measured 2026-10-28) |
-|---|---|---|
-| Muse Voice Transcribe (`muse-voice-transcribe-1.0`) | push-to-talk speech to text; browser sends 16 kHz mono WAV | **live**: `POST /v1/asr/transcribe`, ~0.7 to 1.1 s |
-| Muse Spark (`muse-spark-1.3`) | one action JSON or clarify candidates; `reasoning_effort: minimal`, strict json_schema with a per-request enum of known ids | **live**: ~2.6 s p50, 6.6 s p95 in `npm run eval` |
-| Muse Spark Open (Baseten `meta-models/muse-spark-open`) | same task, alternate backend (JSON mode) | **live**: 0.8 s p50, 7.7 s p95 |
-| Muse Image (`muse-image-1.0`) | Case File panels from engine facts, after play only | **live**: ~12 s per panel, 5 panels per run |
-| Muse Wonder | offline beat/cue selection, V0-gated | not used; `tools/author-mission.ts --validate` works, hand-written beats ship |
-| SAM 3.1 + Spark vision (`VERIFY_ART=1`) | verify art shows the engine's props | stub |
-| Kokoro-82M | offline TTS of every template line | `tools/render-lines.ts` (339-file manifest); not yet rendered; no runtime TTS |
+What actually runs today. Dates are when the number was measured; "Spark" below means `muse-spark-1.3` on the Meta Model API.
 
-Pick the intent backend with `INTENT_BACKEND=mock|meta|baseten`. Spark counts reasoning tokens against `max_completion_tokens`, so the adapter asks for 1200. Baseten serves the model as `meta-models/muse-spark-open` (the `-1026` suffix from the original brief is rejected).
+| Model | Runs in the game? | Its job | Evidence |
+|---|---|---|---|
+| Muse Voice Transcribe | **Yes**, when the server has a key (otherwise Chrome's own speech recognition) | Speech to text for your orders (16 kHz mono WAV) | Word error rate 7.8% on 50 of my own recordings and 7.9% on 30 held-out ones (2026-11-01; it varied 7.8 to 11.3% across runs); latency p50 761 ms, p95 940 ms |
+| Muse Spark (`muse-spark-1.3`) | **Yes**, the default intent backend when a key is set | (1) turns an order into one action or a clarifying question (strict JSON schema, code verifies it); (2) writes new missions for the generator | Order understanding on correct transcripts: 94 to 100% across four dev runs on 2026-11-01 (latest 94%, all misses were timeouts or one-off wobbles), 93.3% on the 30 held-out commands after a bug fix; 0 wrong-target and 0 illegal actions in every run. Latest dev latency p50 1.84 s, p95 8.0 s. Mission generation: see [generation-stats.md](generation-stats.md) |
+| Muse Image (`muse-image-1.0`) | **Not during play.** Pre-generated art, plus the optional Case File | Painted story stills (12), interface art (13: poster, cast portraits, paper, floors), each generated mission's stills, and the post-run Case File comic (needs the server) | About 6 to 15 s per image; list price $0.01 per image |
+| Muse Spark Open (Baseten `meta-models/muse-spark-open`) | **Optional**, `INTENT_BACKEND=baseten`; not the default and not used in the demo | Same task as Spark, alternate backend | Last measured 2026-10-28: 90% on the dev set, 76.7% on the held-out set (below my 90% bar), p50 1.4 s, p95 9.8 s. **Not re-run since the later fixes** |
+| Muse Wonder | **No** | Nothing. No code path calls it | `check-access` can probe it; that is all |
+| SAM 3.1 | **No** | Nothing. An empty `verifyPanel` stub exists in `server/src/adapters/image.ts` and does nothing | n/a |
+| Kokoro-82M (**not a Meta model**; local, Apache-2.0 weights via `kokoro-js`) | Offline, at build time only | Renders every spoken line (Marlow, the client): 542 lines for the built-in story, plus each mission's own. Compressed to MP3 and committed. **No text-to-speech runs while you play** | `tools/render-lines.ts`, `tools/compress-lines.sh` |
+
+Pick the intent backend with `INTENT_BACKEND=mock|meta|baseten`. Spark counts reasoning tokens against `max_completion_tokens`, so the adapter asks for 1200 for orders and 9000 for mission authoring. Baseten serves the open model as `meta-models/muse-spark-open` (the `-1026` suffix from the original brief is rejected).
 
 ## Evaluation data and privacy
 
@@ -125,8 +127,16 @@ Pick the intent backend with `INTENT_BACKEND=mock|meta|baseten`. Spark counts re
 
 ## Metrics and balance
 
-- [metrics.md](metrics.md) (`npm run eval`): intent accuracy on 50 commands for the mock, Spark and Spark Open side by side, invalid actions accepted (0), adversarial V2 check (2000 bad replies, 0 illegal reached the engine), replay determinism.
-- [simulation.md](simulation.md) (`npx tsx tools/simulate.ts`): 1000 seeded runs per policy. Reckless players are caught often and rarely win cleanly; an expert that tracks the guard's loop from what Marlow hears wins cleanly every time.
+Each file is generated by a command and carries its own date. Numbers here are copied from them on 2026-11-01; if a file is newer than this README, trust the file.
+
+- [metrics.md](metrics.md) (`npm run eval`, 2026-11-01): 50 dev commands. Spark 94%, 0 wrong-target, 0 illegal; speech 7.8% word error; end to end from speech 92%. Latency p50 1.84 s, p95 8.0 s (the API was slow that run: 3 timeouts above 8 s). Spark Open is not in this run.
+- [metrics.heldout.md](metrics.heldout.md) (`npm run eval:heldout`, 2026-11-01): 30 frozen commands. Spark 93.3% typed, 93.3% from speech, 0 wrong-target. One case ("head out") exposed a real bug and was fixed, so it is no longer a clean held-out case (disclosed in the file).
+- Safety checks in `metrics.md`: 41,040 hallucinated or wrong-target model replies, 0 executed against a target the phrase does not name; 2,000 illegal replies, 0 reached the engine; replay determinism 100% of generated runs.
+- [simulation.md](simulation.md) (`npx tsx tools/simulate.ts`, 2026-11-01): six simulated players, 1000 runs each, including the new silent alarm (10 moves). Waiting players are always caught; careful and expert players win; rushing players win but never cleanly. It is a measurement, not a target, and it says what it cannot tell you.
+- [generation-stats.md](generation-stats.md): every mission-generation run, failures included: attempts, rejection reasons, repairs, time, tokens and estimated cost.
+- Tests: `npm test` (148 passing on 2026-11-01), `npm run typecheck`, `npm run build`.
+
+**Not measured:** how real players, and especially blind or low-vision players, find it; how the audio sounds to anyone; real screen readers. See [EVALUATION.md](EVALUATION.md).
 
 ## Setting
 

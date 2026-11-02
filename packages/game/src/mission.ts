@@ -192,8 +192,8 @@ export function buildMission(spec: MissionSpec, kase: Pick<MissionCase, "id" | "
   const alt = (...xs: string[]) => xs.map(x => x.toLowerCase().replace(/[^a-z' ]/g, "").trim()).filter(Boolean).join("|");
   const loreTopics: [string, string][] = [
     ["client", `\\b(${alt(spec.clientName, spec.clientName.split(" ")[0], "client", "partner", "employer")})\\b`],
-    ["guard", `\\b(${alt(spec.guardName, spec.guardName.split(" ").pop()!, "guard", "night man", "watchman")})\\b`],
-    ["owner", `\\b(${alt(spec.ownerName, spec.ownerName.split(" ").pop()!, "owner")})\\b`],
+    ["guard", `\\b(${alt(spec.guardName, spec.guardName.split(" ")[0], spec.guardName.split(" ").pop()!, "guard", "night man", "watchman")})\\b`],
+    ["owner", `\\b(${alt(spec.ownerName, spec.ownerName.split(" ")[0], spec.ownerName.split(" ").pop()!, "owner")})\\b`],
     ["item", `\\b(${alt(bare(spec.item.name), ...spec.item.aliases.map(bare))})\\b`],
     ["history", `\\b(what happened|history|the real|true story|inspired)\\b`],
     ["marlow", `\\b(who are you|about yourself|about you)\\b`],

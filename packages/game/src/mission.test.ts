@@ -59,6 +59,12 @@ describe("mission generator: spec -> playable mission", () => {
     const sp = spec(); sp.lore[0].text = "I hired you because I trust you, Owl.";
     expect(checkText(buildMission(sp, kase, base).mission!, []).join(" ")).toMatch(/marlow.lore.client.0: a client fact must name its subject/);
   });
+  it("a lore answer may name its subject by first name, last name or full name (a false rejection found in a real run)", () => {
+    const sp = spec(); sp.lore[2].text = "Otto squeaks when he walks, boss."; // guard is "Otto Brandt"; text uses the first name only
+    expect(checkText(buildMission(sp, kase, base).mission!, [])).toEqual([]);
+    sp.lore[2].text = "Brandt squeaks when he walks, boss.";
+    expect(checkText(buildMission(sp, kase, base).mission!, [])).toEqual([]);
+  });
   it("story questions use the mission's own names, unlocked by what has been discovered", async () => {
     const { mission } = buildMission(spec(), kase, base);
     const sess = new Session({ level: mission!.level, bank: { ...base.lines, ...mission!.lines }, beats: mission!.beats, lore: mission!.lore, loreTopics: mission!.loreTopics, intent: new MockIntent(), seed: 3, memory: new InMemoryStore() });

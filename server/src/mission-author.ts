@@ -4,7 +4,7 @@
  * fictionalization, and the balance simulator. Failures go back to Spark as plain feedback (up to 3 attempts). A
  * mission is only written if everything passes.
  */
-import { mkdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
+import { appendFileSync, mkdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
 import { buildMission, checkText, MISSION_SPEC_SCHEMA, loadBank, type Beat, type Mission, type MissionCase, type MissionSpec } from "@marlow/game";
 import { summarize } from "../../tools/sim-core";
 import { path } from "@marlow/engine";
@@ -62,7 +62,8 @@ LORE: 6 to 10 short facts that MARLOW tells Owl when he asks about a topic, in h
 Return only the JSON object.`;
 
 /** One Spark call. Strict structured output; "low" reasoning (documented as valid for Spark) since this is authoring. */
-export async function draftSpec(cfg: Config, kase: MissionCase, notes: Research | null, feedback: string[], fetchImpl: typeof fetch = fetch): Promise<MissionSpec> {
+export interface Usage { prompt: number; completion: number; reasoning: number }
+export async function draftSpec(cfg: Config, kase: MissionCase, notes: Research | null, feedback: string[], fetchImpl: typeof fetch = fetch, usageOut?: Usage): Promise<MissionSpec> {
   const user = [
     `CASE: ${kase.title} (inspired by ${kase.inspiredBy}, ${kase.year}).`,
     `FACTS:\n- ${kase.facts.join("\n- ")}`,
@@ -79,12 +80,14 @@ export async function draftSpec(cfg: Config, kase: MissionCase, notes: Research 
     }),
   });
   if (!res.ok) throw new Error(`Spark HTTP ${res.status}: ${(await res.text()).slice(0, 300)}`);
-  const content = ((await res.json()) as any)?.choices?.[0]?.message?.content;
+  const body = (await res.json()) as any, content = body?.choices?.[0]?.message?.content;
+  if (usageOut) { const u = body?.usage ?? {}; usageOut.prompt = u.prompt_tokens ?? 0; usageOut.completion = u.completion_tokens ?? 0; usageOut.reasoning = u.completion_tokens_details?.reasoning_tokens ?? 0; }
   if (typeof content !== "string" || !content.trim()) throw new Error("Spark returned no content (raise AUTHOR_MAX_TOKENS: reasoning counts against it)");
   return JSON.parse(content) as MissionSpec;
 }
 
-export interface AuthorResult { mission?: Mission; attempts: { errors: string[]; balance?: unknown; spec?: MissionSpec }[]; research: Research | null; spec?: MissionSpec; tuning?: string }
+export interface AuthorResult { mission?: Mission; attempts: AttemptRecord[]; research: Research | null; spec?: MissionSpec; tuning?: string; startedAt?: string; totalMs?: number }
+export interface AttemptRecord { errors: string[]; balance?: unknown; spec?: MissionSpec; ms?: number; usage?: Usage; repairs?: string[] }
 
 /**
  * Balance is tuned by code, not by the model: the model chooses the building, the story and the order the guard walks
@@ -141,13 +144,15 @@ export async function authorMission(cfg: Config, kase: MissionCase, opts: { atte
   const base = { lines: loadBank(linesJson), beats: beatsJson as Beat[] };
   const notes = await research(kase.wiki ?? kase.inspiredBy, opts.fetchImpl);
   log(notes ? `research: ${notes.title} (${notes.url})` : "research: nothing found, using the case facts only");
-  const out: AuthorResult = { attempts: [], research: notes };
+  const out: AuthorResult = { attempts: [], research: notes, startedAt: new Date().toISOString() };
+  const t0 = Date.now();
   let feedback: string[] = [];
   for (let i = 0; i < (opts.attempts ?? 3); i++) {
     log(`attempt ${i + 1}: asking Muse Spark for a mission spec…`);
     out.tuning = undefined;
+    const tA = Date.now(), usage: Usage = { prompt: 0, completion: 0, reasoning: 0 };
     let spec: MissionSpec;
-    try { spec = opts.fromSpec && i === 0 ? opts.fromSpec : await draftSpec(cfg, kase, notes, feedback, opts.fetchImpl); } catch (e) { feedback = [`(the previous reply could not be used: ${(e as Error).message.slice(0, 160)})`]; out.attempts.push({ errors: feedback }); log(`  ${feedback[0]}`); continue; }
+    try { spec = opts.fromSpec && i === 0 ? opts.fromSpec : await draftSpec(cfg, kase, notes, feedback, opts.fetchImpl, usage); } catch (e) { feedback = [`(the previous reply could not be used: ${(e as Error).message.slice(0, 160)})`]; out.attempts.push({ errors: feedback, ms: Date.now() - tA, usage }); log(`  ${feedback[0]}`); continue; }
     out.spec = spec;
     let built = buildMission(spec, kase, base);
     let errors = built.errors;
@@ -173,13 +178,21 @@ export async function authorMission(cfg: Config, kase: MissionCase, opts: { atte
       if (t.cautiousWin < TARGETS.cautiousWin) errors.push(`too hard even after tuning the guard's schedule: a careful player (listens, moves quietly away from the footsteps, hides when warned) wins only ${t.cautiousWin}%; the target is at least ${TARGETS.cautiousWin}%. The building is probably a single corridor with the guard sweeping it: give it a loop or a side room next to the route so Marlow can step aside while he passes, put cover in the rooms on the way to the item, and attach the guard post away from the item room.`);
       if (t.recklessClean > TARGETS.recklessClean) errors.push(`too easy even after tuning: rushing straight for the item wins cleanly ${t.recklessClean}%; the target is at most ${TARGETS.recklessClean}%. The patrol must walk through the rooms between the entrance and the item, more than once.`);
     }
-    out.attempts.push({ errors, balance, spec });
-    if (!errors.length && built.mission) { out.mission = built.mission; log(`  passed every check`); return out; }
+    out.attempts.push({ errors, balance, spec, ms: Date.now() - tA, usage, repairs: out.tuning ? [out.tuning] : [] });
+    if (!errors.length && built.mission) { out.mission = built.mission; out.totalMs = Date.now() - t0; log(`  passed every check`); return out; }
     log(`  ${errors.length} problem(s): ${errors.slice(0, 3).join(" | ")}`);
     try { mkdirSync("assets/missions/_failed", { recursive: true }); writeFileSync(`assets/missions/_failed/${kase.id}-${Date.now()}.json`, JSON.stringify(spec, null, 1)); } catch { /* best effort */ }
     feedback = errors.slice(0, 12);
   }
+  out.totalMs = Date.now() - t0;
   return out;
+}
+
+/** One line per generation run, failures included: the raw material for generation-stats.md. */
+export function recordRun(kase: MissionCase, r: AuthorResult, extra: { images?: number; voiceLines?: number; extraMs?: number } = {}) {
+  mkdirSync("assets/missions", { recursive: true });
+  const line = { when: r.startedAt, case: kase.id, passed: !!r.mission, mission: r.mission?.id ?? null, totalMs: r.totalMs, attempts: r.attempts.map(a => ({ ms: a.ms, passed: !a.errors.length, errors: a.errors, repairs: a.repairs ?? [], usage: a.usage })), ...extra };
+  appendFileSync("assets/missions/stats.jsonl", JSON.stringify(line) + "\n");
 }
 
 /** Write a passed mission where the web app can load it (assets is the web public directory). */

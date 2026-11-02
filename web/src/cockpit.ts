@@ -3,6 +3,7 @@ import type { Session, TurnOutput } from "@marlow/game";
 import type { Dir, Dist, GameEvent } from "@marlow/shared";
 import type { AudioEngine } from "./audio";
 import { FloorPlan } from "./floorplan";
+import { captionFor } from "./captions";
 
 export interface CockpitDeps { send(text: string): void; session(): Session; audio: AudioEngine; latencyP50(): number | null; onReveal(): void }
 
@@ -11,6 +12,9 @@ const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as 
 const AZ: Record<string, number> = { ahead: 0, right: 90, behind: 180, left: 270, here: 0 };
 const R: Record<Dist, number> = { near: 0.33, mid: 0.62, far: 0.9 };
 
+interface Fx { t0: number; label: string; kind: "ring" | "alarm" | "music" }
+let fx: Fx[] = [];
+let capTimer: ReturnType<typeof setTimeout> | undefined;
 let deps: CockpitDeps;
 let playerPlan: FloorPlan | null = null;
 let pips: Pip[] = [];
@@ -70,6 +74,28 @@ function storyArt(out: TurnOutput) {
   for (const b of [...(out.beatIds ?? [])].reverse()) if (ART[b]) return showArt(ART[b][0], ART[b][1]);
 }
 
+// ---------------- captions and scope effects for every sound ----------------
+/** Show what was just heard as text, under the status line, for a few seconds. */
+export function showCaption(text: string, hold = 6000) {
+  const bar = document.getElementById("cueBar"); if (!bar) return;
+  bar.textContent = text; bar.classList.add("show");
+  clearTimeout(capTimer); capTimer = setTimeout(() => bar.classList.remove("show"), hold);
+}
+/** Every cue of a turn (world sounds, engine sounds, story-beat sounds), once each, as caption text. */
+export function cueCaptions(out: TurnOutput): string[] {
+  return [...new Set([...out.cues.map(c => c.caption), ...(out.beatCueIds ?? []).map(captionFor)])].filter(Boolean);
+}
+function addFx(out: TurnOutput) {
+  const now = performance.now();
+  for (const c of out.cues) {
+    if (c.id === "sfx.alarm") fx.push({ t0: now, label: c.caption, kind: "alarm" });
+    else if (c.kind === "music") fx.push({ t0: now, label: c.caption, kind: "music" });
+    else if (!c.dir || c.dir === "here") fx.push({ t0: now, label: c.caption, kind: "ring" }); // Marlow's own sounds ripple out from her
+  } // directional cues (guard, phone) already have their own labelled marker on the scope
+  for (const id of out.beatCueIds ?? []) fx.push({ t0: now, label: captionFor(id), kind: id.startsWith("music.") ? "music" : "ring" });
+  fx = fx.filter((f, i) => fx.findIndex(g => g.label === f.label && Math.abs(g.t0 - f.t0) < 50) === i);
+}
+
 // ---------------- helpers ----------------
 const dirOf = (e: GameEvent): { dir: Dir; dist: Dist } | null => ("dir" in e && "dist" in e ? { dir: e.dir as Dir, dist: e.dist as Dist } : null);
 const SOUND_LABEL: Record<string, string> = { phone_ring: "Phone ringing" };
@@ -111,6 +137,16 @@ function drawSonar() {
     g.strokeStyle = col; g.lineWidth = 2; g.beginPath(); g.arc(x, y, 9 + (still() ? 5 : (performance.now() / 60) % 14), 0, Math.PI * 2); g.stroke();
     g.fillStyle = `rgba(242,231,208,${alpha})`; g.font = "14px Courier Prime, monospace"; g.textAlign = x > cx ? "right" : "left"; g.fillText(p.label, x + (x > cx ? -14 : 14), y + 4);
   }
+  // sounds that are not a place on the map: rings from Marlow, a red pulse for the alarm, a note for the music
+  const nowMs = performance.now(); fx = fx.filter(f => nowMs - f.t0 < 2800);
+  fx.forEach((f, i) => {
+    const t = (nowMs - f.t0) / 2800, a = 1 - t;
+    if (f.kind === "ring") { g.strokeStyle = `rgba(242,231,208,${a * 0.8})`; g.lineWidth = 2; g.beginPath(); g.arc(cx, cx, 12 + (still() ? 0.5 : t) * rad * 0.7, 0, Math.PI * 2); g.stroke(); }
+    else if (f.kind === "alarm") { g.strokeStyle = `rgba(224,70,60,${a})`; g.lineWidth = 6; g.beginPath(); g.arc(cx, cx, rad - 4 - (still() ? 0 : t * 30), 0, Math.PI * 2); g.stroke(); }
+    g.fillStyle = f.kind === "alarm" ? `rgba(255,130,115,${a})` : f.kind === "music" ? `rgba(240,197,106,${a})` : `rgba(242,231,208,${a})`;
+    g.font = "13px Courier Prime, monospace"; g.textAlign = "center";
+    g.fillText((f.kind === "music" ? "♪ " : "") + f.label, cx, 40 + i * 17);
+  });
   g.fillStyle = "#f2e7d0"; g.beginPath(); g.arc(cx, cx, 7, 0, Math.PI * 2); g.fill(); g.textAlign = "center"; g.font = "700 13px Courier Prime, monospace"; g.fillText("MARLOW", cx, cx + 24);
 }
 function drawWave() {
@@ -212,6 +248,8 @@ export function onTurn(out: TurnOutput) {
   collect(out.events, out.state.turn);
   renderHeader(); renderTopology(); renderSonarNote(); renderClarify(out); renderLastTx(out); storyArt(out);
   renderPlayerMap(out);
+  addFx(out);
+  const caps = cueCaptions(out); if (caps.length) showCaption(caps.join(" · "));
   document.querySelectorAll("#chips button").forEach(b => b.classList.remove("on")); $("choices").replaceChildren();
 }
 /** The solo player's map: only rooms Marlow has seen, growing as she explores. Never the guard. */
@@ -222,6 +260,6 @@ function renderPlayerMap(out: TurnOutput) {
   const s = out.state, name = (id: string) => s.rooms.find(r => r.id === id)?.spokenName.replace(/^the /, "") ?? id;
   c.setAttribute("aria-label", `Map of what Marlow has seen: ${s.knowledge.rooms.filter(r => !s.rooms.find(x => x.id === r)?.offstage).map(name).join(", ")}. Marlow is in the ${name(s.marlow.room)}.`);
 }
-export function resetRun() { playerPlan?.reset(); pips = []; peakAlert = 0; seen = []; if (document.getElementById("casePanels")) renderPanels(); $("story").hidden = true; }
+export function resetRun() { fx = []; playerPlan?.reset(); pips = []; peakAlert = 0; seen = []; if (document.getElementById("casePanels")) renderPanels(); $("story").hidden = true; }
 export function setMic(text: string, live: boolean) { $("micState").textContent = text; $("ptt").classList.toggle("live", live); }
 export function micLevel(rms: number) { ($("micLevel") as HTMLElement).style.width = `${Math.min(100, Math.round(rms * 900))}%`; }

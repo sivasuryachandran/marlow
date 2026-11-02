@@ -1,5 +1,17 @@
 [
  {
+  "id": "diamond2003-ten_layers_down",
+  "title": "Ten Layers Down",
+  "tagline": "ten locks, one tape, one old betrayal",
+  "inspiredBy": "the 2003 Antwerp Diamond Centre heist"
+ },
+ {
+  "id": "louvre1911-the_missing_smile",
+  "title": "The Missing Smile",
+  "tagline": "Steal back the smile that blinded you.",
+  "inspiredBy": "the 1911 theft of the Mona Lisa from the Louvre"
+ },
+ {
   "id": "gallery1990-the_hollow_frames",
   "title": "The Hollow Frames",
   "tagline": "Take the canvas, find the truth, choose who pays",

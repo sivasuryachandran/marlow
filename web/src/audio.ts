@@ -17,7 +17,9 @@ export class AudioEngine {
   missing = new Set<string>();
   analyser!: AnalyserNode; private master!: GainNode;
   /** A generated mission's voice lines: its own lines only from its folder; shared lines from there first, then the default. */
-  mission: { base: string; own: Set<string> } | null = null; private monoNode!: GainNode; private duck!: GainNode;
+  mission: { base: string; own: Set<string> } | null = null;
+  /** Called with a short caption whenever the engine itself makes a sound (radio click, static, the guard pacing), so the screen can show it. */
+  onCue?: (caption: string) => void; private monoNode!: GainNode; private duck!: GainNode;
   private voiceGain!: GainNode; private musicGain!: GainNode; private sfxGain!: GainNode;
   private earpiece!: GainNode; private noiseBuf!: AudioBuffer; private pinkBuf!: AudioBuffer; private brownBuf!: AudioBuffer;
   private timers: ReturnType<typeof setTimeout>[] = []; private ambTimers: ReturnType<typeof setTimeout>[] = []; private tensionTimer?: ReturnType<typeof setInterval>;
@@ -295,12 +297,14 @@ export class AudioEngine {
   // ---------- public playback ----------
   /** Instant on push-to-talk release: radio click, then the pre-rendered "Copy." */
   async playAck(line?: SpokenLine) {
+    this.onCue?.("Radio click: your order is heard");
     this.synth("sfx.radio.click", this.earpiece, this.ctx.currentTime);
     if (line) await this.playVoice(line);
   }
 
   /** Static burst for the timeout branch. */
-  playStatic() { this.synth("sfx.radio.static", this.earpiece, this.ctx.currentTime); }
+  playStatic() {
+    this.onCue?.("Radio static: the signal is bad, say it again"); this.synth("sfx.radio.static", this.earpiece, this.ctx.currentTime); }
 
   playCueId(id: string) {
     if (!this.ctx) return;
@@ -392,6 +396,7 @@ export class AudioEngine {
     this.stopWaiting();
     if (!this.ctx || !lastHeard || lastHeard.dir === "here") return;
     const cue: Cue = { id: "sfx.footsteps.marble", kind: "world", priority: 1, dir: lastHeard.dir as Dir, dist: lastHeard.dist, reverb, caption: "" };
+    this.onCue?.(`Waiting: the guard paces ${lastHeard.dir}, ${lastHeard.dist}`);
     this.waitTimer = setInterval(() => void this.playWorldCue(cue, this.ctx.currentTime), 2200);
   }
   stopWaiting() { if (this.waitTimer) clearInterval(this.waitTimer); this.waitTimer = undefined; }

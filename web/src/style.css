@@ -89,6 +89,9 @@ main{max-width:1500px;margin:0 auto;padding:1rem .8rem}
 /* status: a subtitle bar, like a film caption */
 #status{margin:0 0 .9rem;padding:.6rem 1rem;background:rgba(0,0,0,.72);border-top:1px solid var(--line);border-bottom:1px solid var(--line);color:#fff8e8;font:italic 1.05rem var(--serif);text-align:center;min-height:2.6rem}
 
+/* captions strip: what you would hear, as text */
+.cuebar{min-height:2.1rem;margin:-.3rem 0 .8rem;text-align:center;font:italic 1.02rem var(--serif);color:var(--amber);opacity:0;transition:opacity .35s}.cuebar.show{opacity:1}
+
 /* ---------- the scope (radar) ---------- */
 #sonar{width:100%;max-width:440px;display:block;margin:0 auto;border-radius:50%;background:radial-gradient(circle,#0f2416 0%,#06110a 70%);border:10px solid #2b2218;box-shadow:0 0 0 2px var(--brass2),0 0 0 4px #000,inset 0 0 40px rgba(0,0,0,.8),0 0 30px rgba(155,227,166,.08)}
 #sonarNote{font:.85rem var(--type);color:var(--dim);text-align:center}
