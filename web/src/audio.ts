@@ -34,7 +34,9 @@ export class AudioEngine {
   private ambience?: { stop(): void };
   private waitTimer?: ReturnType<typeof setInterval>;
 
-  async unlock() {
+  private musicStarted = false;
+  /** Audio context without the music: the audio guide can talk before the job starts. */
+  async prepare() {
     if (this.ctx) { await this.ctx.resume(); return; }
     this.ctx = new AudioContext();
     const c = this.ctx;
@@ -44,6 +46,7 @@ export class AudioEngine {
     this.earpiece = c.createGain();
     this.sfxGain.connect(this.duck); this.musicGain.connect(this.duck); this.duck.connect(this.master);
     this.voiceGain.connect(this.master);
+    this.guideGain = c.createGain(); this.guideGain.connect(this.master);
     this.noiseBuf = this.makeNoise(8); this.pinkBuf = this.makeColored(20, "pink", 11); this.brownBuf = this.makeColored(20, "brown", 13);
     // Earpiece bus: band-pass radio voice + faint static, mono and centred.
     const hp = c.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 300;
@@ -55,8 +58,38 @@ export class AudioEngine {
     for (const kind of ["marble", "dry", "metal"]) {
       const cv = c.createConvolver(); cv.buffer = this.makeIR(kind); cv.connect(this.sfxGain); this.reverbs[kind] = cv;
     }
-    this.startMusic();
     await c.resume();
+  }
+
+  async unlock() {
+    await this.prepare();
+    if (!this.musicStarted) { this.musicStarted = true; this.startMusic(); }
+  }
+
+  // ---------- audio guide: a plain, clear voice for the controls and the briefing ----------
+  private guideGain!: GainNode; private guideGen = 0; private guideSrc?: AudioBufferSourceNode; private guideDone?: () => void;
+  /** True while a guide line is being spoken. */
+  guideBusy = false;
+  /** True while the game's own voice is playing (not the guide). */
+  get voiceActive() { return this.voicePlaying - (this.guideBusy ? 1 : 0) > 0; }
+  stopGuide() {
+    this.guideGen++; try { this.guideSrc?.stop(); } catch { /* already ended */ }
+    this.guideSrc = undefined; this.guideBusy = false; const d = this.guideDone; this.guideDone = undefined; d?.();
+  }
+  /** Speak one pre-rendered guide line (never synthesized at runtime). Starting a new one cuts off the old. Resolves when finished or cut off. Missing file: silent. */
+  async speakGuide(line: Pick<SpokenLine, "id" | "audioKey">, base?: string): Promise<void> {
+    await this.prepare();
+    this.stopGuide();
+    const gen = this.guideGen;
+    const buf = (base ? await this.asset(`${base}/${line.audioKey}.mp3`) : null) ?? await this.asset(`/audio/lines/${line.audioKey}.mp3`);
+    if (gen !== this.guideGen || !buf) return;
+    const c = this.ctx, s = c.createBufferSource(); s.buffer = buf; s.connect(this.guideGain);
+    this.guideGain.gain.setTargetAtTime(Math.max(0.6, this.settings.voice), c.currentTime, 0.02);
+    this.guideSrc = s; this.guideBusy = true;
+    this.duckOn();
+    await new Promise<void>(res => { this.guideDone = res; s.onended = () => res(); s.start(c.currentTime + 0.02); });
+    if (gen === this.guideGen) { this.guideBusy = false; this.guideSrc = undefined; }
+    this.duckOff();
   }
 
   applySettings(s: Partial<AudioSettings> = {}) {

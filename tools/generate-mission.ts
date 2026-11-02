@@ -60,12 +60,12 @@ if (flag("voices")) {
   const bank = { ...loadBank(linesJson), ...m.lines }, overlay = new Set(Object.keys(m.lines)), adir = `${dir}/audio`;
   mkdirSync(adir, { recursive: true });
   const todo = Object.entries(bank).flatMap(([id, def]) => expandLine(id, def, m.level as never).map(x => ({ ...x, id })))
-    .filter(x => overlay.has(x.id) || !existsSync(`assets/audio/lines/${x.audioKey}.mp3`));
+    .filter(x => (overlay.has(x.id) ? !existsSync(`${adir}/${x.audioKey}.mp3`) : !existsSync(`assets/audio/lines/${x.audioKey}.mp3`)));
   status(`voices: ${todo.length} lines to render with Kokoro`);
   try {
     const { KokoroTTS } = await import(/* @vite-ignore */ "kokoro-js" as string);
     const tts = await KokoroTTS.from_pretrained("onnx-community/Kokoro-82M-v1.0-ONNX", { dtype: "q8" });
-    const voices: Record<string, string> = { marlow: "af_heart", client: "bf_emma", system: "af_heart" };
+    const voices: Record<string, string> = { marlow: "af_heart", client: "bf_emma", system: "af_heart", guide: process.env.KOKORO_VOICE_GUIDE ?? "am_adam" };
     let n = 0;
     for (const x of todo) {
       const wav = `${adir}/${x.audioKey}.wav`;
@@ -94,7 +94,7 @@ if (flag("art")) {
     } catch (e) { status(`  art ${beat} failed: ${(e as Error).message.slice(0, 100)}`); }
   }
 }
-recordRun(kase, result, { images: nImages, voiceLines: nVoices, extraMs: Date.now() - tRest });
+if (!fromSpec) recordRun(kase, result, { images: nImages, voiceLines: nVoices, extraMs: Date.now() - tRest });
 writeFileSync(`${dir}/mission.json`, JSON.stringify(m));
 status(`ready: play it at /?mission=${m.id}`);
 finish({ ok: true, id: m.id });

@@ -4,6 +4,7 @@ import beatsJson from "../../data/beats.json";
 import level from "../../data/level.json";
 import { Session, loadBank, renderLine, type Beat, type SpokenLine, type TurnOutput } from "@marlow/game";
 import type { GameEvent } from "@marlow/shared";
+import { guide } from "./guide";
 import { AudioEngine, type AudioSettings } from "./audio";
 import { renderDebug } from "./debug";
 import { HttpIntent } from "./intent-client";
@@ -172,6 +173,7 @@ function finish(out: TurnOutput) {
     : `Marlow was caught after ${out.state.turn} turns: ${whyCaught(out)}.`;
   status(pending ? "Marlow is waiting: burn the tape, or send it?" : "The run is over.");
   $<HTMLButtonElement>(pending ? "burnBtn" : "again").focus();
+  void guide.announce(pending ? "guide.status.pick" : "guide.status.over");
 }
 
 // ---------- always-on listening ----------
@@ -205,6 +207,7 @@ function toggleMute() {
   b.setAttribute("aria-pressed", String(muted)); b.textContent = muted ? "MUTED · TAP TO LISTEN" : "LISTENING · TAP TO MUTE"; setMic(muted ? "mic muted" : "mic live", !muted);
   if (muted) hfPause(); else hf.paused = false;
   status(muted ? "Mic muted." : "Listening.");
+  void guide.announce(muted ? "guide.mic.muted" : "guide.mic.live");
 }
 
 // ---------- push to talk ----------
@@ -252,6 +255,7 @@ function wirePtt() {
 
 // ---------- wiring ----------
 bindSettings(); wirePtt(); initCoop(); initMissions(mission);
+guide.init({ audio, bank, level: gameLevel as never, mission: mission as never });
 if (mission?.art?.length) setMissionArt(`/missions/${mission.id}/art`, artCaptions(mission));
 initCockpit({
   send: text => { if (busy || !session) return; void audio.playAck(); void handleTranscript(text); },

@@ -880,5 +880,545 @@
     "curt": [
       "No alarm."
     ]
+  },
+  "guide.on": {
+    "speaker": "guide",
+    "text": [
+      "Audio guide on. I will read each control as you move to it with the Tab key. Press H for help on this screen, and Escape to stop me. Press G to turn me off."
+    ]
+  },
+  "guide.off": {
+    "speaker": "guide",
+    "text": [
+      "Audio guide off. Press G to turn it back on."
+    ]
+  },
+  "guide.help.start": {
+    "speaker": "guide",
+    "text": [
+      "This is the start screen of Marlow, a heist you play by ear. You are Owl, a blind fixer. Marlow is your eyes inside a gallery. Put on headphones. Press Tab to reach the Start the job button, then press Enter. Open the Briefing tab to hear the whole story and the rules read aloud."
+    ]
+  },
+  "guide.help.play": {
+    "speaker": "guide",
+    "text": [
+      "You are in the game. Speak an order, or type it in the order box and press Enter. If the microphone is not always listening, hold Space to talk. Keys one to seven are quick actions. You can ask Marlow questions that cost nothing, like what do you see, or how long do we have. Press Escape to skip what she is saying, and O for audio only mode."
+    ]
+  },
+  "guide.help.brief": {
+    "speaker": "guide",
+    "text": [
+      "This is the Briefing tab. Press the Listen to the briefing button to hear the story and the rules. You can also choose a different case here, or write a new one from a real heist."
+    ]
+  },
+  "guide.help.case": {
+    "speaker": "guide",
+    "text": [
+      "This is the Case File tab. It shows how your run went, with pictures. The button makes a comic of your run, which takes about a minute and needs the game server."
+    ]
+  },
+  "guide.help.spec": {
+    "speaker": "guide",
+    "text": [
+      "This is the Spectator tab. It reveals where the guard really is. It is a spoiler for the player, meant for a sighted partner."
+    ]
+  },
+  "guide.help.set": {
+    "speaker": "guide",
+    "text": [
+      "This is the Settings tab. You can change the volume of the voices, music and effects, turn on rain ambience, mono audio and captions, or make Marlow forget your past runs."
+    ]
+  },
+  "guide.help.end": {
+    "speaker": "guide",
+    "text": [
+      "The run is over. Press Tab to find the Run it again button."
+    ]
+  },
+  "guide.help.pick": {
+    "speaker": "guide",
+    "text": [
+      "Marlow is waiting for your answer about the tape. Say burn it, or send it, or press Tab to reach the two buttons."
+    ]
+  },
+  "guide.ctl.skiplink": {
+    "speaker": "guide",
+    "text": [
+      "Skip to the game. Link. Press G at any time for the audio guide."
+    ]
+  },
+  "guide.ctl.start": {
+    "speaker": "guide",
+    "text": [
+      "Start the job. Button. Begins the heist. The browser will ask for the microphone."
+    ]
+  },
+  "guide.ctl.tab.play": {
+    "speaker": "guide",
+    "text": [
+      "Van Cockpit. Tab one of five. This is the game screen."
+    ]
+  },
+  "guide.ctl.tab.brief": {
+    "speaker": "guide",
+    "text": [
+      "Briefing. Tab two of five. The story and the rules, and the choice of case."
+    ]
+  },
+  "guide.ctl.tab.case": {
+    "speaker": "guide",
+    "text": [
+      "Case File. Tab three of five. How your run went."
+    ]
+  },
+  "guide.ctl.tab.spec": {
+    "speaker": "guide",
+    "text": [
+      "Spectator and debug. Tab four of five. A spoiler: it shows where the guard really is."
+    ]
+  },
+  "guide.ctl.tab.set": {
+    "speaker": "guide",
+    "text": [
+      "Settings. Tab five of five. Volume, ambience, captions and memory."
+    ]
+  },
+  "guide.ctl.audioOnly.off": {
+    "speaker": "guide",
+    "text": [
+      "Audio only. Toggle button, currently off. Press Enter to hide all visual panels and play by sound alone. Key O."
+    ]
+  },
+  "guide.ctl.audioOnly.on": {
+    "speaker": "guide",
+    "text": [
+      "Audio only. Toggle button, currently on. Press Enter to bring the visual panels back. Key O."
+    ]
+  },
+  "guide.ctl.guide.on": {
+    "speaker": "guide",
+    "text": [
+      "Audio guide. Toggle button, currently on. Press Enter or G to turn it off."
+    ]
+  },
+  "guide.ctl.guide.off": {
+    "speaker": "guide",
+    "text": [
+      "Audio guide. Toggle button, currently off. Press Enter or G to turn it on."
+    ]
+  },
+  "guide.ctl.coop": {
+    "speaker": "guide",
+    "text": [
+      "Co-op, Seer link. Button. Creates a room code, so a friend who can see can watch the whole map while you listen."
+    ]
+  },
+  "guide.ctl.coopLink": {
+    "speaker": "guide",
+    "text": [
+      "Seer link address. Read only text. Send this to your friend."
+    ]
+  },
+  "guide.ctl.coopCopy": {
+    "speaker": "guide",
+    "text": [
+      "Copy link. Button. Copies the address for your friend."
+    ]
+  },
+  "guide.ctl.coopStop": {
+    "speaker": "guide",
+    "text": [
+      "Stop sharing. Button. Closes the room."
+    ]
+  },
+  "guide.ctl.ptt.hold": {
+    "speaker": "guide",
+    "text": [
+      "Transmit. Button. Hold Space, or hold the button, and speak your order, then let go."
+    ]
+  },
+  "guide.ctl.ptt.live": {
+    "speaker": "guide",
+    "text": [
+      "Microphone is always listening. Button. Press Enter to mute it."
+    ]
+  },
+  "guide.ctl.ptt.muted": {
+    "speaker": "guide",
+    "text": [
+      "Microphone is muted. Button. Press Enter to listen again."
+    ]
+  },
+  "guide.ctl.ptt.unavailable": {
+    "speaker": "guide",
+    "text": [
+      "Voice input is not available in this browser. Type your orders in the order box instead."
+    ]
+  },
+  "guide.ctl.cmd": {
+    "speaker": "guide",
+    "text": [
+      "Order box. Type an order, such as go to the hall, then press Enter."
+    ]
+  },
+  "guide.ctl.skip": {
+    "speaker": "guide",
+    "text": [
+      "Skip the talking. Button. Key Escape. Stops what is being said."
+    ]
+  },
+  "guide.ctl.chip.move": {
+    "speaker": "guide",
+    "text": [
+      "Move. Key one. Then choose a room to go to."
+    ]
+  },
+  "guide.ctl.chip.peek": {
+    "speaker": "guide",
+    "text": [
+      "Peek. Key two. Then choose a door to look through."
+    ]
+  },
+  "guide.ctl.chip.listen": {
+    "speaker": "guide",
+    "text": [
+      "Listen. Key three. Marlow listens for the guard."
+    ]
+  },
+  "guide.ctl.chip.wait": {
+    "speaker": "guide",
+    "text": [
+      "Wait. Key four. Marlow holds still for one move."
+    ]
+  },
+  "guide.ctl.chip.hide": {
+    "speaker": "guide",
+    "text": [
+      "Hide. Key five. Marlow hides behind cover, if there is any."
+    ]
+  },
+  "guide.ctl.chip.take": {
+    "speaker": "guide",
+    "text": [
+      "Take. Key six. Then choose what to pick up."
+    ]
+  },
+  "guide.ctl.chip.exit": {
+    "speaker": "guide",
+    "text": [
+      "Exit. Key seven. Marlow leaves the building."
+    ]
+  },
+  "guide.ctl.burn": {
+    "speaker": "guide",
+    "text": [
+      "Burn it. Button. Marlow burns the tape."
+    ]
+  },
+  "guide.ctl.send": {
+    "speaker": "guide",
+    "text": [
+      "Send it. Button. Marlow sends the tape out."
+    ]
+  },
+  "guide.ctl.again": {
+    "speaker": "guide",
+    "text": [
+      "Run it again. Button. Starts a new run. Marlow remembers how this one went."
+    ]
+  },
+  "guide.ctl.openCase": {
+    "speaker": "guide",
+    "text": [
+      "Open the Case File. Button."
+    ]
+  },
+  "guide.ctl.casefile": {
+    "speaker": "guide",
+    "text": [
+      "Make the Case File. Button. Draws a comic of your run. It takes about a minute and needs the server."
+    ]
+  },
+  "guide.ctl.reveal": {
+    "speaker": "guide",
+    "text": [
+      "Show ground truth. Button. A spoiler: it shows where the guard really is."
+    ]
+  },
+  "guide.ctl.vVoice": {
+    "speaker": "guide",
+    "text": [
+      "Voice volume. Slider. Use the arrow keys."
+    ]
+  },
+  "guide.ctl.vMusic": {
+    "speaker": "guide",
+    "text": [
+      "Music volume. Slider. Use the arrow keys."
+    ]
+  },
+  "guide.ctl.vSfx": {
+    "speaker": "guide",
+    "text": [
+      "Effects volume. Slider. Use the arrow keys."
+    ]
+  },
+  "guide.ctl.ambience.off": {
+    "speaker": "guide",
+    "text": [
+      "Rain and room ambience. Checkbox, not checked. Press Space to turn it on."
+    ]
+  },
+  "guide.ctl.ambience.on": {
+    "speaker": "guide",
+    "text": [
+      "Rain and room ambience. Checkbox, checked. Press Space to turn it off."
+    ]
+  },
+  "guide.ctl.mono.off": {
+    "speaker": "guide",
+    "text": [
+      "Mono audio. Checkbox, not checked. Press Space to turn it on."
+    ]
+  },
+  "guide.ctl.mono.on": {
+    "speaker": "guide",
+    "text": [
+      "Mono audio. Checkbox, checked. Press Space to turn it off."
+    ]
+  },
+  "guide.ctl.captions.off": {
+    "speaker": "guide",
+    "text": [
+      "Captions on screen. Checkbox, not checked. Press Space to turn it on."
+    ]
+  },
+  "guide.ctl.captions.on": {
+    "speaker": "guide",
+    "text": [
+      "Captions on screen. Checkbox, checked. Press Space to turn it off."
+    ]
+  },
+  "guide.ctl.forget": {
+    "speaker": "guide",
+    "text": [
+      "Forget Marlow's memory. Button. Marlow forgets how your past runs went."
+    ]
+  },
+  "guide.ctl.listenBrief.play": {
+    "speaker": "guide",
+    "text": [
+      "Listen to the briefing. Button. Reads the story and the rules aloud."
+    ]
+  },
+  "guide.ctl.listenBrief.stop": {
+    "speaker": "guide",
+    "text": [
+      "Stop the briefing. Button. Stops the reading."
+    ]
+  },
+  "guide.ctl.case.builtin": {
+    "speaker": "guide",
+    "text": [
+      "The Purloined Ledger. The built-in story, with Owl, Marlow, Ines and the Hale Gallery. Press Enter to play it."
+    ]
+  },
+  "guide.ctl.genCase": {
+    "speaker": "guide",
+    "text": [
+      "Real case. Choose a real heist to write a new story from."
+    ]
+  },
+  "guide.ctl.genTheme": {
+    "speaker": "guide",
+    "text": [
+      "Or describe a heist in your own words, and type it here."
+    ]
+  },
+  "guide.ctl.genSubmit": {
+    "speaker": "guide",
+    "text": [
+      "Write the case. Button. Asks the A I to write a new mission, then checks it. It takes a few minutes."
+    ]
+  },
+  "guide.choice.go": {
+    "speaker": "guide",
+    "text": [
+      "Go to {room}. Button."
+    ]
+  },
+  "guide.choice.peek": {
+    "speaker": "guide",
+    "text": [
+      "Peek through {door}. Button."
+    ]
+  },
+  "guide.choice.take": {
+    "speaker": "guide",
+    "text": [
+      "Take {item}. Button."
+    ]
+  },
+  "guide.pick.door": {
+    "speaker": "guide",
+    "text": [
+      "{door}. Button."
+    ]
+  },
+  "guide.pick.room": {
+    "speaker": "guide",
+    "text": [
+      "{room}. Button."
+    ]
+  },
+  "guide.pick.item": {
+    "speaker": "guide",
+    "text": [
+      "{item}. Button."
+    ]
+  },
+  "guide.pick.prop": {
+    "speaker": "guide",
+    "text": [
+      "{prop}. Button."
+    ]
+  },
+  "guide.status.over": {
+    "speaker": "guide",
+    "text": [
+      "The run is over."
+    ]
+  },
+  "guide.status.pick": {
+    "speaker": "guide",
+    "text": [
+      "Marlow is waiting for your answer. Burn the tape, or send it?"
+    ]
+  },
+  "guide.end.won": {
+    "speaker": "guide",
+    "text": [
+      "Job done."
+    ]
+  },
+  "guide.end.alarm": {
+    "speaker": "guide",
+    "text": [
+      "Marlow was caught. The silent alarm ran out and the building sealed."
+    ]
+  },
+  "guide.end.chase": {
+    "speaker": "guide",
+    "text": [
+      "Marlow was caught. She stood still while the guard ran at her."
+    ]
+  },
+  "guide.end.alert": {
+    "speaker": "guide",
+    "text": [
+      "Marlow was caught. She was spotted too many times."
+    ]
+  },
+  "guide.end.burned": {
+    "speaker": "guide",
+    "text": [
+      "The tape was burned."
+    ]
+  },
+  "guide.end.sent": {
+    "speaker": "guide",
+    "text": [
+      "The tape was sent."
+    ]
+  },
+  "guide.mic.muted": {
+    "speaker": "guide",
+    "text": [
+      "Microphone muted."
+    ]
+  },
+  "guide.mic.live": {
+    "speaker": "guide",
+    "text": [
+      "Microphone listening."
+    ]
+  },
+  "guide.coop.ready": {
+    "speaker": "guide",
+    "text": [
+      "Seer link is on. Tell your friend this room code, and send them the link."
+    ]
+  },
+  "guide.roomcode": {
+    "speaker": "guide",
+    "text": [
+      "Your room code is"
+    ]
+  },
+  "guide.letter": {
+    "speaker": "guide",
+    "text": [
+      "{letter}."
+    ]
+  },
+  "guide.brief.start": {
+    "speaker": "guide",
+    "text": [
+      "The briefing."
+    ]
+  },
+  "guide.brief.job": {
+    "speaker": "guide",
+    "text": [
+      "The job. You are Owl, once the best fixer in the city. Three years ago, on the night of the Fenwick job, the lights went out and you lost your sight. All you remember is a sound: a heavy step, a drag, and keys. Marlow is your eyes: young, brave, the only one who still calls you boss. Your old partner Ines sends you both into the Hale Gallery for one ledger. She says: don't read it, it's only numbers."
+    ]
+  },
+  "guide.brief.how": {
+    "speaker": "guide",
+    "text": [
+      "How to play. Wear headphones. The whole picture is three D sound: you can hear which direction the guard is in. Speak an order, type it, or press a key in the playbook. Marlow tells you what she sees. You only know what she tells you, and what you hear."
+    ]
+  },
+  "guide.brief.goal": {
+    "speaker": "guide",
+    "text": [
+      "Your goal. Get {item} and bring it out through {room}, without being caught. Doors are noisy. The guard hears them and walks toward the sound. If he spots Marlow he runs at her, and you have exactly one turn to hide or leave the room."
+    ]
+  },
+  "guide.brief.alarm": {
+    "speaker": "guide",
+    "text": [
+      "The silent alarm. Taking the item sets it off. You have {count} moves to get out. Waiting for the guard to leave no longer works. Ask, how long do we have, at any time, to hear how many moves are left."
+    ]
+  },
+  "guide.brief.tape": {
+    "speaker": "guide",
+    "text": [
+      "The ending. If you win, Marlow plays you a tape she found. Say burn it, or send it."
+    ]
+  },
+  "guide.brief.say": {
+    "speaker": "guide",
+    "text": [
+      "Things to say. Listen. What do you see. Go to the hall. Peek the left door quietly. Hide. Take it. Go back. Exit. You can also ask Marlow questions, like who is the client, or where can I hide. Questions cost nothing: no move passes."
+    ]
+  },
+  "guide.brief.engine": {
+    "speaker": "guide",
+    "text": [
+      "One last thing. The game engine decides what happens. The A I only understands what you said."
+    ]
+  },
+  "guide.brief.cast": {
+    "speaker": "guide",
+    "text": [
+      "The players. Owl: the voice in her ear. That is you. Marlow: the eyes. Ines: the client, an old partner. Halloran: the night man. Hale: he owns the gallery, and the ledger."
+    ]
+  },
+  "guide.brief.end": {
+    "speaker": "guide",
+    "text": [
+      "That is the briefing. Press Tab to continue."
+    ]
   }
 }

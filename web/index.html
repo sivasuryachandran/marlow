@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="/src/style.css">
 </head>
 <body>
-<a class="skip" href="#tab-play">Skip to the game</a>
+<a class="skip" href="#tab-play">Skip to the game. Press G for the audio guide.</a>
 
 <header id="topbar" aria-label="Run status">
   <h1 class="sr-only">MARLOW, a heist you play by ear</h1>
@@ -21,6 +21,7 @@
   </div>
   <div class="cell"><small>MARLOW'S TRUST</small><span class="meter"><i id="hTrust" style="width:50%"></i></span><b id="hTrustN">50%</b></div>
   <button id="coopBtn" class="cell toggle" type="button" aria-pressed="false" aria-controls="coop" title="A friend sees the building while you listen">CO-OP: SEER LINK</button>
+  <button id="guideToggle" class="cell toggle" type="button" aria-pressed="false" aria-keyshortcuts="G" title="A voice reads each control aloud as you move to it. H for help on this screen.">AUDIO GUIDE [G]</button>
   <button id="audioOnly" class="cell toggle" type="button" aria-pressed="false" aria-keyshortcuts="O" title="Hide the visual panels and play by ear only">AUDIO ONLY [O]</button>
 </header>
 
@@ -128,6 +129,7 @@
 
 <!-- ============ BRIEFING ============ -->
 <section id="tab-brief" role="tabpanel" aria-labelledby="t-brief" hidden>
+  <p class="listen"><button id="listenBrief" class="primary" type="button" aria-pressed="false" aria-keyshortcuts="Escape">Listen to the briefing</button></p>
   <section id="cases" class="panel cases" aria-labelledby="casesH"><h2 id="casesH">Choose your case <small>the built-in story, or one written from a real heist</small></h2></section>
   <div class="brief-grid">
     <article class="paper" aria-labelledby="memoH">

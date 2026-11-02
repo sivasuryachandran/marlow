@@ -37,6 +37,12 @@ While Marlow is talking, **Skip** (or Escape) cuts her off, and a new order alwa
 
 **With no API keys** the game still runs: speech uses Chrome's built-in recognition and understanding uses a small offline parser (fewer phrasings). **With keys** (`cp .env.example .env`, fill `MODEL_API_KEY`, then `npm run server` in a second terminal and `npm run dev`) it uses Muse Voice Transcribe and Muse Spark for natural phrasing, and the mic listens hands-free (no button to hold).
 
+## Audio guide (for players who can't use the screen)
+
+Press **G** (or the AUDIO GUIDE button in the top bar) and a third voice, the guide, reads each control aloud as you Tab to it: what it is, what it does, its key, and its state (on/off, muted/listening). **H** gives help for the screen you are on (start, game, briefing, settings, end of run, the tape choice). **Escape** stops it. The Briefing tab has a **Listen to the briefing** button that reads the story and the rules aloud (it works with the guide off); for a generated case it reads that case's own briefing. Room codes for the Seer link are spoken letter by letter. The skip link announces the G key to screen-reader users.
+
+Same rule as the rest of the game: every guide sentence is a pre-rendered Kokoro voice line (`guide.*` in `data/lines.json`, voice `am_adam`), none is synthesized while you play. A test checks that every button, input and tab on the page has a guide line and an mp3. Not yet tested with a blind or low-vision player, and not tested alongside a screen reader (a screen reader may read the same control at the same time; the guide is off by default for that reason).
+
 ## Run it (developer commands)
 
 ```bash

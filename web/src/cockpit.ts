@@ -216,11 +216,11 @@ function renderCaseStats() {
 // ---------------- tactical chips ----------------
 function showChoices(act: string) {
   const s = deps.session().state, box = $("choices"); box.replaceChildren();
-  const add = (label: string, text: string) => { const b = document.createElement("button"); b.type = "button"; b.textContent = label; b.addEventListener("click", () => { box.replaceChildren(); deps.send(text); }); box.append(b); };
+  const add = (label: string, text: string, g?: [string, Record<string, string>]) => { const b = document.createElement("button"); b.type = "button"; b.textContent = label; if (g) { b.dataset.guide = g[0]; b.dataset.guideSlots = JSON.stringify(g[1]); } b.addEventListener("click", () => { box.replaceChildren(); deps.send(text); }); box.append(b); };
   const doors = s.doors.filter(d => d.between.includes(s.marlow.room) && s.knowledge.doors.includes(d.id));
-  if (act === "move") for (const d of doors) { const o = s.rooms.find(r => r.id === (d.between[0] === s.marlow.room ? d.between[1] : d.between[0]))!; if (!o.offstage) add(`Go to ${o.spokenName}`, `go to ${o.spokenName.replace(/^the /, "")}`); }
-  if (act === "peek") for (const d of doors) add(`Peek ${d.spokenName}`, `peek ${d.spokenName}`);
-  if (act === "take") for (const i of s.items.filter(i => i.room === s.marlow.room && s.knowledge.items.includes(i.id))) add(`Take ${i.spokenName}`, `take ${i.spokenName.replace(/^the /, "")}`);
+  if (act === "move") for (const d of doors) { const o = s.rooms.find(r => r.id === (d.between[0] === s.marlow.room ? d.between[1] : d.between[0]))!; if (!o.offstage) add(`Go to ${o.spokenName}`, `go to ${o.spokenName.replace(/^the /, "")}`, ["guide.choice.go", { room: o.spokenName }]); }
+  if (act === "peek") for (const d of doors) add(`Peek ${d.spokenName}`, `peek ${d.spokenName}`, ["guide.choice.peek", { door: d.spokenName }]);
+  if (act === "take") for (const i of s.items.filter(i => i.room === s.marlow.room && s.knowledge.items.includes(i.id))) add(`Take ${i.spokenName}`, `take ${i.spokenName.replace(/^the /, "")}`, ["guide.choice.take", { item: i.spokenName }]);
   if (!box.children.length) { const p = document.createElement("p"); p.className = "dim"; p.textContent = `Nothing to ${act} here that Marlow has told you about.`; box.append(p); }
 }
 function pressChip(act: string) {

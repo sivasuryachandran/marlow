@@ -3023,5 +3023,770 @@
   "audioKey": "marlow.alarm.none.c0",
   "text": "No alarm.",
   "speaker": "marlow"
+ },
+ {
+  "audioKey": "guide.on.v0",
+  "text": "Audio guide on. I will read each control as you move to it with the Tab key. Press H for help on this screen, and Escape to stop me. Press G to turn me off.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.off.v0",
+  "text": "Audio guide off. Press G to turn it back on.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.help.start.v0",
+  "text": "This is the start screen of Marlow, a heist you play by ear. You are Owl, a blind fixer. Marlow is your eyes inside a gallery. Put on headphones. Press Tab to reach the Start the job button, then press Enter. Open the Briefing tab to hear the whole story and the rules read aloud.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.help.play.v0",
+  "text": "You are in the game. Speak an order, or type it in the order box and press Enter. If the microphone is not always listening, hold Space to talk. Keys one to seven are quick actions. You can ask Marlow questions that cost nothing, like what do you see, or how long do we have. Press Escape to skip what she is saying, and O for audio only mode.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.help.brief.v0",
+  "text": "This is the Briefing tab. Press the Listen to the briefing button to hear the story and the rules. You can also choose a different case here, or write a new one from a real heist.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.help.case.v0",
+  "text": "This is the Case File tab. It shows how your run went, with pictures. The button makes a comic of your run, which takes about a minute and needs the game server.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.help.spec.v0",
+  "text": "This is the Spectator tab. It reveals where the guard really is. It is a spoiler for the player, meant for a sighted partner.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.help.set.v0",
+  "text": "This is the Settings tab. You can change the volume of the voices, music and effects, turn on rain ambience, mono audio and captions, or make Marlow forget your past runs.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.help.end.v0",
+  "text": "The run is over. Press Tab to find the Run it again button.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.help.pick.v0",
+  "text": "Marlow is waiting for your answer about the tape. Say burn it, or send it, or press Tab to reach the two buttons.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.skiplink.v0",
+  "text": "Skip to the game. Link. Press G at any time for the audio guide.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.start.v0",
+  "text": "Start the job. Button. Begins the heist. The browser will ask for the microphone.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.tab.play.v0",
+  "text": "Van Cockpit. Tab one of five. This is the game screen.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.tab.brief.v0",
+  "text": "Briefing. Tab two of five. The story and the rules, and the choice of case.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.tab.case.v0",
+  "text": "Case File. Tab three of five. How your run went.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.tab.spec.v0",
+  "text": "Spectator and debug. Tab four of five. A spoiler: it shows where the guard really is.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.tab.set.v0",
+  "text": "Settings. Tab five of five. Volume, ambience, captions and memory.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.audioOnly.off.v0",
+  "text": "Audio only. Toggle button, currently off. Press Enter to hide all visual panels and play by sound alone. Key O.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.audioOnly.on.v0",
+  "text": "Audio only. Toggle button, currently on. Press Enter to bring the visual panels back. Key O.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.guide.on.v0",
+  "text": "Audio guide. Toggle button, currently on. Press Enter or G to turn it off.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.guide.off.v0",
+  "text": "Audio guide. Toggle button, currently off. Press Enter or G to turn it on.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.coop.v0",
+  "text": "Co-op, Seer link. Button. Creates a room code, so a friend who can see can watch the whole map while you listen.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.coopLink.v0",
+  "text": "Seer link address. Read only text. Send this to your friend.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.coopCopy.v0",
+  "text": "Copy link. Button. Copies the address for your friend.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.coopStop.v0",
+  "text": "Stop sharing. Button. Closes the room.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.ptt.hold.v0",
+  "text": "Transmit. Button. Hold Space, or hold the button, and speak your order, then let go.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.ptt.live.v0",
+  "text": "Microphone is always listening. Button. Press Enter to mute it.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.ptt.muted.v0",
+  "text": "Microphone is muted. Button. Press Enter to listen again.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.ptt.unavailable.v0",
+  "text": "Voice input is not available in this browser. Type your orders in the order box instead.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.cmd.v0",
+  "text": "Order box. Type an order, such as go to the hall, then press Enter.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.skip.v0",
+  "text": "Skip the talking. Button. Key Escape. Stops what is being said.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.chip.move.v0",
+  "text": "Move. Key one. Then choose a room to go to.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.chip.peek.v0",
+  "text": "Peek. Key two. Then choose a door to look through.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.chip.listen.v0",
+  "text": "Listen. Key three. Marlow listens for the guard.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.chip.wait.v0",
+  "text": "Wait. Key four. Marlow holds still for one move.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.chip.hide.v0",
+  "text": "Hide. Key five. Marlow hides behind cover, if there is any.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.chip.take.v0",
+  "text": "Take. Key six. Then choose what to pick up.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.chip.exit.v0",
+  "text": "Exit. Key seven. Marlow leaves the building.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.burn.v0",
+  "text": "Burn it. Button. Marlow burns the tape.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.send.v0",
+  "text": "Send it. Button. Marlow sends the tape out.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.again.v0",
+  "text": "Run it again. Button. Starts a new run. Marlow remembers how this one went.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.openCase.v0",
+  "text": "Open the Case File. Button.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.casefile.v0",
+  "text": "Make the Case File. Button. Draws a comic of your run. It takes about a minute and needs the server.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.reveal.v0",
+  "text": "Show ground truth. Button. A spoiler: it shows where the guard really is.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.vVoice.v0",
+  "text": "Voice volume. Slider. Use the arrow keys.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.vMusic.v0",
+  "text": "Music volume. Slider. Use the arrow keys.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.vSfx.v0",
+  "text": "Effects volume. Slider. Use the arrow keys.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.ambience.off.v0",
+  "text": "Rain and room ambience. Checkbox, not checked. Press Space to turn it on.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.ambience.on.v0",
+  "text": "Rain and room ambience. Checkbox, checked. Press Space to turn it off.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.mono.off.v0",
+  "text": "Mono audio. Checkbox, not checked. Press Space to turn it on.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.mono.on.v0",
+  "text": "Mono audio. Checkbox, checked. Press Space to turn it off.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.captions.off.v0",
+  "text": "Captions on screen. Checkbox, not checked. Press Space to turn it on.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.captions.on.v0",
+  "text": "Captions on screen. Checkbox, checked. Press Space to turn it off.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.forget.v0",
+  "text": "Forget Marlow's memory. Button. Marlow forgets how your past runs went.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.listenBrief.play.v0",
+  "text": "Listen to the briefing. Button. Reads the story and the rules aloud.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.listenBrief.stop.v0",
+  "text": "Stop the briefing. Button. Stops the reading.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.case.builtin.v0",
+  "text": "The Purloined Ledger. The built-in story, with Owl, Marlow, Ines and the Hale Gallery. Press Enter to play it.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.genCase.v0",
+  "text": "Real case. Choose a real heist to write a new story from.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.genTheme.v0",
+  "text": "Or describe a heist in your own words, and type it here.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.ctl.genSubmit.v0",
+  "text": "Write the case. Button. Asks the A I to write a new mission, then checks it. It takes a few minutes.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.choice.go.v0.room=the_lobby",
+  "text": "Go to the lobby. Button.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.choice.go.v0.room=the_hall",
+  "text": "Go to the hall. Button.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.choice.go.v0.room=the_gallery",
+  "text": "Go to the gallery. Button.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.choice.go.v0.room=the_office",
+  "text": "Go to the office. Button.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.choice.go.v0.room=the_stairwell",
+  "text": "Go to the stairwell. Button.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.choice.peek.v0.door=the_lobby_door",
+  "text": "Peek through the lobby door. Button.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.choice.peek.v0.door=the_gallery_arch",
+  "text": "Peek through the gallery arch. Button.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.choice.peek.v0.door=the_office_door",
+  "text": "Peek through the office door. Button.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.choice.peek.v0.door=the_stairwell_door",
+  "text": "Peek through the stairwell door. Button.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.choice.take.v0.item=the_ledger",
+  "text": "Take the ledger. Button.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.pick.door.v0.door=the_lobby_door",
+  "text": "The lobby door. Button.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.pick.door.v0.door=the_gallery_arch",
+  "text": "The gallery arch. Button.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.pick.door.v0.door=the_office_door",
+  "text": "The office door. Button.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.pick.door.v0.door=the_stairwell_door",
+  "text": "The stairwell door. Button.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.pick.room.v0.room=the_lobby",
+  "text": "The lobby. Button.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.pick.room.v0.room=the_hall",
+  "text": "The hall. Button.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.pick.room.v0.room=the_gallery",
+  "text": "The gallery. Button.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.pick.room.v0.room=the_office",
+  "text": "The office. Button.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.pick.room.v0.room=the_stairwell",
+  "text": "The stairwell. Button.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.pick.item.v0.item=the_ledger",
+  "text": "The ledger. Button.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.pick.prop.v0.prop=the_display_case",
+  "text": "The display case. Button.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.pick.prop.v0.prop=the_desk",
+  "text": "The desk. Button.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.status.over.v0",
+  "text": "The run is over.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.status.pick.v0",
+  "text": "Marlow is waiting for your answer. Burn the tape, or send it?",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.end.won.v0",
+  "text": "Job done.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.end.alarm.v0",
+  "text": "Marlow was caught. The silent alarm ran out and the building sealed.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.end.chase.v0",
+  "text": "Marlow was caught. She stood still while the guard ran at her.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.end.alert.v0",
+  "text": "Marlow was caught. She was spotted too many times.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.end.burned.v0",
+  "text": "The tape was burned.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.end.sent.v0",
+  "text": "The tape was sent.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.mic.muted.v0",
+  "text": "Microphone muted.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.mic.live.v0",
+  "text": "Microphone listening.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.coop.ready.v0",
+  "text": "Seer link is on. Tell your friend this room code, and send them the link.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.roomcode.v0",
+  "text": "Your room code is",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.letter.v0.letter=A",
+  "text": "A.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.letter.v0.letter=B",
+  "text": "B.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.letter.v0.letter=C",
+  "text": "C.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.letter.v0.letter=D",
+  "text": "D.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.letter.v0.letter=E",
+  "text": "E.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.letter.v0.letter=F",
+  "text": "F.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.letter.v0.letter=G",
+  "text": "G.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.letter.v0.letter=H",
+  "text": "H.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.letter.v0.letter=I",
+  "text": "I.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.letter.v0.letter=J",
+  "text": "J.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.letter.v0.letter=K",
+  "text": "K.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.letter.v0.letter=L",
+  "text": "L.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.letter.v0.letter=M",
+  "text": "M.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.letter.v0.letter=N",
+  "text": "N.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.letter.v0.letter=O",
+  "text": "O.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.letter.v0.letter=P",
+  "text": "P.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.letter.v0.letter=Q",
+  "text": "Q.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.letter.v0.letter=R",
+  "text": "R.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.letter.v0.letter=S",
+  "text": "S.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.letter.v0.letter=T",
+  "text": "T.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.letter.v0.letter=U",
+  "text": "U.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.letter.v0.letter=V",
+  "text": "V.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.letter.v0.letter=W",
+  "text": "W.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.letter.v0.letter=X",
+  "text": "X.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.letter.v0.letter=Y",
+  "text": "Y.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.letter.v0.letter=Z",
+  "text": "Z.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.brief.start.v0",
+  "text": "The briefing.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.brief.job.v0",
+  "text": "The job. You are Owl, once the best fixer in the city. Three years ago, on the night of the Fenwick job, the lights went out and you lost your sight. All you remember is a sound: a heavy step, a drag, and keys. Marlow is your eyes: young, brave, the only one who still calls you boss. Your old partner Ines sends you both into the Hale Gallery for one ledger. She says: don't read it, it's only numbers.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.brief.how.v0",
+  "text": "How to play. Wear headphones. The whole picture is three D sound: you can hear which direction the guard is in. Speak an order, type it, or press a key in the playbook. Marlow tells you what she sees. You only know what she tells you, and what you hear.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.brief.goal.v0.item=the_ledger.room=the_lobby",
+  "text": "Your goal. Get the ledger and bring it out through the lobby, without being caught. Doors are noisy. The guard hears them and walks toward the sound. If he spots Marlow he runs at her, and you have exactly one turn to hide or leave the room.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.brief.goal.v0.item=the_ledger.room=the_hall",
+  "text": "Your goal. Get the ledger and bring it out through the hall, without being caught. Doors are noisy. The guard hears them and walks toward the sound. If he spots Marlow he runs at her, and you have exactly one turn to hide or leave the room.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.brief.goal.v0.item=the_ledger.room=the_gallery",
+  "text": "Your goal. Get the ledger and bring it out through the gallery, without being caught. Doors are noisy. The guard hears them and walks toward the sound. If he spots Marlow he runs at her, and you have exactly one turn to hide or leave the room.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.brief.goal.v0.item=the_ledger.room=the_office",
+  "text": "Your goal. Get the ledger and bring it out through the office, without being caught. Doors are noisy. The guard hears them and walks toward the sound. If he spots Marlow he runs at her, and you have exactly one turn to hide or leave the room.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.brief.goal.v0.item=the_ledger.room=the_stairwell",
+  "text": "Your goal. Get the ledger and bring it out through the stairwell, without being caught. Doors are noisy. The guard hears them and walks toward the sound. If he spots Marlow he runs at her, and you have exactly one turn to hide or leave the room.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.brief.alarm.v0.count=one",
+  "text": "The silent alarm. Taking the item sets it off. You have one moves to get out. Waiting for the guard to leave no longer works. Ask, how long do we have, at any time, to hear how many moves are left.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.brief.alarm.v0.count=two",
+  "text": "The silent alarm. Taking the item sets it off. You have two moves to get out. Waiting for the guard to leave no longer works. Ask, how long do we have, at any time, to hear how many moves are left.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.brief.alarm.v0.count=three",
+  "text": "The silent alarm. Taking the item sets it off. You have three moves to get out. Waiting for the guard to leave no longer works. Ask, how long do we have, at any time, to hear how many moves are left.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.brief.alarm.v0.count=four",
+  "text": "The silent alarm. Taking the item sets it off. You have four moves to get out. Waiting for the guard to leave no longer works. Ask, how long do we have, at any time, to hear how many moves are left.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.brief.alarm.v0.count=five",
+  "text": "The silent alarm. Taking the item sets it off. You have five moves to get out. Waiting for the guard to leave no longer works. Ask, how long do we have, at any time, to hear how many moves are left.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.brief.alarm.v0.count=six",
+  "text": "The silent alarm. Taking the item sets it off. You have six moves to get out. Waiting for the guard to leave no longer works. Ask, how long do we have, at any time, to hear how many moves are left.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.brief.alarm.v0.count=seven",
+  "text": "The silent alarm. Taking the item sets it off. You have seven moves to get out. Waiting for the guard to leave no longer works. Ask, how long do we have, at any time, to hear how many moves are left.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.brief.alarm.v0.count=eight",
+  "text": "The silent alarm. Taking the item sets it off. You have eight moves to get out. Waiting for the guard to leave no longer works. Ask, how long do we have, at any time, to hear how many moves are left.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.brief.alarm.v0.count=nine",
+  "text": "The silent alarm. Taking the item sets it off. You have nine moves to get out. Waiting for the guard to leave no longer works. Ask, how long do we have, at any time, to hear how many moves are left.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.brief.alarm.v0.count=ten",
+  "text": "The silent alarm. Taking the item sets it off. You have ten moves to get out. Waiting for the guard to leave no longer works. Ask, how long do we have, at any time, to hear how many moves are left.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.brief.alarm.v0.count=eleven",
+  "text": "The silent alarm. Taking the item sets it off. You have eleven moves to get out. Waiting for the guard to leave no longer works. Ask, how long do we have, at any time, to hear how many moves are left.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.brief.alarm.v0.count=twelve",
+  "text": "The silent alarm. Taking the item sets it off. You have twelve moves to get out. Waiting for the guard to leave no longer works. Ask, how long do we have, at any time, to hear how many moves are left.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.brief.alarm.v0.count=thirteen",
+  "text": "The silent alarm. Taking the item sets it off. You have thirteen moves to get out. Waiting for the guard to leave no longer works. Ask, how long do we have, at any time, to hear how many moves are left.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.brief.alarm.v0.count=fourteen",
+  "text": "The silent alarm. Taking the item sets it off. You have fourteen moves to get out. Waiting for the guard to leave no longer works. Ask, how long do we have, at any time, to hear how many moves are left.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.brief.alarm.v0.count=fifteen",
+  "text": "The silent alarm. Taking the item sets it off. You have fifteen moves to get out. Waiting for the guard to leave no longer works. Ask, how long do we have, at any time, to hear how many moves are left.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.brief.alarm.v0.count=sixteen",
+  "text": "The silent alarm. Taking the item sets it off. You have sixteen moves to get out. Waiting for the guard to leave no longer works. Ask, how long do we have, at any time, to hear how many moves are left.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.brief.alarm.v0.count=seventeen",
+  "text": "The silent alarm. Taking the item sets it off. You have seventeen moves to get out. Waiting for the guard to leave no longer works. Ask, how long do we have, at any time, to hear how many moves are left.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.brief.alarm.v0.count=eighteen",
+  "text": "The silent alarm. Taking the item sets it off. You have eighteen moves to get out. Waiting for the guard to leave no longer works. Ask, how long do we have, at any time, to hear how many moves are left.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.brief.alarm.v0.count=nineteen",
+  "text": "The silent alarm. Taking the item sets it off. You have nineteen moves to get out. Waiting for the guard to leave no longer works. Ask, how long do we have, at any time, to hear how many moves are left.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.brief.alarm.v0.count=twenty",
+  "text": "The silent alarm. Taking the item sets it off. You have twenty moves to get out. Waiting for the guard to leave no longer works. Ask, how long do we have, at any time, to hear how many moves are left.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.brief.tape.v0",
+  "text": "The ending. If you win, Marlow plays you a tape she found. Say burn it, or send it.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.brief.say.v0",
+  "text": "Things to say. Listen. What do you see. Go to the hall. Peek the left door quietly. Hide. Take it. Go back. Exit. You can also ask Marlow questions, like who is the client, or where can I hide. Questions cost nothing: no move passes.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.brief.engine.v0",
+  "text": "One last thing. The game engine decides what happens. The A I only understands what you said.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.brief.cast.v0",
+  "text": "The players. Owl: the voice in her ear. That is you. Marlow: the eyes. Ines: the client, an old partner. Halloran: the night man. Hale: he owns the gallery, and the ledger.",
+  "speaker": "guide"
+ },
+ {
+  "audioKey": "guide.brief.end.v0",
+  "text": "That is the briefing. Press Tab to continue.",
+  "speaker": "guide"
  }
 ]

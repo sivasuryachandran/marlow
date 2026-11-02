@@ -28,7 +28,7 @@ try { ({ KokoroTTS } = await import(/* @vite-ignore */ "kokoro-js" as string)); 
 catch { console.log("kokoro-js not installed. Run `npm i -D kokoro-js` locally (Apache-2.0), or record the voice bank using the manifest names. The game still plays: missing lines use a placeholder tone."); process.exit(0); }
 
 const tts = await KokoroTTS.from_pretrained("onnx-community/Kokoro-82M-v1.0-ONNX", { dtype: "q8" });
-const voices: Record<string, string> = { marlow: process.env.KOKORO_VOICE_MARLOW ?? "af_heart", client: process.env.KOKORO_VOICE_CLIENT ?? "bf_emma", system: "af_heart" };
+const voices: Record<string, string> = { marlow: process.env.KOKORO_VOICE_MARLOW ?? "af_heart", client: process.env.KOKORO_VOICE_CLIENT ?? "bf_emma", system: "af_heart", guide: process.env.KOKORO_VOICE_GUIDE ?? "am_adam" };
 let n = 0;
 for (const m of todo) {
   const audio = await tts.generate(m.text, { voice: voices[m.speaker] ?? "af_heart" });

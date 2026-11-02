@@ -1,5 +1,5 @@
 /** Template bank (L4). Every spoken fact is a template + engine-supplied slots. */
-export interface LineDef { speaker: "marlow" | "client" | "system"; text: string[]; curt?: string[] }
+export interface LineDef { speaker: "marlow" | "client" | "system" | "guide"; text: string[]; curt?: string[] }
 export type LineBank = Record<string, LineDef>;
 export interface LineRef { id: string; slots: Record<string, string> }
 export interface SpokenLine { id: string; variant: number; text: string; speaker: string; audioKey: string; curt: boolean }
@@ -56,7 +56,7 @@ export function slotDomains(level: { rooms: any[]; doors: any[]; props: any[]; i
   return {
     room: level.rooms.filter(r => !r.offstage).map(r => r.spokenName), door: level.doors.filter(d => d.kind !== "stairs").map(d => d.spokenName),
     item: level.items.map(i => i.spokenName), prop: level.props.map(p => p.spokenName),
-    dir: ["ahead", "behind", "left", "right"], dist: ["near", "mid", "far"], count: COUNT_WORDS.slice(1),
+    dir: ["ahead", "behind", "left", "right"], dist: ["near", "mid", "far"], count: COUNT_WORDS.slice(1), letter: "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""),
   };
 }
 

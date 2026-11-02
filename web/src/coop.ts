@@ -1,3 +1,4 @@
+import { guide } from "./guide";
 /** Host side of the Seer link: publishes a snapshot of the world after every turn to a room a friend can watch. */
 import type { Session, TurnOutput } from "@marlow/game";
 
@@ -44,7 +45,7 @@ export function initCoop() {
     if (!hosting) {
       hosting = true; code = newCode(); panel.hidden = false;
       $("coopBtn").setAttribute("aria-pressed", "true");
-      await showLinks(); connect(); $("coopCode").focus();
+      await showLinks(); connect(); $("coopCode").focus(); void guide.roomCode(code);
     } else panel.hidden = !panel.hidden;
   });
   $("coopCopy").addEventListener("click", async () => {

@@ -30,6 +30,8 @@ export interface MissionCase { id: string; title: string; inspiredBy: string; ye
 export interface Mission {
   id: string; title: string; tagline: string; inspiredBy: string; sources: string[];
   level: unknown; lines: LineBank; beats: Beat[]; lore: Record<string, [string, string][]>; loreTopics: [string, string][]; clientFirstName?: string;
+  /** Names for the briefing page and the audio guide. */
+  cast?: { client: string; guard: string; owner: string };
 }
 
 const str = { type: "string" } as const;
@@ -185,6 +187,11 @@ export function buildMission(spec: MissionSpec, kase: Pick<MissionCase, "id" | "
     "marlow.nudge.take": m("marlow", `It's right here, boss. Want me to take ${item}?`),
     "marlow.nudge.exit": m("marlow", `We have it. Back to ${the(start.name)} and out, boss.`),
   };
+  // the audio guide's briefing for this case, and the spoken line for its card in the case picker
+  const sent = (t: string) => t.trim().replace(/[.!?]+$/, "") + ".";
+  lines["guide.brief.job"] = m("guide", `The job. ${sent(spec.title)} ${sent(spec.tagline)} You are Owl, a blind fixer. Marlow is your eyes. Your client is ${sent(spec.clientName)} The place belongs to ${sent(spec.ownerName)}`);
+  lines["guide.brief.cast"] = m("guide", `The players. Owl: the voice in her ear. That is you. Marlow: the eyes. ${spec.clientName}: the client. ${spec.guardName}: the night guard. ${spec.ownerName}: owns the place.`);
+  lines["guide.card"] = m("guide", `${sent(spec.title)} ${sent(spec.tagline)} Press Enter to play it.`);
   for (const r of rooms.slice(1)) lines[`marlow.story.${r.id}`] = m("marlow", r.describe);
   // beats: the generic ones from the base game, plus this mission's story beats
   const keep = new Set(["callback_spotted", "callback_ignored", "callback_none", "alert_2_first", "low_trust", "extraction_caught"]);
@@ -223,7 +230,7 @@ export function buildMission(spec: MissionSpec, kase: Pick<MissionCase, "id" | "
   const bank = { ...base.lines, ...lines };
   const beatErrs = validateBeats(beats, bank, ["sfx.phone.ring", "music.calm", "sfx.radio.static", "music.tension.on", "music.tension.off"], parsed.data as unknown as Level);
   if (beatErrs.length) return { errors: beatErrs };
-  return { errors: [], mission: { id: `${kase.id}-${slug(spec.title)}`.slice(0, 48), clientFirstName: spec.clientName.split(" ")[0], title: spec.title, tagline: spec.tagline, inspiredBy: kase.inspiredBy, sources: kase.sources, level: parsed.data, lines, beats, lore, loreTopics } };
+  return { errors: [], mission: { id: `${kase.id}-${slug(spec.title)}`.slice(0, 48), clientFirstName: spec.clientName.split(" ")[0], title: spec.title, tagline: spec.tagline, inspiredBy: kase.inspiredBy, sources: kase.sources, level: parsed.data, lines, beats, lore, loreTopics, cast: { client: spec.clientName, guard: spec.guardName, owner: spec.ownerName } } };
 }
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
