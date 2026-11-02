@@ -410,3 +410,37 @@ describe("determinism", () => {
     }
   });
 });
+
+
+describe("silent alarm", () => {
+  const withAlarm = (n: number, extra?: (s: WorldState) => void) => mk(1, s => { at(s, "office"); s.objective.alarmTurns = n; s.guard.step = 0; extra?.(s); });
+  const take = { action: "take", target: "ledger" } as Action;
+  it("taking the objective starts the countdown; nothing else does", () => {
+    const r = step(withAlarm(5), take);
+    expect(r.state.alarm).toBe(5);
+    expect(r.events).toContainEqual({ type: "alarm_started", turns: 5, perceived: true });
+    expect(step(mk(1, s => { at(s, "office"); delete s.objective.alarmTurns; }), take).state.alarm).toBeNull(); // a level without alarmTurns has no alarm
+  });
+  it("ticks once per turn after the take, and reaching zero means caught (reason alarm)", () => {
+    let s = step(withAlarm(3), take).state;
+    const left: number[] = [];
+    for (let i = 0; i < 6 && s.status === "playing"; i++) {
+      const r = step(s, { action: "wait" }); s = r.state;
+      for (const e of r.events) if (e.type === "alarm_tick") left.push(e.left);
+    }
+    expect(left).toEqual([2, 1]);
+    expect(s.status).toBe("caught");
+    expect(s.alarm).toBe(0);
+  });
+  it("leaving before it ends wins; the exit order is not too late on the last tick", () => {
+    let s = step(withAlarm(4, st => { st.marlow.room = "office"; }), take).state;
+    s = step(s, { action: "move", target: "hall", stance: "quiet" }).state;
+    s = step(s, { action: "move", target: "lobby", stance: "quiet" }).state;
+    expect(s.alarm).toBe(2);
+    expect(step(s, { action: "exit" }).state.status).toBe("won");
+  });
+  it("is deterministic: the same orders give identical events", () => {
+    const run = () => { let s = withAlarm(4); const out: unknown[] = []; for (const a of [take, { action: "wait" }, { action: "wait" }, { action: "wait" }] as Action[]) { if (s.status !== "playing") break; const r = step(s, a); s = r.state; out.push(r.events); } return JSON.stringify(out); };
+    expect(run()).toBe(run());
+  });
+});

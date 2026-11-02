@@ -58,7 +58,9 @@ export function narrate(prev: WorldState, next: WorldState, events: GameEvent[])
       case "item_taken": out.push({ id: "marlow.take", slots: { item: nameOf(next, e.item) } }); break;
       case "sound_heard": out.push({ id: `marlow.sound.${e.sound}`, slots: { dir: e.dir, dist: e.dist } }); break;
       case "spotted": out.push({ id: "marlow.spotted", slots: {} }); break;
-      case "caught": out.push({ id: e.reason === "chase" ? "marlow.chase.caught" : "marlow.caught", slots: {} }); break;
+      case "caught": out.push({ id: e.reason === "chase" ? "marlow.chase.caught" : e.reason === "alarm" ? "marlow.alarm.caught" : "marlow.caught", slots: {} }); break;
+      case "alarm_started": out.push({ id: "marlow.alarm.start", slots: {} }); break;
+      case "alarm_tick": if (e.left === Math.ceil(e.total / 2)) out.push({ id: "marlow.alarm.half", slots: {} }); else if (e.left === 1) out.push({ id: "marlow.alarm.last", slots: {} }); else if (e.left === 3) out.push({ id: "marlow.alarm.late", slots: {} }); break;
       case "guard_alerted": out.push({ id: "marlow.guard.alerted", slots: { dir: e.dir } }); break;
       case "chase_started": out.push({ id: "marlow.chase", slots: {} }); break;
       case "chase_escaped": out.push({ id: "marlow.chase.escaped", slots: {} }); break;
@@ -75,6 +77,8 @@ export function narrate(prev: WorldState, next: WorldState, events: GameEvent[])
 export interface Cue {
   id: string; kind: "world" | "sfx" | "music"; priority: number;
   dir?: Dir; fromDir?: Dir; dist?: Dist; occluded?: boolean; reverb: string; caption: string;
+  /** 0..1 intensity for cues that build (the silent alarm gets higher and faster as time runs out). */
+  level?: number;
 }
 
 const spokenDir = (d: Dir) => (d === "here" ? "here" : d);
@@ -105,6 +109,8 @@ export function cuesFor(prev: WorldState, next: WorldState, events: GameEvent[])
         guardCue(e); break;
       case "sound_heard": cues.push({ id: "sfx.phone.ring", kind: "world", priority: 3, dir: e.dir, dist: e.dist, reverb, caption: `Phone ringing, ${spokenDir(e.dir)}, ${e.dist}` }); break;
       case "guard_alerted": cues.push({ id: "sfx.guard.alert", kind: "world", priority: 5, dir: e.dir, dist: e.dist, reverb, caption: `He heard that: his footsteps turn toward you, ${spokenDir(e.dir)}` }); break;
+      case "alarm_started": cues.push({ id: "sfx.alarm", kind: "sfx", priority: 6, reverb, level: 0.1, caption: "Silent alarm: a red warning pulse begins" }, { id: "music.tension.on", kind: "music", priority: 2, reverb, caption: "Music: tension rises" }); break;
+      case "alarm_tick": cues.push({ id: "sfx.alarm", kind: "sfx", priority: 4, reverb, level: Math.min(1, 1 - e.left / e.total), caption: e.left === 1 ? "Alarm: last pulse, fast and high" : `Alarm pulses faster (${e.left} moves left)` }); break;
       case "chase_started": cues.push({ id: "sfx.chase", kind: "sfx", priority: 7, reverb, caption: "Chase: the guard is running at Marlow" }); break;
       case "spotted": cues.push({ id: "sfx.stinger.spotted", kind: "sfx", priority: 6, reverb, caption: "Alarm stinger: Marlow has been spotted" }); break;
     }

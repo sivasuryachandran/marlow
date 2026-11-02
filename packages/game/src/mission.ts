@@ -60,6 +60,9 @@ const bare = (n: string) => n.replace(/^(the|an?) /i, "");
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z]+/g, "_").replace(/^_|_$/g, "").slice(0, 20) || "x";
 const words = (s: string): string[] => s.toLowerCase().match(/[a-z']+/g) ?? [];
 
+/** Silent alarm length: about three times the shortest way out (moves plus the exit order), so quiet decisive play wins and hiding forever does not. */
+export const alarmTurnsFor = (probe: WorldState, itemRoom: string, exit: string) => ((path(probe, itemRoom, exit)?.length ?? 3) - 1 + 1) * 3 + 1;
+
 /** Structural checks on the spec itself, before building. */
 export function checkSpec(spec: MissionSpec): string[] {
   const e: string[] = [], ids = new Set<string>(), cells = new Set<string>();
@@ -138,7 +141,7 @@ export function buildMission(spec: MissionSpec, kase: Pick<MissionCase, "id" | "
     rooms: levelRooms, doors, props,
     items: [{ id: itemId, room: itemRoom, spokenName: the(spec.item.name), aliases: spec.item.aliases.map(a => bare(a).toLowerCase()) }],
     guard: { id: "g1", route: route.slice(0, 30), step: 0, startWindow: 1 },
-    start: { room: start.id, facing: "north" }, objective: { item: itemId, exitRoom: start.id }, scheduled: [],
+    start: { room: start.id, facing: "north" }, objective: { item: itemId, exitRoom: start.id, alarmTurns: alarmTurnsFor(probe, itemRoom, start.id) }, scheduled: [],
   };
   const parsed = Level.safeParse(level);
   if (!parsed.success) return { errors: [`level does not parse: ${parsed.error.issues.slice(0, 3).map(i => i.path.join(".") + " " + i.message).join("; ")}`] };

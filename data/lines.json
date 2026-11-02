@@ -810,5 +810,55 @@
     "text": [
       "I'm Marlow, boss. Your eyes."
     ]
+  },
+  "marlow.alarm.start": {
+    "speaker": "marlow",
+    "text": [
+      "Silent alarm, boss! A red light just blinked on. The doors will seal soon. Get me out!",
+      "That tripped something. A silent alarm. We don't have long!"
+    ],
+    "curt": [
+      "Alarm! Get me out!"
+    ]
+  },
+  "marlow.alarm.half": {
+    "speaker": "marlow",
+    "text": [
+      "Half our time's gone, boss. Pulses are getting faster.",
+      "The alarm's quickening. We need to move."
+    ],
+    "curt": [
+      "Half the time gone."
+    ]
+  },
+  "marlow.alarm.late": {
+    "speaker": "marlow",
+    "text": [
+      "Three moves left, boss. Maybe less.",
+      "The pulse is nearly constant now, boss."
+    ],
+    "curt": [
+      "Three left!"
+    ]
+  },
+  "marlow.alarm.last": {
+    "speaker": "marlow",
+    "text": [
+      "Last chance, boss! Get me out now!",
+      "The doors are closing! One move!"
+    ],
+    "curt": [
+      "One move!"
+    ]
+  },
+  "marlow.alarm.caught": {
+    "speaker": "marlow",
+    "text": [
+      "The doors sealed. They have us, boss. I'm sorry.",
+      "Too slow. The building locked down around me."
+    ],
+    "curt": [
+      "Sealed in."
+    ]
   }
 }

@@ -72,7 +72,7 @@ function advanceGuard(s: WorldState) {
 }
 
 /** Bump when a rule changes behaviour, so logs recorded under older rules are reported stale instead of as nondeterminism. */
-export const RULES_VERSION = 4;
+export const RULES_VERSION = 5;
 
 export function step(prev: WorldState, action: Action, rngIn?: Rng): StepResult {
   const v = validate(prev, action);
@@ -86,6 +86,7 @@ export function step(prev: WorldState, action: Action, rngIn?: Rng): StepResult 
   const chasing = s.chase;
   s.memory.warned = false;
   let guardSteps = 1;
+  let alarmStartedNow = false;
 
   const addTrust = (delta: number, reason: string, loss?: string) => {
     s.trust = clamp(s.trust + delta);
@@ -172,7 +173,11 @@ export function step(prev: WorldState, action: Action, rngIn?: Rng): StepResult 
       item.room = null;
       s.marlow.carrying = item.id;
       ev.push({ type: "item_taken", item: item.id, perceived: true });
-      if (item.id === s.objective.item) addTrust(5, "ledger_taken");
+      if (item.id === s.objective.item) {
+        addTrust(5, "ledger_taken");
+        // Silent alarm: taking the objective starts a countdown. Reach the exit and leave before it hits zero.
+        if (s.objective.alarmTurns && s.alarm === null) { s.alarm = s.objective.alarmTurns; alarmStartedNow = true; ev.push({ type: "alarm_started", turns: s.alarm, perceived: true }); }
+      }
       break;
     }
     case "exit": {
@@ -216,6 +221,13 @@ export function step(prev: WorldState, action: Action, rngIn?: Rng): StepResult 
   }
 
   s.turn += 1;
+
+  // The silent alarm ticks once per turn after the one it started on. At zero the building seals: caught.
+  if (s.status === "playing" && s.alarm !== null && !alarmStartedNow) {
+    s.alarm -= 1;
+    if (s.alarm <= 0) { s.status = "caught"; ev.push({ type: "caught", reason: "alarm", perceived: true }); }
+    else ev.push({ type: "alarm_tick", left: s.alarm, total: s.objective.alarmTurns!, perceived: true });
+  }
 
   if (s.status === "playing") {
     // Scheduled world events: pre-declared sounds only, perceived within 2 hops.

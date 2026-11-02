@@ -48,7 +48,9 @@ export const WorldState = z.object({
   alert: z.number().int(), chase: z.boolean().default(false), trust: z.number(), status: z.enum(["playing", "won", "caught"]),
   rooms: z.array(Room), doors: z.array(Door), props: z.array(Prop), items: z.array(Item),
   guard: Guard, marlow: Marlow, knowledge: Knowledge,
-  objective: z.object({ item: z.string(), exitRoom: z.string() }),
+  objective: z.object({ item: z.string(), exitRoom: z.string(), alarmTurns: z.number().int().min(2).optional() }),
+  /** Silent alarm: turns left to get out once the objective item is taken (null = not running). Reaching 0 means caught. */
+  alarm: z.number().int().nullable().default(null),
   scheduled: z.array(ScheduledEvent),
   memory: z.object({ lastTrustLoss: z.string().nullable(), warned: z.boolean(), danger: z.array(z.string()).default([]) }),
 });
@@ -58,7 +60,7 @@ export type WorldState = z.infer<typeof WorldState>;
 export const Level = z.object({
   rooms: z.array(Room), doors: z.array(Door), props: z.array(Prop), items: z.array(Item),
   guard: Guard.omit({ step: true }), start: z.object({ room: z.string(), facing: Compass }),
-  objective: z.object({ item: z.string(), exitRoom: z.string() }),
+  objective: z.object({ item: z.string(), exitRoom: z.string(), alarmTurns: z.number().int().min(2).optional() }),
   scheduled: z.array(ScheduledEvent).default([]),
 });
 export type Level = z.infer<typeof Level>;
@@ -102,7 +104,9 @@ export type GameEvent = { perceived: boolean } & (
   | { type: "alert_changed"; alert: number }
   | { type: "trust_changed"; delta: number; reason: string }
   | { type: "spotted" }
-  | { type: "caught"; reason?: "alert" | "chase" }
+  | { type: "caught"; reason?: "alert" | "chase" | "alarm" }
+  | { type: "alarm_started"; turns: number; perceived: true }
+  | { type: "alarm_tick"; left: number; total: number; perceived: true }
   | { type: "chase_started" }
   | { type: "chase_escaped" }
   | { type: "won"; alert: number }

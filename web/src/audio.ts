@@ -141,7 +141,7 @@ export class AudioEngine {
   }
 
   /** Placeholder synth for every cue id; a real file at /audio/sfx/<id>.wav replaces it. Returns duration in seconds. */
-  private synth(id: string, dest: AudioNode, t: number, limp = false): number {
+  private synth(id: string, dest: AudioNode, t: number, limp = false, level = 0): number {
     const mat = id.startsWith("sfx.footsteps.") ? id.split(".")[2] : "";
     if (mat) {
       if (limp) { // Halloran: a heavy step, then the other foot dragging, over and over
@@ -168,6 +168,12 @@ export class AudioEngine {
         o.connect(f); f.connect(g); g.connect(dest); o.start(t + 0.05); lfo.start(t + 0.05); o.stop(t + 1.3); lfo.stop(t + 1.3);
         this.burst(dest, t + 0.1, { freq: 1400, q: 0.6, dur: 1.0, gain: 0.05 });
         return 1.3;
+      }
+      case "sfx.alarm": {
+        // Silent alarm: two-tone pulses that get higher, louder and faster as time runs out (level 0..1).
+        const pulses = 2 + Math.round(level * 4), gap = 0.42 - 0.26 * level, f = 520 + 620 * level, gain = 0.07 + 0.1 * level;
+        for (let i = 0; i < pulses; i++) { this.tone(dest, t + i * gap, f, gap * 0.45, gain, "square"); this.tone(dest, t + i * gap + gap * 0.45, f * 0.75, gap * 0.3, gain * 0.8, "square"); }
+        return pulses * gap;
       }
       case "sfx.phone.ring":
         for (let i = 0; i < 3; i++) { this.tone(dest, t + i * 0.9, 440, 0.4, 0.1); this.tone(dest, t + i * 0.9, 480, 0.4, 0.1); }
@@ -337,7 +343,7 @@ export class AudioEngine {
     dry.connect(this.sfxGain); wet.connect(this.reverbs[cue.reverb] ?? this.reverbs.marble);
     const buf = await this.asset(`/audio/sfx/${cue.id}.wav`);
     if (buf) { const s = c.createBufferSource(); s.buffer = buf; s.connect(out); s.start(t); return buf.duration; }
-    return this.synth(cue.id, out, t, cue.kind === "world" && cue.id.startsWith("sfx.footsteps.")); // the guard limps; Marlow's own steps are even
+    return this.synth(cue.id, out, t, cue.kind === "world" && cue.id.startsWith("sfx.footsteps."), cue.level ?? 0); // the guard limps; Marlow's own steps are even
   }
   private setPos(p: PannerNode, x: number, z: number, t: number) {
     p.positionX.setValueAtTime(x, t); p.positionY.setValueAtTime(0, t); p.positionZ.setValueAtTime(z, t);

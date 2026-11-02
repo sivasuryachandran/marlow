@@ -2633,5 +2633,80 @@
   "audioKey": "marlow.lore.marlow.0.v0",
   "text": "I'm Marlow, boss. Your eyes.",
   "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.start.v0",
+  "text": "Silent alarm, boss! A red light just blinked on. The doors will seal soon. Get me out!",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.start.v1",
+  "text": "That tripped something. A silent alarm. We don't have long!",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.start.c0",
+  "text": "Alarm! Get me out!",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.half.v0",
+  "text": "Half our time's gone, boss. Pulses are getting faster.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.half.v1",
+  "text": "The alarm's quickening. We need to move.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.half.c0",
+  "text": "Half the time gone.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.late.v0",
+  "text": "Three moves left, boss. Maybe less.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.late.v1",
+  "text": "The pulse is nearly constant now, boss.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.late.c0",
+  "text": "Three left!",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.last.v0",
+  "text": "Last chance, boss! Get me out now!",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.last.v1",
+  "text": "The doors are closing! One move!",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.last.c0",
+  "text": "One move!",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.caught.v0",
+  "text": "The doors sealed. They have us, boss. I'm sorry.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.caught.v1",
+  "text": "Too slow. The building locked down around me.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.caught.c0",
+  "text": "Sealed in.",
+  "speaker": "marlow"
  }
 ]

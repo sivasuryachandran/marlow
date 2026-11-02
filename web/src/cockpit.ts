@@ -147,6 +147,8 @@ function renderHeader() {
   $("hTrust").style.width = `${Math.round(s.trust)}%`; $("hTrustN").textContent = `${Math.round(s.trust)}%`;
   const l = deps.latencyP50(); $("hLatency").textContent = l == null ? "—" : `${Math.round(l)} ms p50`;
   peakAlert = Math.max(peakAlert, s.alert);
+  const al = $("alarmCell"); al.hidden = s.alarm === null || s.status !== "playing";
+  if (s.alarm !== null) { $("alarmLeft").textContent = `${s.alarm} moves left`; al.classList.toggle("hot", s.alarm <= 3); }
 }
 function renderSonarNote() {
   const now = deps.session().state.turn, live = pips.filter(p => now - p.turn <= 3);

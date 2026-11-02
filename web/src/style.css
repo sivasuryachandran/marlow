@@ -44,6 +44,9 @@ small{color:var(--dim);font-weight:400}
 .toggle{font-family:var(--type)}
 .toggle[aria-pressed="true"]{background:linear-gradient(#b83a3b,var(--oxblood));color:#fff;border-color:#d9a0a0}
 
+.cell.alarm{border-color:#e05a4f;background:linear-gradient(#3a1613,#220e0c)}.cell.alarm small{color:#ff9d92}.cell.alarm.hot{animation:alarmflash .6s steps(2) infinite}
+@keyframes alarmflash{50%{background:#7a1f1a}}
+
 /* ---------- tabs: ticket stubs ---------- */
 nav[aria-label="Sections"]{border-bottom:1px solid var(--line);background:#0b0907}
 #tabs{display:flex;gap:.45rem;flex-wrap:wrap;padding:.7rem .8rem .55rem;max-width:1500px;margin:0 auto}

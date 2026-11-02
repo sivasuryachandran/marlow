@@ -237,7 +237,8 @@
   },
   "objective": {
     "item": "ledger",
-    "exitRoom": "lobby"
+    "exitRoom": "lobby",
+    "alarmTurns": 10
   },
   "scheduled": [
     {

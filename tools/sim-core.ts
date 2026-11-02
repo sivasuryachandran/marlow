@@ -22,7 +22,7 @@ function objectiveAction(s: WorldState): Action | { move: string } {
 }
 const mv = (t: string): Action => ({ action: "move", target: t });
 
-const policies: Record<string, (s: WorldState, m: Mem) => Action> = {
+export const policies: Record<string, (s: WorldState, m: Mem) => Action> = {
   /** The earlier cautious player: listens and waits, but never takes cover on a warning. */
   "cautious-no-cover"(s, m) { const w = m.warnedAtTurn; m.warnedAtTurn = null; const a = policies.cautious(s, m); m.warnedAtTurn = w; return a; },
   reckless(s) {
@@ -41,6 +41,8 @@ const policies: Record<string, (s: WorldState, m: Mem) => Action> = {
     if (s.chase) { if (cover) return { action: "hide" }; const to = "move" in a && exits().includes(a.move) ? a.move : exits()[0]; return { action: "move", target: to, stance: "quiet" }; }
     if (!("move" in a)) return a;
     const quiet = (t: string): Action => ({ action: "move", target: t, stance: "quiet" });
+    // The silent alarm is running and time is short: a thoughtful player stops waiting and goes, quietly, accepting the risk.
+    if (s.alarm !== null && s.alarm <= remaining(s) + 2) return quiet(a.move);
     if (m.warnedAtTurn === s.turn) {
       if (cover) return { action: "hide" };
       const away = exits().filter(r => locate(s, r).dir !== m.heardDir);
@@ -51,6 +53,17 @@ const policies: Record<string, (s: WorldState, m: Mem) => Action> = {
       if (m.heardDist !== "near" && locate(s, a.move).dir !== m.heardDir) return quiet(a.move);
       return cover ? { action: "hide" } : { action: "wait" };
     }
+    return { action: "listen" };
+  },
+  /**
+   * waiter: the most timid player. Listens; moves only after a silent listen; whenever it is unsure (anything heard, any
+   * warning) it simply waits. It never hides on a warning and ignores the alarm: it shows what pure waiting is worth.
+   */
+  waiter(s, m) {
+    const a = objectiveAction(s);
+    if (s.chase) { const exits = neighbors(s, s.marlow.room).filter(r => !s.rooms.find(x => x.id === r)?.offstage); return { action: "move", target: "move" in a && exits.includes(a.move) ? a.move : exits[0], stance: "quiet" }; }
+    if (!("move" in a)) return a;
+    if (m.silentAtTurn === s.turn) return m.silent && m.warnedAtTurn !== s.turn ? { action: "move", target: a.move, stance: "quiet" } : { action: "wait" };
     return { action: "listen" };
   },
   cautious(s, m) {
