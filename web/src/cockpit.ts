@@ -2,6 +2,7 @@
 import type { Session, TurnOutput } from "@marlow/game";
 import type { Dir, Dist, GameEvent } from "@marlow/shared";
 import type { AudioEngine } from "./audio";
+import { FloorPlan } from "./floorplan";
 
 export interface CockpitDeps { send(text: string): void; session(): Session; audio: AudioEngine; latencyP50(): number | null; onReveal(): void }
 
@@ -11,6 +12,7 @@ const AZ: Record<string, number> = { ahead: 0, right: 90, behind: 180, left: 270
 const R: Record<Dist, number> = { near: 0.33, mid: 0.62, far: 0.9 };
 
 let deps: CockpitDeps;
+let playerPlan: FloorPlan | null = null;
 let pips: Pip[] = [];
 let peakAlert = 0;
 let revealed = false;
@@ -207,8 +209,17 @@ export function initCockpit(d: CockpitDeps) {
 export function onTurn(out: TurnOutput) {
   collect(out.events, out.state.turn);
   renderHeader(); renderTopology(); renderSonarNote(); renderClarify(out); renderLastTx(out); storyArt(out);
+  renderPlayerMap(out);
   document.querySelectorAll("#chips button").forEach(b => b.classList.remove("on")); $("choices").replaceChildren();
 }
-export function resetRun() { pips = []; peakAlert = 0; seen = []; if (document.getElementById("casePanels")) renderPanels(); $("story").hidden = true; }
+/** The solo player's map: only rooms Marlow has seen, growing as she explores. Never the guard. */
+function renderPlayerMap(out: TurnOutput) {
+  const c = document.getElementById("playerMap") as HTMLCanvasElement | null; if (!c) return;
+  playerPlan ??= new FloorPlan(c, "player");
+  playerPlan.update(out.state, out.events);
+  const s = out.state, name = (id: string) => s.rooms.find(r => r.id === id)?.spokenName.replace(/^the /, "") ?? id;
+  c.setAttribute("aria-label", `Map of what Marlow has seen: ${s.knowledge.rooms.filter(r => !s.rooms.find(x => x.id === r)?.offstage).map(name).join(", ")}. Marlow is in the ${name(s.marlow.room)}.`);
+}
+export function resetRun() { playerPlan?.reset(); pips = []; peakAlert = 0; seen = []; if (document.getElementById("casePanels")) renderPanels(); $("story").hidden = true; }
 export function setMic(text: string, live: boolean) { $("micState").textContent = text; $("ptt").classList.toggle("live", live); }
 export function micLevel(rms: number) { ($("micLevel") as HTMLElement).style.width = `${Math.min(100, Math.round(rms * 900))}%`; }

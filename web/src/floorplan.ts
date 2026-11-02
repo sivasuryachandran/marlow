@@ -25,8 +25,11 @@ export class FloorPlan {
   private guard?: Mover;
   private ripples: Ripple[] = [];
   private lastRooms = { marlow: "", guard: "" };
+  private view: { x: number; y: number; w: number; h: number } = { x: 0, y: 0, w: 0, h: 0 };
+  private dpr = 1;
 
-  constructor(private canvas: HTMLCanvasElement) {
+  /** "truth": everything, for the seer and the Spectator tab. "player": only what Marlow has seen, growing as she explores. */
+  constructor(private canvas: HTMLCanvasElement, private mode: "truth" | "player" = "truth") {
     this.g = canvas.getContext("2d")!;
     for (const t of TEXTURES) {
       const img = new Image(); img.src = `/art/ui/${t}.jpg`;
@@ -38,13 +41,9 @@ export class FloorPlan {
 
   /** Feed the latest state (and the events of the turn that produced it). */
   update(s: WorldState, events: GameEvent[] = []) {
-    if (!this.plan) {
-      this.plan = planLayout(s);
-      const dpr = Math.min(2, window.devicePixelRatio || 1);
-      this.canvas.width = this.plan.width * dpr; this.canvas.height = this.plan.height * dpr;
-      this.canvas.style.aspectRatio = `${this.plan.width} / ${this.plan.height}`;
-      this.g.setTransform(dpr, 0, 0, dpr, 0, 0);
-    }
+    if (!this.plan) { this.plan = planLayout(s); this.dpr = Math.min(2, window.devicePixelRatio || 1); }
+    this.s = s;
+    this.fit();
     this.s = s;
     const now = performance.now(), p = this.plan;
     const hideSpot = s.marlow.hidden ? p.props.find(x => x.room === s.marlow.room && x.hide) : undefined;
@@ -55,6 +54,33 @@ export class FloorPlan {
     this.lastRooms = { marlow: s.marlow.room, guard: gr };
     for (const e of events) this.rippleFor(e, now);
   }
+
+  /** Forget the previous run (a new run starts with an empty map). */
+  reset() { this.plan = undefined; this.marlow = undefined; this.guard = undefined; this.ripples = []; this.lastRooms = { marlow: "", guard: "" }; this.view = { x: 0, y: 0, w: 0, h: 0 }; }
+
+  /** Rooms the picture may show. Truth mode: all of them. Player mode: only those Marlow has seen, never the guard's post. */
+  private shown(): PlanRoom[] {
+    const p = this.plan!, s = this.s!;
+    return this.mode === "truth" ? p.rooms : p.rooms.filter(r => !r.offstage && s.knowledge.rooms.includes(r.id));
+  }
+  /** Size the canvas to the picture: the whole plan, or (player) just the explored rooms plus the street. */
+  private fit() {
+    const p = this.plan!, rs = this.shown();
+    let v = { x: 0, y: 0, w: p.width, h: p.height };
+    if (this.mode === "player" && rs.length) {
+      const x0 = Math.min(...rs.map(r => r.x)) - 40, y0 = Math.min(...rs.map(r => r.y)) - 40, x1 = Math.max(...rs.map(r => r.x + r.w)) + 40;
+      const exitRoom = rs.find(r => Math.abs(p.exit.x - (r.x + r.w / 2)) < 1 && p.exit.y > r.y + r.h);
+      const y1 = Math.max(...rs.map(r => r.y + r.h)) + (exitRoom ? p.street.h : 40);
+      v = { x: x0, y: y0, w: Math.max(420, x1 - x0), h: Math.max(300, y1 - y0) };
+    }
+    if (v.w !== this.view.w || v.h !== this.view.h || v.x !== this.view.x || v.y !== this.view.y) {
+      this.view = v;
+      this.canvas.width = Math.round(v.w * this.dpr); this.canvas.height = Math.round(v.h * this.dpr);
+      this.canvas.style.aspectRatio = `${v.w} / ${v.h}`;
+    }
+  }
+  /** A door is shown to the player only if Marlow knows it; the truth view shows all. */
+  private doorShown(id: string): boolean { return this.mode === "truth" || this.s!.knowledge.doors.includes(id); }
 
   // ---------- motion ----------
   private doorBetween(a: string, b: string) { return this.plan!.doors.find(d => d.between.includes(a) && d.between.includes(b)); }
@@ -78,6 +104,7 @@ export class FloorPlan {
   }
 
   private rippleFor(e: GameEvent, now: number) {
+    if (this.mode === "player" && !e.perceived) return;
     const p = this.plan!, s = this.s!, m = this.marlow?.at;
     if (e.type === "door_noise") { const d = p.doors.find(x => x.id === e.door); if (d) this.ripples.push({ x: d.x, y: d.y, t0: now, color: "240,180,90", label: "creak" }); }
     else if (e.type === "guard_alerted" && m) this.ripples.push({ ...m, t0: now, color: "240,180,90", label: "he heard that" });
@@ -91,25 +118,38 @@ export class FloorPlan {
 
   // ---------- drawing ----------
   private draw(now: number) {
-    const g = this.g, p = this.plan!, s = this.s!;
-    g.clearRect(0, 0, p.width, p.height);
-    g.fillStyle = "#0b0907"; g.fillRect(0, 0, p.width, p.height);
+    const g = this.g, p = this.plan!, s = this.s!, v = this.view, player = this.mode === "player", rooms = this.shown();
+    g.setTransform(this.dpr, 0, 0, this.dpr, -v.x * this.dpr, -v.y * this.dpr);
+    g.clearRect(v.x, v.y, v.w, v.h);
+    g.fillStyle = player ? "#0a0806" : "#0b0907"; g.fillRect(v.x, v.y, v.w, v.h);
     this.street(now);
-    for (const r of p.rooms) { g.fillStyle = r.offstage ? "#1a1510" : "#2f251b"; g.fillRect(r.x - WALL / 2, r.y - WALL / 2, r.w + WALL, r.h + WALL); } // walls
-    for (const r of p.rooms) this.floor(r);
-    for (const d of p.doors) this.door(d.id);
-    this.decor(now);
-    for (const pr of p.props) this.prop(pr.id, now);
-    this.fog();
-    this.route();
-    this.flashlight(now);
+    for (const r of rooms) { g.fillStyle = r.offstage ? "#1a1510" : "#2f251b"; g.fillRect(r.x - WALL / 2, r.y - WALL / 2, r.w + WALL, r.h + WALL); } // walls
+    for (const r of rooms) this.floor(r);
+    for (const d of p.doors) if (this.doorShown(d.id) && d.between.some(b => rooms.some(r => r.id === b))) this.door(d.id);
+    if (player) this.unexplored(rooms);
+    this.decor(now, rooms);
+    for (const pr of p.props) if (rooms.some(r => r.id === pr.room) && (!player || s.knowledge.props.includes(pr.id))) this.prop(pr.id, now);
+    if (!player) { this.fog(); this.route(); this.flashlight(now); }
     this.ripplesDraw(now);
     this.tokens(now);
     this.compass();
   }
 
+  /** Doors Marlow knows lead somewhere she has not seen: a dashed, unlabelled stub, so the map invites exploring. */
+  private unexplored(rooms: PlanRoom[]) {
+    const g = this.g, p = this.plan!, s = this.s!;
+    for (const d of p.doors) {
+      if (!s.knowledge.doors.includes(d.id)) continue;
+      const other = d.between.find(b => !rooms.some(r => r.id === b)); const o = p.rooms.find(r => r.id === other);
+      if (!other || !o || o.offstage) continue;
+      g.save(); g.setLineDash([6, 6]); g.strokeStyle = "rgba(242,231,208,.35)"; g.lineWidth = 2; g.strokeRect(o.x, o.y, o.w, o.h);
+      g.fillStyle = "rgba(242,231,208,.5)"; g.font = "italic 14px 'Libre Baskerville', serif"; g.textAlign = "center"; g.fillText("not seen yet", o.x + o.w / 2, o.y + o.h / 2 + 5); g.restore();
+    }
+  }
+
   private street(now: number) {
     const g = this.g, st = this.plan!.street;
+    if (this.mode === "player" && !this.shown().some(r => Math.abs(this.plan!.exit.x - (r.x + r.w / 2)) < 1 && this.plan!.exit.y > r.y + r.h)) return;
     g.fillStyle = this.pats.floor_street ?? "#141110"; g.fillRect(st.x, st.y, st.w, st.h);
     g.fillStyle = "rgba(0,0,0,.35)"; g.fillRect(st.x, st.y, st.w, st.h);
     if (!still()) { g.strokeStyle = "rgba(200,210,230,.25)"; g.lineWidth = 1; for (let i = 0; i < 40; i++) { const x = (i * 97 + now / 6) % st.w, y = st.y + ((i * 53 + now / 3) % st.h); g.beginPath(); g.moveTo(x, y); g.lineTo(x - 3, y + 9); g.stroke(); } }
@@ -143,8 +183,8 @@ export class FloorPlan {
     if (d.id === p.doors.find(x => x.between.includes(s.objective.exitRoom))?.id) { /* exit drawn separately */ }
   }
 
-  private decor(now: number) {
-    const g = this.g, p = this.plan!, s = this.s!, room = (id: string) => p.rooms.find(r => r.id === id);
+  private decor(now: number, shown: PlanRoom[]) {
+    const g = this.g, p = this.plan!, s = this.s!, room = (id: string) => shown.find(r => r.id === id), player = this.mode === "player";
     // the front doors from the exit room to the street
     const e = p.exit; g.fillStyle = "#4a3a28"; g.fillRect(e.x - 34, e.y - WALL / 2 - 1, 68, WALL + 2); g.fillStyle = "#8a5a2b"; g.fillRect(e.x - 30, e.y - 3, 28, 6); g.fillRect(e.x + 2, e.y - 3, 28, 6);
     // portraits along the hall walls
@@ -154,10 +194,10 @@ export class FloorPlan {
     const office = room("office");
     if (office) { const x = office.x + office.w - 54, y = office.y + office.h - 54; g.fillStyle = "#2a2a2c"; g.fillRect(x, y, 40, 40); g.fillStyle = "#111"; g.fillRect(x + 6, y + 6, 28, 28); g.strokeStyle = "#7d7d80"; g.lineWidth = 3; g.beginPath(); g.moveTo(x + 40, y + 2); g.lineTo(x + 58, y - 10); g.stroke(); }
     // stair treads in the stairwell
-    const sw = p.rooms.find(r => r.floor === "floor_metal" && !r.offstage);
+    const sw = shown.find(r => r.floor === "floor_metal" && !r.offstage);
     if (sw) { g.strokeStyle = "rgba(200,200,200,.25)"; g.lineWidth = 2; for (let i = 0; i < 7; i++) { const y = sw.y + 14 + i * 9; g.beginPath(); g.moveTo(sw.x + sw.w * 0.3, y); g.lineTo(sw.x + sw.w * 0.7, y); g.stroke(); } }
     // the ledger, if it is still in a room
-    for (const it of s.items) if (it.room) {
+    for (const it of s.items) if (it.room && room(it.room) && (!player || s.knowledge.items.includes(it.id))) {
       const desk = p.props.find(pr => pr.room === it.room && pr.kind === "desk"), r = room(it.room)!;
       const x = desk ? desk.x + desk.w * 0.55 : r.x + r.w / 2, y = desk ? desk.y + desk.h / 2 : r.y + r.h / 2;
       g.save(); g.translate(x, y); g.rotate(-0.2); g.fillStyle = "#6b1d1e"; g.fillRect(-10, -7, 20, 14); g.strokeStyle = "#e8cf8e"; g.lineWidth = 1; g.strokeRect(-8, -5, 16, 10); g.restore();
@@ -241,7 +281,7 @@ export class FloorPlan {
       g.fillStyle = fill; g.strokeStyle = stroke; g.lineWidth = 2.5; g.beginPath(); g.arc(p.x, p.y, r, 0, Math.PI * 2); g.fill(); g.stroke();
       g.fillStyle = letterCol; g.font = `bold ${r}px 'Courier Prime', monospace`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(letter, p.x, p.y + 1); g.textBaseline = "alphabetic";
     };
-    if (this.guard) {
+    if (this.guard && this.mode === "truth") {
       const at = this.pos(this.guard, now);
       disc(at, 15, "#b8302a", "#f2e7d0", "G", "#fff");
       g.fillStyle = "#e8cf8e"; g.font = "12px 'Special Elite', monospace"; g.textAlign = "center"; g.fillText("Halloran", at.x, at.y + 30);

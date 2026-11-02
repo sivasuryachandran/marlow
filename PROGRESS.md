@@ -145,3 +145,6 @@ Why: the same rule as the rest of MARLOW, applied to content. The AI proposes, t
 - **Found while building it:** my "cautious" simulated player needs total silence before moving, which never comes in a small building, so it timed out (0%) on valid buildings. Added "careful" (moves quietly away from the footsteps); kept "cautious" unchanged so the built-in level's published numbers stay comparable.
 - First live runs: Spark's buildings were structurally valid every time; balance needed the code-side tuning; 2 of 3 saved Spark specs pass after tuning, the third is genuinely too hard and is rejected.
 - Tests: 6 builder/check tests, 2 author tests (tuner on a fixture, research with mocked network).
+
+## Solo map that fills in as Marlow explores (2026-11-01)
+Same floor-plan renderer in "player" mode (`web/src/floorplan.ts`): draws only rooms in Marlow's knowledge (never the off-stage guard post), only doors, cover and items she knows, a dashed "not seen yet" stub where a known door leads somewhere unseen, ripples only for perceived events; no guard token, flashlight, route or fog. The canvas grows as the explored area grows. Verified: 840x600 at the start, then wider as she entered the hall and office; the label lists only seen rooms. Audio-only mode (key O) still hides every visual panel. Seer and Spectator keep the full ground-truth map.
