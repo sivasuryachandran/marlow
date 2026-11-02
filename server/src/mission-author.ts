@@ -154,7 +154,8 @@ export async function authorMission(cfg: Config, kase: MissionCase, opts: { atte
     let spec: MissionSpec;
     try { spec = opts.fromSpec && i === 0 ? opts.fromSpec : await draftSpec(cfg, kase, notes, feedback, opts.fetchImpl, usage); } catch (e) { feedback = [`(the previous reply could not be used: ${(e as Error).message.slice(0, 160)})`]; out.attempts.push({ errors: feedback, ms: Date.now() - tA, usage }); log(`  ${feedback[0]}`); continue; }
     out.spec = spec;
-    let built = buildMission(spec, kase, base);
+    let built: ReturnType<typeof buildMission>;
+    try { built = buildMission(spec, kase, base); } catch (e) { built = { errors: [`internal error while building (the spec is probably malformed): ${(e as Error).message.slice(0, 120)}`] }; }
     let errors = built.errors;
     // where the guard rests is geometry, so the code chooses it: the model's choice first, then every other room
     let postNote = "";
@@ -167,7 +168,7 @@ export async function authorMission(cfg: Config, kase: MissionCase, opts: { atte
         if (t.ok) { built = b; b.mission.level = t.level; postNote = at === spec.guardPost.attachTo ? "" : `; the code moved his post next to ${at}`; out.tuning = t.note + postNote; break; }
       }
     }
-    if (built.mission) errors = checkText(built.mission, kase.realNames);
+    if (built.mission) { try { errors = checkText(built.mission, kase.realNames); } catch (e) { errors = [`internal error while checking text: ${(e as Error).message.slice(0, 120)}`]; } }
     let balance: unknown;
     if (built.mission && !errors.length) {
       const t = out.tuning ? { level: built.mission.level, ...lastBalance(built.mission.level), note: out.tuning } : tuneGuard(built.mission.level);

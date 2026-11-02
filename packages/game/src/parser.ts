@@ -12,8 +12,12 @@ export type LocalParse =
   | { kind: "lore"; topic: string }
   | null;
 
+/** The longest order we will read (characters); a long spoken order is about 120. Longer text is cut, so no input can stall the parser. */
+export const MAX_ORDER_CHARS = 400;
+
 /** Speech recognizers sometimes stutter ("the the", "Listen,Listen,", "sneak to the sneak to the hall"): collapse adjacent repeats. */
 export function cleanTranscript(text: string): string {
+  text = text.slice(0, MAX_ORDER_CHARS);
   let w = text.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/[,;]+/g, " ").split(/\s+/).filter(Boolean);
   for (let n = 3; n >= 1; n--) {
     for (let i = 0; i + 2 * n <= w.length; ) {
@@ -32,6 +36,7 @@ export const DEFAULT_TOPICS: [string, RegExp][] = [["ines", /\b(ines|client|part
   ["fenwick", /\b(fenwick|that night|the night)\b/], ["ledger", /\b(ledger|numbers|payments?)\b/], ["tape", /\b(tape|recording|cassette)\b/], ["marlow", /\b(who are you|about yourself|about you)\b/]];
 
 export function localParse(text: string, s: WorldState, topics: [string, RegExp][] = DEFAULT_TOPICS): LocalParse {
+  text = text.slice(0, MAX_ORDER_CHARS);
   const quiet = /\b(quietly|softly|carefully|slowly|silently|gently|sneak|creep)\b/.test(norm(text));
   const t = norm(text).replace(/\b(quietly|softly|carefully|slowly|silently|gently|sneak|creep)\b/g, " ").replace(/\s+/g, " ").trim().replace(/^(ok(ay)?|alright|marlow|boss)\s+/, "").replace(/\s+(please|marlow)$/, "");
   if (["wait", "stop", "hold", "hold on", "hold up", "freeze", "stay", "stay put", "hold position"].includes(t)) return { kind: "action", action: { action: "wait" } };
@@ -82,6 +87,7 @@ const ORDER_WORDS = new Set(["go", "move", "walk", "head", "enter", "step", "sne
 
 /** True when the order contains anything the game could act on. Pure small talk ("yeah we did good") never needs a model call. */
 export function plausibleOrder(text: string, s: WorldState): boolean {
+  text = text.slice(0, MAX_ORDER_CHARS);
   const names = new Set<string>();
   const add = (x: { spokenName: string; aliases?: string[] }) => [x.spokenName, ...(x.aliases ?? [])].forEach(n => n.toLowerCase().split(/\W+/).forEach(w => w && names.add(w)));
   s.rooms.forEach(add); s.props.forEach(add); s.items.forEach(add);

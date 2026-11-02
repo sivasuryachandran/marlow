@@ -11,6 +11,7 @@ import { buildCaseFile } from "./casefile";
 import { loadConfig } from "./config";
 import { replayRows } from "./replay";
 import { SeerRooms } from "./seer";
+import { checkIntentRequest, limit } from "./limits";
 import { CASES } from "./mission-author";
 import { spawn } from "node:child_process";
 import { WebSocketServer } from "ws";
@@ -24,11 +25,21 @@ const app = new Hono();
 mkdirSync(cfg.runsDir, { recursive: true });
 const safeId = (s: string) => /^[\w.-]{1,80}$/.test(s);
 
+// Damage control for anything that costs credits or writes files (see limits.ts). Generous for one person playing.
+const MIN = 60_000, HOUR = 3_600_000;
+app.use("/api/intent", limit({ max: 120, windowMs: MIN, maxBytes: 64 * 1024 }));
+app.use("/api/warmup", limit({ max: 10, windowMs: MIN, maxBytes: 4 * 1024 }));
+app.use("/api/transcribe", limit({ max: 60, windowMs: MIN, maxBytes: 3 * 1024 * 1024 })); // 30 s of 16 kHz mono WAV is about 1 MB
+app.use("/api/log", limit({ max: 600, windowMs: MIN, maxBytes: 64 * 1024 }));
+app.use("/api/casefile/*", limit({ max: 6, windowMs: HOUR, maxBytes: 1024 }));
+app.use("/api/missions/generate", limit({ max: 4, windowMs: HOUR, maxBytes: 4 * 1024 }));
+
 app.get("/api/health", c => c.json({ intent: cfg.intentBackend, stt: !!cfg.modelApiKey, image: false, timeoutMs: cfg.timeoutMs, keys: { meta: !!cfg.modelApiKey, baseten: !!cfg.basetenKey } }));
 
 app.post("/api/intent", async c => {
-  const req = (await c.req.json()) as IntentRequest;
-  try { return c.json(await intent.infer(req)); }
+  const req = (await c.req.json().catch(() => null)) as IntentRequest | null;
+  const bad = checkIntentRequest(req); if (bad) return c.json({ error: bad }, 400); // never forward what our game could not have sent
+  try { return c.json(await intent.infer(req!)); }
   catch (e) { return c.json({ error: String(e), notConfigured: e instanceof NotConfigured }, e instanceof NotConfigured ? 501 : 502); }
 });
 
@@ -44,7 +55,9 @@ app.post("/api/transcribe", async c => {
 });
 
 app.post("/api/log", async c => {
-  const { runId, row } = (await c.req.json()) as { runId: string; row: Record<string, unknown> };
+  const body = (await c.req.json().catch(() => null)) as { runId?: string; row?: Record<string, unknown> } | null;
+  if (!body || typeof body !== "object" || !body.row || typeof body.row !== "object") return c.json({ error: "expected {runId, row}" }, 400);
+  const { runId, row } = body as { runId: string; row: Record<string, unknown> };
   if (!safeId(runId)) return c.json({ error: "bad runId" }, 400);
   appendFileSync(`${cfg.runsDir}/${runId}.jsonl`, JSON.stringify(row) + "\n");
   return c.json({ ok: true });

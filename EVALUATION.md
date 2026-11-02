@@ -7,7 +7,7 @@ MARLOW is a screenless, binaural heist game played by voice. A deterministic eng
 ```bash
 git clone https://github.com/sivasuryachandran/marlow.git && cd marlow
 npm install
-npm test && npm run typecheck && npm run build   # expect 151 tests passing
+npm test && npm run typecheck && npm run build   # expect 165 tests passing
 npm run dev                                       # http://localhost:5173/?seed=7  (Chrome, headphones)
 ```
 Without keys the game uses Chrome speech recognition and an offline intent parser. Never ask for or paste real API keys; `.env` is gitignored and no key is in any commit.
@@ -24,12 +24,13 @@ Without keys the game uses Chrome speech recognition and an offline intent parse
 | Generated missions are validated and balance-tested before play | `packages/game/src/mission.ts`, `server/src/mission-author.ts`, `npm run mission -- --list`, `assets/missions/*/report.md`, [generation-stats.md](generation-stats.md) (every run, failures included) |
 | Truth flows engine to narration only; the model never states facts | `packages/game/src/narrate.ts`, `session.ts` |
 | Accessibility: axe-clean, keyboard-only playable, audio-only mode | `PROGRESS.md` (accessibility audit); open the app, press O |
+| Stress-tested: hostile model replies and text never break a session, invalid actions never change the world, accepted generated missions are winnable, the relay survives abuse | `tools/stress.ts`, [stress-results.md](stress-results.md) (also `npm test`) |
 | Meta models used for real: Spark (intent, mission authoring), Voice Transcribe, Muse Image | `server/src/adapters/*`, `tools/check-access.ts`, request shapes pinned in `adapters.test.ts` |
 
 ## Where I would attack it
 1. Prompt-injection or odd phrasing that makes the model pick a legal-but-unintended action (see `data/eval/commands.jsonl` and `heldout.jsonl` for the test phrases).
 2. The mission generator: can a hostile theme or case text get unsafe or off-brand content past the checks in `checkText`?
-3. The WebSocket relay (`server/src/seer.ts`): room codes, message size, a seer sending messages.
+3. The WebSocket relay (`server/src/seer.ts`) and the HTTP endpoints (`server/src/index.ts`, `limits.ts`): the server has no login, only rate limits and size caps. Try to spend credits or write files you should not.
 4. Anything in `web/` that could leak the guard's true position to the solo player (the player map must never show him).
 5. Repo hygiene: secrets, licences (`CREDITS.md`), large files.
 

@@ -2,7 +2,7 @@ import { createInitialState, locate, RULES_VERSION, sideRelativeToFacing, step }
 import type { Action, GameEvent, WorldState } from "@marlow/shared";
 import { Director, type Beat } from "./director";
 import { knowledgeList, type IntentAdapter, type KnowledgeScope, type KnownEntity } from "./intent";
-import { cleanTranscript, localParse, plausibleOrder } from "./parser";
+import { cleanTranscript, localParse, MAX_ORDER_CHARS, plausibleOrder } from "./parser";
 import { hash, renderLine, type LineBank, type LineRef, type SpokenLine } from "./lines";
 import type { MemoryStore } from "./memory";
 import { countWord } from "./lines";
@@ -79,7 +79,8 @@ export class Session {
 
   /** Returns null when the turn was superseded or timed out (reply discarded, state untouched). */
   async submit(rawTranscript: string): Promise<TurnOutput | null> {
-    const transcript = cleanTranscript(rawTranscript);
+    // Spoken orders are short. Cap what we will parse so a pasted wall of text can neither stall the parser nor reach the model.
+    const transcript = cleanTranscript(String(rawTranscript ?? "").slice(0, MAX_ORDER_CHARS));
     const turnId = ++this.currentTurn;
     const t0 = this.now();
     const s = this.state;
@@ -196,10 +197,16 @@ export class Session {
   private async callIntent(turnId: number, req: Parameters<IntentAdapter["infer"]>[0]): Promise<unknown | typeof TIMEOUT | null> {
     const timeoutMs = this.cfg.timeoutMs ?? 4000;
     let timer: ReturnType<typeof setTimeout> | undefined;
-    const call = this.cfg.intent.infer(req);
+    // An adapter that throws or rejects (network down, a 500) must never break the turn: it is the same as a bad signal.
+    let failed = false;
+    const call: Promise<{ turnId: number; reply: unknown }> = Promise.resolve().then(() => this.cfg.intent.infer(req)).catch(err => {
+      failed = true; this.write({ turnId, adapterError: String((err as Error)?.message ?? err).slice(0, 200) });
+      return { turnId: -1, reply: null };
+    });
     const winner = await Promise.race([
       call, new Promise<typeof TIMEOUT>(res => { timer = setTimeout(() => res(TIMEOUT), timeoutMs); }),
     ]).finally(() => clearTimeout(timer));
+    if (failed && winner !== TIMEOUT) { this.dead.add(turnId); return TIMEOUT; }
     if (winner === TIMEOUT) {
       this.dead.add(turnId);
       call.then(late => this.write({ turnId, discarded: true, reason: "late_reply", replyTurnId: late.turnId }), () => {});

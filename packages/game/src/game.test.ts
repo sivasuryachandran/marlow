@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import level from "../../../data/level.json";
 import linesJson from "../../../data/lines.json";
+import { fixtureSpec } from "./mission.fixture";
 import loreJson from "../../../data/lore.json";
 import beatsJson from "../../../data/beats.json";
 import cuesJson from "../../../data/cues.json";
@@ -8,7 +9,7 @@ import { createInitialState, solve, candidateActions, step, Rng, revealRoom } fr
 import type { Action, Level, WorldState } from "@marlow/shared";
 import {
   loadBank, localParse, mockInfer, knowledgeList, verify, v1, MockIntent, Session, InMemoryStore, validateBeats,
-  expandLine, cuesFor, checkMatch, plausibleOrder, coverRefs, type IntentAdapter, type Beat,
+  expandLine, buildMission, shapeErrors, MAX_ORDER_CHARS, cuesFor, checkMatch, plausibleOrder, coverRefs, type IntentAdapter, type Beat,
 } from "./index";
 
 const bank = loadBank(linesJson);
@@ -469,5 +470,30 @@ describe("play-test fixes", () => {
     expect(out?.lines.map(l => l.id)).toEqual(["marlow.alarm.status"]);
     expect(out?.lines[0].text).toMatch(/seven/i);
     expect(sess.state.alarm).toBe(7); // asking costs nothing
+  });
+});
+
+describe("bugs found by stress testing (regressions)", () => {
+  it("an intent adapter that throws or rejects is a bad signal, never an exception", async () => {
+    for (const infer of [async () => { throw new Error("network down"); }, () => { throw new Error("sync boom"); }, () => Promise.reject(new Error("500"))]) {
+      const sess = mkSession({ intent: { name: "broken", infer } as unknown as IntentAdapter }); sess.start();
+      const before = JSON.stringify(sess.state);
+      const out = await sess.submit("go do something clever");
+      expect(out?.kind).toBe("timeout"); // "Signal's bad, say again?"
+      expect(JSON.stringify(sess.state)).toBe(before);
+    }
+  });
+  it("a very long order is cut, so it can neither stall the parser nor reach the model whole", async () => {
+    let seen = 0; const intent = { name: "spy", infer: async (r: { turnId: number; transcript: string }) => { seen = r.transcript.length; return { turnId: r.turnId, reply: {} }; } } as unknown as IntentAdapter;
+    const sess = mkSession({ intent }); sess.start();
+    const t0 = performance.now(); await sess.submit("go to the hall ".repeat(40000)); expect(performance.now() - t0).toBeLessThan(500);
+    expect(seen).toBeLessThanOrEqual(MAX_ORDER_CHARS);
+    expect(localParse("how long ".repeat(100000), mk())).toBeTruthy(); // returns quickly, does not hang
+  });
+  it("a malformed mission spec is rejected with errors instead of crashing the generator", () => {
+    for (const bad of [null, {}, { rooms: null }, { rooms: [], links: "x" }, { ...fixtureSpec(), patrol: null }, { ...fixtureSpec(), lines: {} }, { ...fixtureSpec(), item: null }])
+      expect(() => buildMission(bad as never, { id: "x", inspiredBy: "x", sources: [] }, { lines: bank, beats })).not.toThrow();
+    expect(shapeErrors({ ...fixtureSpec(), rooms: null }).join(" ")).toMatch(/rooms must be a list/);
+    expect(buildMission(null as never, { id: "x", inspiredBy: "x", sources: [] }, { lines: bank, beats }).errors.length).toBeGreaterThan(0);
   });
 });

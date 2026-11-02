@@ -63,8 +63,30 @@ const words = (s: string): string[] => s.toLowerCase().match(/[a-z']+/g) ?? [];
 /** Silent alarm length: about three times the shortest way out (moves plus the exit order), so quiet decisive play wins and hiding forever does not. */
 export const alarmTurnsFor = (probe: WorldState, itemRoom: string, exit: string) => ((path(probe, itemRoom, exit)?.length ?? 3) - 1 + 1) * 3 + 1;
 
+/** Is this even the right shape? The model's reply is untrusted: report what is wrong instead of crashing on it. */
+export function shapeErrors(spec: unknown): string[] {
+  const e: string[] = [], o = (x: unknown): x is Record<string, unknown> => !!x && typeof x === "object" && !Array.isArray(x);
+  const str = (x: unknown) => typeof x === "string", strs = (x: unknown) => Array.isArray(x) && x.every(str), num = (x: unknown) => typeof x === "number" && Number.isFinite(x);
+  if (!o(spec)) return ["the spec is not an object"];
+  for (const k of ["title", "tagline", "clientName", "guardName", "ownerName", "guardSound"]) if (!str(spec[k])) e.push(`${k} must be text`);
+  if (!Array.isArray(spec.rooms)) e.push("rooms must be a list");
+  else spec.rooms.forEach((r, i) => { if (!o(r) || !str(r.id) || !str(r.name) || !strs(r.aliases) || !num(r.x) || !num(r.y) || !str(r.cover) || !str(r.describe) || !["marble", "carpet", "metal"].includes(r.floor as string)) e.push(`rooms[${i}] is malformed (needs id, name, aliases, floor, x, y, cover, describe)`); });
+  if (!Array.isArray(spec.links) || !spec.links.every(l => o(l) && str(l.a) && str(l.b) && ["door", "arch", "stairs"].includes(l.kind as string))) e.push("links must be a list of {a, b, kind}");
+  if (!o(spec.item) || !str(spec.item.id) || !str(spec.item.name) || !strs(spec.item.aliases) || !str(spec.item.room)) e.push("item must be {id, name, aliases, room}");
+  if (!o(spec.guardPost) || !str(spec.guardPost.name) || !str(spec.guardPost.attachTo)) e.push("guardPost must be {name, attachTo}");
+  if (!strs(spec.patrol)) e.push("patrol must be a list of room ids");
+  if (!o(spec.lines)) e.push("lines must be an object");
+  else {
+    for (const k of ["marlowIntro", "guardFirstHeard", "take", "clientAfterTake", "clientCheckin", "outro", "evidence", "evidenceAsk", "burn", "send", "clientAfterBurn", "clientAfterSend"]) if (!str(spec.lines[k])) e.push(`lines.${k} must be text`);
+    if (!strs(spec.lines.clientIntro)) e.push("lines.clientIntro must be a list of text");
+  }
+  if (!Array.isArray(spec.lore) || !spec.lore.every(l => o(l) && str(l.text) && ["client", "guard", "owner", "item", "history"].includes(l.topic as string) && ["start", "guard", "item", "end"].includes(l.when as string))) e.push("lore must be a list of {topic, when, text}");
+  return e;
+}
+
 /** Structural checks on the spec itself, before building. */
 export function checkSpec(spec: MissionSpec): string[] {
+  const bad = shapeErrors(spec); if (bad.length) return bad;
   const e: string[] = [], ids = new Set<string>(), cells = new Set<string>();
   if (spec.rooms.length < 4 || spec.rooms.length > 6) e.push(`need 4 to 6 rooms, got ${spec.rooms.length}`);
   for (const r of spec.rooms) {
