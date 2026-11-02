@@ -36,6 +36,9 @@ async function showLinks() {
 }
 
 export function initCoop() {
+  // ?coop=ABCD (used by the split-screen page): start sharing at once, in that room
+  const pre = new URLSearchParams(location.search).get("coop")?.toUpperCase();
+  if (pre && /^[A-Z]{4}$/.test(pre)) { hosting = true; code = pre; $("coop").hidden = true; $("coopBtn").setAttribute("aria-pressed", "true"); void showLinks(); connect(); }
   $("coopBtn").addEventListener("click", async () => {
     const panel = $("coop");
     if (!hosting) {

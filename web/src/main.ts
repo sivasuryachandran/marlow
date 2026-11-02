@@ -82,11 +82,20 @@ function bindSettings() {
   $("forget").addEventListener("click", () => { store.reset(); status("Marlow has forgotten your past runs."); });
 }
 
+/** Play a turn's audio with a Skip button and the Escape key available while it plays. */
+async function play(out: Parameters<AudioEngine["playTurn"]>[0]) {
+  $("skip").hidden = false;
+  try { await audio.playTurn(out); } finally { $("skip").hidden = true; }
+}
+
 // ---------- session ----------
 function postLog(runId: string, row: Record<string, unknown>) {
   fetch("/api/log", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ runId, row }) }).catch(() => {});
 }
+let latest = 0; // the newest turn: an older turn that finishes talking later must not set the status or end the run
+let gen = 0; // bumped on every new run: late work from an earlier run must not touch the screen
 function newSession() {
+  gen++; busy = false; if (audio.ctx) audio.skipVoice(); // cut off anything still being said from the last run
   const runId = `${seed}-${Date.now().toString(36)}`;
   session = new Session({
     level: gameLevel, bank, beats: gameBeats, lore: gameLore, loreTopics: mission?.loreTopics, intent, seed, memory: store, runId,
@@ -120,15 +129,18 @@ async function begin() {
   status("The client is on the line…");
   showTurn(intro);
   refresh();
-  hfPause(); await audio.playTurn(intro); hfResume();
+  hfPause(); await play(intro); hfResume();
   status(`Marlow is in position. Run ${session.runNumber}. ${hf ? "Just speak; the mic is always listening." : stt ? "Hold the button or Space to talk." : "Type an order."}`);
 }
 
 async function handleTranscript(text: string) {
   busy = true; hfPause();
-  try { await handleTranscript1(text); } finally { busy = false; hfResume(); }
+  const myGen = gen;
+  try { await handleTranscript1(text); } finally { if (myGen === gen) { busy = false; hfResume(); } }
 }
 async function handleTranscript1(text: string) {
+  const myGen = gen, mine = ++latest;
+  if (audio.ctx) audio.skipVoice(); // barge-in: a new order cuts off whatever Marlow was still saying
   log("you", `You: ${text}`);
   status("Marlow is working it out…");
   audio.startWaiting(session.state.knowledge.guardLastHeard as never, session.state.rooms.find(r => r.id === session.state.marlow.room)!.reverb);
@@ -141,18 +153,25 @@ async function handleTranscript1(text: string) {
   showTurn(out);
   if (out.kind === "timeout") audio.playStatic();
   refresh();
-  await audio.playTurn(out);
+  await play(out);
+  if (myGen !== gen || mine !== latest) return; // a new run, or a newer order, took over while she was still talking
   if (out.state.status !== "playing") finish(out);
   else status("Your move.");
 }
 
+/** Why the run ended, in plain words (from the last turn's events). */
+function whyCaught(out: TurnOutput): string {
+  const c = out.events.find(e => e.type === "caught") as { reason?: string } | undefined;
+  return c?.reason === "alarm" ? "the silent alarm ran out and the building sealed" : c?.reason === "chase" ? "she stood still while the guard ran at her" : "she was spotted too many times";
+}
 function finish(out: TurnOutput) {
-  $("end").hidden = false;
-  $("endText").textContent = out.state.status === "won"
-    ? `Job done in ${out.state.turn} turns. Alert ${out.state.alert} of 3. Trust ${Math.round(out.state.trust)}.`
-    : `Marlow was caught after ${out.state.turn} turns. Trust ${Math.round(out.state.trust)}.`;
-  status("The run is over.");
-  $<HTMLButtonElement>("again").focus();
+  const won = out.state.status === "won", pending = won && !session.ending;
+  $("end").hidden = false; $("endChoices").hidden = !pending;
+  $("endText").textContent = won
+    ? (pending ? `Job done in ${out.state.turn} turns. Marlow found a tape in the ledger.` : `Job done in ${out.state.turn} turns. Alert ${out.state.alert} of 3. Trust ${Math.round(out.state.trust)}.${session.ending ? ` The tape was ${session.ending === "burn" ? "burned" : "sent"}.` : ""}`)
+    : `Marlow was caught after ${out.state.turn} turns: ${whyCaught(out)}.`;
+  status(pending ? "Marlow is waiting: burn the tape, or send it?" : "The run is over.");
+  $<HTMLButtonElement>(pending ? "burnBtn" : "again").focus();
 }
 
 // ---------- always-on listening ----------
@@ -246,11 +265,15 @@ $("f").addEventListener("submit", e => {
   if (!text || !session) return;
   void audio.playAck(); void handleTranscript(text);
 });
+$("burnBtn").addEventListener("click", () => { if (!busy) { void audio.playAck(); void handleTranscript("burn it"); } });
+$("sendBtn").addEventListener("click", () => { if (!busy) { void audio.playAck(); void handleTranscript("send it"); } });
+$("skip").addEventListener("click", () => audio.skipVoice());
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("skip").hidden) audio.skipVoice(); });
 $("again").addEventListener("click", async () => {
   seed = (fixedSeed ?? seed) + 1; if (fixedSeed != null) { /* stay reproducible: run 2 = seed+1 */ }
   newSession();
   const intro = session.start(); showTurn(intro); refresh();
-  status(`Run ${session.runNumber}.`); hfPause(); await audio.playTurn(intro); hfResume(); status("Marlow is in position.");
+  status(`Run ${session.runNumber}.`); hfPause(); await play(intro); hfResume(); status("Marlow is in position.");
 });
 $("casefile").addEventListener("click", async () => {
   const out = $("casefileOut"); out.textContent = "Drawing the Case File…";

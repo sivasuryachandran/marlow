@@ -7,7 +7,7 @@ MARLOW is a screenless, binaural heist game played by voice. A deterministic eng
 ```bash
 git clone https://github.com/sivasuryachandran/marlow.git && cd marlow
 npm install
-npm test && npm run typecheck && npm run build   # expect 149 tests passing
+npm test && npm run typecheck && npm run build   # expect 151 tests passing
 npm run dev                                       # http://localhost:5173/?seed=7  (Chrome, headphones)
 ```
 Without keys the game uses Chrome speech recognition and an offline intent parser. Never ask for or paste real API keys; `.env` is gitignored and no key is in any commit.
@@ -40,7 +40,7 @@ Without keys the game uses Chrome speech recognition and an offline intent parse
 - Spark accuracy varies run to run (dev set 94 to 100% across four runs); Spark Open on Baseten was last measured at 76.7% on the held-out set and has not been re-run.
 - Three missions have been generated end to end (gallery, Louvre, diamond vault); 3 of 4 case runs recorded by the instrumented generator... see generation-stats.md for the real counts, including failures and one false rejection caused by my own checker.
 - The generator tunes balance with simulated players (careful, reckless), not people; real players may find generated levels easier or harder. The silent alarm length (10 on the built-in level) was chosen from a simulation sweep so a human has slack, not from human play.
-- Seer link works on the same network only (no hosted relay).
+- Seer link works on the same network only (no hosted relay). `PLAYTEST.md` is the protocol for a two-person test; it has not been run, so there is no evidence yet that people want to play this.
 
 ## A prompt you can paste to another agent
 > You are reviewing the public repo https://github.com/sivasuryachandran/marlow, a hackathon game. Read `EVALUATION.md` and `README.md` first. Clone it, run `npm install && npm test && npm run typecheck`, and play it with `npm run dev`. Then act as [a senior engineer / a security reviewer / an accessibility specialist / a game designer / a hackathon judge]. Verify the claims in the table yourself instead of trusting the docs, try to break the areas listed under "Where I would attack it", and report: (1) bugs with exact steps, (2) claims that are false or overstated, (3) the three highest-impact improvements, (4) a score out of 10 for originality, technical depth, accessibility and polish, each with a reason. Do not use or request API keys.

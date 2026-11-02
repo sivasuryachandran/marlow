@@ -18,6 +18,10 @@ export class AudioEngine {
   analyser!: AnalyserNode; private master!: GainNode;
   /** A generated mission's voice lines: its own lines only from its folder; shared lines from there first, then the default. */
   mission: { base: string; own: Set<string> } | null = null;
+  private skipGen = 0; private sleepers: (() => void)[] = []; private voiceSrc = new Set<AudioBufferSourceNode>();
+  /** Stop the voice that is playing and skip the rest of this turn's lines (a long intro, or a reply you have already read). */
+  skipVoice() { this.skipGen++; for (const v of this.voiceSrc) { try { v.stop(); } catch { /* already ended */ } } this.voiceSrc.clear(); const r = this.sleepers; this.sleepers = []; r.forEach(f => f()); }
+  private sleep(ms: number) { return new Promise<void>(res => { const id = setTimeout(res, ms); this.sleepers.push(() => { clearTimeout(id); res(); }); }); }
   /** Called with a short caption whenever the engine itself makes a sound (radio click, static, the guard pacing), so the screen can show it. */
   onCue?: (caption: string) => void; private monoNode!: GainNode; private duck!: GainNode;
   private voiceGain!: GainNode; private musicGain!: GainNode; private sfxGain!: GainNode;
@@ -360,14 +364,14 @@ export class AudioEngine {
     const t = c.currentTime + 0.02;
     let dur: number;
     if (buf) {
-      const s = c.createBufferSource(); s.buffer = buf; s.connect(this.earpiece); s.start(t); dur = buf.duration;
+      const s = c.createBufferSource(); s.buffer = buf; s.connect(this.earpiece); s.start(t); dur = buf.duration; this.voiceSrc.add(s); s.onended = () => this.voiceSrc.delete(s);
     } else {
       // No pre-rendered file: murmur placeholder (never runtime TTS). Length follows word count; pitch follows speaker.
       const words = line.text.split(/\s+/).length, base = line.speaker === "client" ? 105 : 190;
       dur = Math.min(7, 0.22 * words + 0.2);
       for (let i = 0; i < words; i++) this.tone(this.earpiece, t + i * 0.22, base * (1 + 0.08 * ((i * 7) % 5)), 0.17, 0.07, "triangle");
     }
-    await new Promise(r => setTimeout(r, dur * 1000 + 120));
+    await this.sleep(dur * 1000 + 120);
     this.duckOff();
   }
 
@@ -384,9 +388,10 @@ export class AudioEngine {
       if (important) await tasks[tasks.length - 1]; // serialise important cues
     }
     for (const id of out.beatCueIds) this.playCueId(id);
+    const gen = this.skipGen;
     const voice = (async () => {
-      await new Promise(r => setTimeout(r, out.cues.length ? 450 : 0));
-      for (const l of out.lines) { await this.playVoice(l); await new Promise(r => setTimeout(r, 180)); }
+      await this.sleep(out.cues.length ? 450 : 0);
+      for (const l of out.lines) { if (gen !== this.skipGen) break; await this.playVoice(l); await this.sleep(180); }
     })();
     await Promise.all([...tasks, voice]);
   }

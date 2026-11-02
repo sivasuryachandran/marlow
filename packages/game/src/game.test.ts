@@ -31,7 +31,7 @@ describe("content (V0)", () => {
       "move", "move.quiet", "door_noise", "arrive.item", "arrive.hide", "peek.room", "peek.empty", "peek.guard", "listen.heard", "guard.here",
       "listen.quiet", "wait", "hide", "take", "warning", "sound.phone_ring", "spotted", "caught", "win.clean", "win.messy",
       "refuse.unknown_target", "refuse.not_known", "refuse.not_adjacent", "refuse.door_locked", "refuse.not_in_room", "refuse.no_hide_spot",
-      "refuse.no_item", "guard.alerted", "alarm.start", "alarm.half", "alarm.late", "alarm.last", "alarm.caught", "chase", "chase.escaped", "chase.caught", "refuse.not_ready_to_exit", "refuse.game_over", "clarify.door", "clarify.room", "clarify.other",
+      "refuse.no_item", "guard.alerted", "alarm.start", "alarm.status", "alarm.none", "alarm.half", "alarm.late", "alarm.last", "alarm.caught", "chase", "chase.escaped", "chase.caught", "refuse.not_ready_to_exit", "refuse.game_over", "clarify.door", "clarify.room", "clarify.other",
     ];
     for (const n of need) expect(bank["marlow." + n], n).toBeDefined();
     for (const n of ["ack", "sayagain", "timeout", "nothing_pending", "nothing_to_repeat"]) expect(bank["system." + n]).toBeDefined();
@@ -450,5 +450,24 @@ describe("the guard investigates noise: what Owl hears", () => {
     const prev = mk(1, s => { inHall(s); s.guard.at = "stairwell"; }), next = structuredClone(prev);
     const cue = cuesFor(prev, next, [{ type: "guard_heard", dir: "ahead", dist: "near", via: "footsteps", perceived: true }]).find(c => c.id.startsWith("sfx.footsteps"));
     expect(cue!.fromDir).toBeUndefined();
+  });
+});
+
+describe("play-test fixes", () => {
+  it("a plain 'take the ledger' is local (instant, no model call) when the ledger is here; anything extra goes to the model", () => {
+    const s = mk(); s.marlow.room = "office"; revealRoom(s, "office", true);
+    for (const t of ["take the ledger", "grab the book", "steal the logbook", "pick up the ledger"]) expect(localParse(t, s)).toEqual({ kind: "action", action: { action: "take", target: "ledger" } });
+    expect(localParse("grab the book off the desk", s)?.kind).not.toBe("action"); // extra words: the model and the matcher decide
+    expect(localParse("take the ledger", mk())).toBeNull(); // not in this room: never guess
+  });
+  it("'how long do we have' is a free local answer about the alarm, with a spoken number", async () => {
+    const intent = { name: "never", init: async () => {}, infer: async () => { throw new Error("model must not be called"); } } as unknown as IntentAdapter;
+    const sess = mkSession({ intent }); sess.start();
+    expect((await sess.submit("how long do we have?"))?.lines.map(l => l.id)).toEqual(["marlow.alarm.none"]);
+    (sess as unknown as { state: WorldState }).state.alarm = 7;
+    const out = await sess.submit("how many moves do we have left");
+    expect(out?.lines.map(l => l.id)).toEqual(["marlow.alarm.status"]);
+    expect(out?.lines[0].text).toMatch(/seven/i);
+    expect(sess.state.alarm).toBe(7); // asking costs nothing
   });
 });

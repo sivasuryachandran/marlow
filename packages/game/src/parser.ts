@@ -7,6 +7,7 @@ export type LocalParse =
   | { kind: "ready" }
   | { kind: "look" }
   | { kind: "talk" }
+  | { kind: "alarm" }
   | { kind: "cover" }
   | { kind: "lore"; topic: string }
   | null;
@@ -42,6 +43,17 @@ export function localParse(text: string, s: WorldState, topics: [string, RegExp]
   }
   // "Where can I hide": from what she already knows. Free and local.
   if (/\b(where (can|could|do|should) (i|you|we) hide|any (cover|hiding)|hiding (spot|place)|where is (the )?cover|where'?s (the )?cover|is there (any )?(cover|a place to hide))\b/.test(t)) return { kind: "cover" };
+  // "How long do we have?": only the alarm has a clock. Free and local.
+  if (/\b(how (long|much time|many (moves|turns|steps))|time (do we have|is left|left)|how soon|alarm (left|time|clock)|are we running out)\b/.test(t)) return { kind: "alarm" };
+  // A plain "take the <thing here>": the same names the matcher accepts, with nothing else in the order, so no model is needed.
+  const takeM = /^(take|grab|steal|pocket|lift|pick up|get)\s+(?:the\s+|a\s+|an\s+)?(.+)$/.exec(t);
+  if (takeM) {
+    const want = takeM[2].replace(/^the\s+/, "");
+    for (const it of s.items) {
+      if (it.room !== s.marlow.room || !s.knowledge.items.includes(it.id)) continue;
+      if ([it.spokenName, ...it.aliases].some(n => n.toLowerCase().replace(/^(the|a|an)\s+/, "") === want)) return { kind: "action", action: { action: "take", target: it.id } };
+    }
+  }
   // Checking in on her ("can you hear me", "are you there", "hello"): she answers; no turn passes, nothing moves.
   if (/^(hey|hi|hello|testing|test|hello marlow|hey marlow|are you there|you there|is anyone there|can you hear me|do you hear me|can you hear me now|are you (ok|okay|alright|all right)|how are you|you ok|you okay|are you with me|are you listening|marlow)( there| now)?$/.test(t)) return { kind: "talk" };
   // Story questions ("who is Ines", "tell me about the tape"): answered from the facts discovered so far.

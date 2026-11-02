@@ -34,6 +34,8 @@ function render(m: Snapshot) {
   $("sTurn").textContent = String(s.turn).padStart(2, "0");
   $("sObj").textContent = s.status !== "playing" ? (s.status === "won" ? "Job done" : "Caught") : s.marlow.carrying ? "Exit through the lobby" : "Secure the ledger";
   document.querySelectorAll<HTMLElement>("#topbar .chip").forEach(c => c.classList.toggle("on", Number(c.dataset.a) === Math.min(3, s.alert)));
+  const al = $("alarmCell"); al.hidden = s.alarm === null || s.status !== "playing";
+  if (s.alarm !== null) { $("alarmLeft").textContent = `${s.alarm} moves left`; al.classList.toggle("hot", s.alarm <= 3); }
   plan ??= new FloorPlan($("seerMap") as HTMLCanvasElement);
   plan.update(s, m.events ?? []);
   $("seerMap").setAttribute("aria-label", `Ground-truth floor plan. ${truthLine(s)}`);

@@ -64,6 +64,7 @@
   <div id="game" hidden>
     <p id="status" role="status" aria-live="polite"></p>
     <p id="cueBar" class="cuebar" aria-hidden="true"></p>
+    <button id="skip" type="button" class="skip-voice" aria-keyshortcuts="Escape" hidden>Skip the talking <kbd>Esc</kbd></button>
     <div class="grid">
       <section class="panel visual" aria-labelledby="sonarH">
         <h2 id="sonarH">The scope <small>only what Owl has heard</small></h2>
@@ -97,6 +98,7 @@
 
         <div id="end" hidden>
           <p id="endText"></p>
+          <div id="endChoices" hidden><p class="dim">Marlow is waiting for your answer. Say it, or press a button:</p><div class="btns"><button id="burnBtn" class="primary" type="button">Burn it</button><button id="sendBtn" class="primary" type="button">Send it</button></div></div>
           <div class="btns"><button id="again" class="primary" type="button">Run it again (Marlow remembers)</button><button id="openCase" type="button">Open the Case File</button></div>
         </div>
       </section>

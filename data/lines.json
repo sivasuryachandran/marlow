@@ -860,5 +860,25 @@
     "curt": [
       "Sealed in."
     ]
+  },
+  "marlow.alarm.status": {
+    "speaker": "marlow",
+    "text": [
+      "About {count} moves left, boss.",
+      "{count} moves, boss. Maybe less."
+    ],
+    "curt": [
+      "{count} left."
+    ]
+  },
+  "marlow.alarm.none": {
+    "speaker": "marlow",
+    "text": [
+      "No alarm yet, boss. We're fine for time.",
+      "Nothing's ticking, boss."
+    ],
+    "curt": [
+      "No alarm."
+    ]
   }
 }

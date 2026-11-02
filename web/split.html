@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MARLOW — One Sees, One Hears</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Limelight&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Special+Elite&family=Courier+Prime:wght@400;700&display=swap">
+<link rel="stylesheet" href="/src/style.css">
+<style>
+  body.split{padding-bottom:0;height:100vh;display:flex;flex-direction:column}
+  .splitbar{display:flex;flex-wrap:wrap;gap:.6rem 1.2rem;align-items:center;justify-content:space-between;padding:.5rem 1rem;background:linear-gradient(#120e0b,#0b0907);border-bottom:2px solid var(--brass2)}
+  .splitbar h1{font:400 1.3rem var(--display);letter-spacing:.14em;color:var(--brass);margin:0}
+  .splitbar p{margin:0;font:.8rem var(--type);color:var(--dim)}
+  .halves{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr}
+  .half{display:flex;flex-direction:column;min-width:0;min-height:0;border-right:2px solid var(--brass2)}
+  .half:last-child{border-right:0}
+  .half h2{margin:0;padding:.35rem 1rem;font:400 1rem var(--display);letter-spacing:.12em;text-transform:uppercase;color:#fff3dc;background:rgba(158,42,43,.45)}
+  .half h2 small{font:.7rem var(--type);letter-spacing:.06em;margin-left:.6rem;color:var(--cream);text-transform:none}
+  .half iframe{flex:1;border:0;width:100%;background:#000}
+  @media(max-width:900px){body.split{height:auto}.halves{grid-template-columns:1fr}.half{border-right:0;border-bottom:2px solid var(--brass2)}.half iframe{height:90vh}}
+</style>
+</head>
+<body class="split">
+<div class="splitbar">
+  <h1>One sees. One hears.</h1>
+  <p>Room <b id="room">----</b> · The listener plays by ear and gives the orders. The seer sees the whole building and the guard, and says what they notice on a call. The seer cannot give orders.</p>
+</div>
+<main class="halves">
+  <section class="half" aria-labelledby="hl"><h2 id="hl">Hears <small>Owl, in the van: voice, scope, only what Marlow has seen</small></h2><iframe id="listener" title="The listener's game" allow="microphone; autoplay"></iframe></section>
+  <section class="half" aria-labelledby="hs"><h2 id="hs">Sees <small>the whole map, the guard, his flashlight and route</small></h2><iframe id="seer" title="The seer's map"></iframe></section>
+</main>
+<script type="module">
+  const L = "ABCDEFGHJKLMNPQRSTUVWXYZ", q = new URLSearchParams(location.search);
+  let code = (q.get("room") ?? "").toUpperCase();
+  if (!/^[A-Z]{4}$/.test(code)) code = Array.from({ length: 4 }, () => L[Math.floor(Math.random() * L.length)]).join("");
+  const seed = q.get("seed") ?? "7", mission = q.get("mission");
+  document.getElementById("room").textContent = code;
+  document.getElementById("listener").src = `/?coop=${code}&seed=${encodeURIComponent(seed)}${mission ? `&mission=${encodeURIComponent(mission)}` : ""}`;
+  document.getElementById("seer").src = `/seer.html?room=${code}`;
+</script>
+</body>
+</html>

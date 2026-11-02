@@ -5,6 +5,7 @@ import { knowledgeList, type IntentAdapter, type KnowledgeScope, type KnownEntit
 import { cleanTranscript, localParse, plausibleOrder } from "./parser";
 import { hash, renderLine, type LineBank, type LineRef, type SpokenLine } from "./lines";
 import type { MemoryStore } from "./memory";
+import { countWord } from "./lines";
 import { coverRefs, cuesFor, narrate, type Cue } from "./narrate";
 import { verify, type Verified } from "./verify";
 
@@ -115,6 +116,7 @@ export class Session {
           if (this.pending) return out("clarify", [this.clarifyRef(this.pending.candidates, s)], {}, { parsed: local.kind });
           return out("local", [{ id: "system.nothing_pending", slots: {} }], {}, { parsed: local.kind });
         case "lore": return out("local", [{ id: this.loreLine(local.topic), slots: {} }], {}, { parsed: `lore:${local.topic}` });
+        case "alarm": return out("local", s.alarm === null ? [{ id: "marlow.alarm.none", slots: {} }] : [{ id: "marlow.alarm.status", slots: { count: countWord(s.alarm) } }], {}, { parsed: "alarm" });
         case "cover": return out("local", coverRefs(s), {}, { parsed: "cover" });
         case "talk": return out("local", [{ id: "marlow.talk", slots: {} }], {}, { parsed: "talk" });
         case "look": return out("local", this.lookRefs(s), {}, { parsed: "look" });

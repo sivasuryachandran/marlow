@@ -2708,5 +2708,320 @@
   "audioKey": "marlow.alarm.caught.c0",
   "text": "Sealed in.",
   "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.v0.count=one",
+  "text": "About one moves left, boss.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.v0.count=two",
+  "text": "About two moves left, boss.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.v0.count=three",
+  "text": "About three moves left, boss.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.v0.count=four",
+  "text": "About four moves left, boss.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.v0.count=five",
+  "text": "About five moves left, boss.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.v0.count=six",
+  "text": "About six moves left, boss.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.v0.count=seven",
+  "text": "About seven moves left, boss.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.v0.count=eight",
+  "text": "About eight moves left, boss.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.v0.count=nine",
+  "text": "About nine moves left, boss.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.v0.count=ten",
+  "text": "About ten moves left, boss.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.v0.count=eleven",
+  "text": "About eleven moves left, boss.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.v0.count=twelve",
+  "text": "About twelve moves left, boss.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.v0.count=thirteen",
+  "text": "About thirteen moves left, boss.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.v0.count=fourteen",
+  "text": "About fourteen moves left, boss.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.v0.count=fifteen",
+  "text": "About fifteen moves left, boss.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.v0.count=sixteen",
+  "text": "About sixteen moves left, boss.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.v0.count=seventeen",
+  "text": "About seventeen moves left, boss.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.v0.count=eighteen",
+  "text": "About eighteen moves left, boss.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.v0.count=nineteen",
+  "text": "About nineteen moves left, boss.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.v0.count=twenty",
+  "text": "About twenty moves left, boss.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.v1.count=one",
+  "text": "One moves, boss. Maybe less.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.v1.count=two",
+  "text": "Two moves, boss. Maybe less.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.v1.count=three",
+  "text": "Three moves, boss. Maybe less.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.v1.count=four",
+  "text": "Four moves, boss. Maybe less.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.v1.count=five",
+  "text": "Five moves, boss. Maybe less.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.v1.count=six",
+  "text": "Six moves, boss. Maybe less.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.v1.count=seven",
+  "text": "Seven moves, boss. Maybe less.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.v1.count=eight",
+  "text": "Eight moves, boss. Maybe less.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.v1.count=nine",
+  "text": "Nine moves, boss. Maybe less.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.v1.count=ten",
+  "text": "Ten moves, boss. Maybe less.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.v1.count=eleven",
+  "text": "Eleven moves, boss. Maybe less.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.v1.count=twelve",
+  "text": "Twelve moves, boss. Maybe less.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.v1.count=thirteen",
+  "text": "Thirteen moves, boss. Maybe less.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.v1.count=fourteen",
+  "text": "Fourteen moves, boss. Maybe less.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.v1.count=fifteen",
+  "text": "Fifteen moves, boss. Maybe less.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.v1.count=sixteen",
+  "text": "Sixteen moves, boss. Maybe less.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.v1.count=seventeen",
+  "text": "Seventeen moves, boss. Maybe less.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.v1.count=eighteen",
+  "text": "Eighteen moves, boss. Maybe less.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.v1.count=nineteen",
+  "text": "Nineteen moves, boss. Maybe less.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.v1.count=twenty",
+  "text": "Twenty moves, boss. Maybe less.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.c0.count=one",
+  "text": "One left.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.c0.count=two",
+  "text": "Two left.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.c0.count=three",
+  "text": "Three left.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.c0.count=four",
+  "text": "Four left.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.c0.count=five",
+  "text": "Five left.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.c0.count=six",
+  "text": "Six left.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.c0.count=seven",
+  "text": "Seven left.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.c0.count=eight",
+  "text": "Eight left.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.c0.count=nine",
+  "text": "Nine left.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.c0.count=ten",
+  "text": "Ten left.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.c0.count=eleven",
+  "text": "Eleven left.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.c0.count=twelve",
+  "text": "Twelve left.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.c0.count=thirteen",
+  "text": "Thirteen left.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.c0.count=fourteen",
+  "text": "Fourteen left.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.c0.count=fifteen",
+  "text": "Fifteen left.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.c0.count=sixteen",
+  "text": "Sixteen left.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.c0.count=seventeen",
+  "text": "Seventeen left.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.c0.count=eighteen",
+  "text": "Eighteen left.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.c0.count=nineteen",
+  "text": "Nineteen left.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.status.c0.count=twenty",
+  "text": "Twenty left.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.none.v0",
+  "text": "No alarm yet, boss. We're fine for time.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.none.v1",
+  "text": "Nothing's ticking, boss.",
+  "speaker": "marlow"
+ },
+ {
+  "audioKey": "marlow.alarm.none.c0",
+  "text": "No alarm.",
+  "speaker": "marlow"
  }
 ]

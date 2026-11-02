@@ -44,7 +44,8 @@ export function truthLine(s: WorldState): string {
   const name = (id: string) => s.rooms.find(r => r.id === id)?.spokenName ?? id;
   const g = guardRoom(s), next = nextGuardRoom(s), loc = locate(s, g);
   const where = g === s.marlow.room ? "in the same room as Marlow" : `in ${name(g)} (${loc.hops} room${loc.hops === 1 ? "" : "s"} away, ${loc.dir})`;
-  return `Guard is ${where}${next && next !== g ? `, heading to ${name(next)} next` : ", staying put"}. Marlow is in ${name(s.marlow.room)}${s.marlow.hidden ? ", hidden" : ""}${s.marlow.carrying ? ", carrying the ledger" : ""}.`;
+  const alarm = s.alarm !== null && s.status === "playing" ? ` ALARM: ${s.alarm} moves left.` : "";
+  return `Guard is ${where}${next && next !== g ? `, heading to ${name(next)} next` : ", staying put"}. Marlow is in ${name(s.marlow.room)}${s.marlow.hidden ? ", hidden" : ""}${s.marlow.carrying ? ", carrying the ledger" : ""}.${alarm}`;
 }
 
 /** Debug/demo mode (?debug=1, or the Spectator tab after "Show ground truth"): map plus raw state and the last events. */

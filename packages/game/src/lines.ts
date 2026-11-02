@@ -48,11 +48,15 @@ export function renderLine(bank: LineBank, ref: LineRef, opts: { seed: number; t
 }
 
 /** Slot domains per line id, used by tools/render-lines.ts to enumerate every file that can be spoken. */
+/** Number words for the "count" slot (alarm moves left); every one has a pre-rendered voice line. */
+export const COUNT_WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty"];
+export const countWord = (n: number) => COUNT_WORDS[Math.max(0, Math.min(20, Math.round(n)))];
+
 export function slotDomains(level: { rooms: any[]; doors: any[]; props: any[]; items: any[] }): Record<string, string[]> {
   return {
     room: level.rooms.filter(r => !r.offstage).map(r => r.spokenName), door: level.doors.filter(d => d.kind !== "stairs").map(d => d.spokenName),
     item: level.items.map(i => i.spokenName), prop: level.props.map(p => p.spokenName),
-    dir: ["ahead", "behind", "left", "right"], dist: ["near", "mid", "far"],
+    dir: ["ahead", "behind", "left", "right"], dist: ["near", "mid", "far"], count: COUNT_WORDS.slice(1),
   };
 }
 
